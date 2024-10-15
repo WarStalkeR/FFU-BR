@@ -28,7 +28,7 @@ namespace Ostranauts.Ships.Commands {
                     return CommandCode.Cancelled;
                 }
                 shipStationKeepingTarget = base.ShipUs.shipStationKeepingTarget;
-            } else if ((base.ShipUs.IsDocked() && (!FFU_BR_Defs.TowBraceAllowsKeep || !base.ShipUs.TowBraceSecured())) || shipStationKeepingTarget.HideFromSystem) {
+            } else if ((base.ShipUs.IsDocked() && !(FFU_BR_Defs.TowBraceAllowsKeep && base.ShipUs.TowBraceSecured())) || shipStationKeepingTarget.HideFromSystem) {
                 return CommandCode.Finished;
             }
             GUIOrbitDraw gUIOrbitDraw = null;
