@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>9.0</LangVersion>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="@echo off&#xD;&#xA;setlocal&#xD;&#xA;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\DLL_NAME.MOD_NAME.mm.dll&quot;&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;) else if $(ConfigurationName) == DebugMM (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\DLL_NAME.MOD_NAME.mm.dll&quot;&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\DLL_NAME.MOD_NAME.mm.dll&quot;&#xD;&#xA;    &quot;$(SolutionDir)..\MonoMod\MonoMod.exe&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\DLL_NAME.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\DLL_NAME.MOD_NAME.mm.dll&quot; /F&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_DLL_NAME.pdb&quot; /F&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_DLL_NAME.dll&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\DLL_NAME-MOD_NAME.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_DLL_NAME.dll&quot; /F&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;)" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" Publicize="true">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\..\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>..\..\..\BepInEx\core\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>..\..\..\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>..\..\..\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>..\..\..\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod">
+      <HintPath>..\..\..\BepInEx\core\MonoMod.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>..\..\..\BepInEx\core\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>
