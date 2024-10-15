@@ -23,16 +23,16 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
             _numbList.Clear();
             _co = co;
             int num = 0;
-            foreach (Condition condition in co.mapConds.Values) {
-                if (condition.nDisplayType == 1) {
+            foreach (Condition cond in co.mapConds.Values) {
+                if (cond.nDisplayType == 1) {
                     NumbElement component = Object.Instantiate(_numberElement, _tfNumbContainer.transform).GetComponent<NumbElement>();
                     string strData;
-                    if (FFU_BR_Defs.InfoCelsiusKelvin && condition.strName == "StatGasTemp") {
-                        double amount = condition.fCount * condition.fConversionFactor;
-                        strData = amount.ToString("N3") + condition.strDisplayBonus + " | " + (amount - 273.15d).ToString("N1") + "C";
+                    if (FFU_BR_Defs.InfoCelsiusKelvin && cond.strName == "StatGasTemp") {
+                        double amount = cond.fCount * cond.fConversionFactor;
+                        strData = amount.ToString("N3") + cond.strDisplayBonus + " | " + (amount - 273.15d).ToString("N1") + "C";
                     }
-                    else strData = (condition.fCount * condition.fConversionFactor).ToString("N3") + condition.strDisplayBonus;
-                    component.SetData(condition.strNameFriendly, condition.strName, strData, condition.strDesc, DataHandler.GetColor(condition.strColor));
+                    else strData = (cond.fCount * cond.fConversionFactor).ToString("N3") + cond.strDisplayBonus;
+                    component.SetData(cond.strNameFriendly, cond.strName, strData, cond.strDesc, DataHandler.GetColor(cond.strColor));
                     _numbList.Add(component);
                     num++;
                     LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
