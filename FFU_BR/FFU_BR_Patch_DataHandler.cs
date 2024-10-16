@@ -15,10 +15,11 @@ using Ostranauts.Trading;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using MonoMod;
 using UnityEngine;
 
 public static class patch_DataHandler {
-    public static void Init() {
+    [MonoModReplace] public static void Init() {
         // Early Access Build Info
         try {
             Debug.Log("#Info# Getting build info.");
@@ -178,7 +179,6 @@ public static class patch_DataHandler {
 
 					// Handle Dedicated/Invalid Settings
                     if (aLoadEntry == "core") {
-                        //DataHandler.LoadMod(DataHandler.strAssetPath, newModList.aIgnorePatterns, coreModInfo);
                         modQueuedPaths.Add(new string[] { DataHandler.strAssetPath, aLoadEntry });
                         continue;
                     }
@@ -217,7 +217,6 @@ public static class patch_DataHandler {
                     }
 
 					// Queue Mod's Path For Loading
-                    //DataHandler.LoadMod(modFolderPath, newModList.aIgnorePatterns, DataHandler.dictModInfos[aLoadEntry]);
                     modQueuedPaths.Add(new string[] { modFolderPath, aLoadEntry });
                 }
 
