@@ -10,7 +10,6 @@
 
 using BepInEx;
 using BepInEx.Configuration;
-using FFU_Beyond_Reach;
 using System.IO;
 
 namespace FFU_Beyond_Reach {
@@ -73,14 +72,6 @@ namespace FFU_Beyond_Reach {
             }
             ModLog.Info($"CheatSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
-    }
-}
-
-public static class patch_DataHandler {
-    public static void orig_Init() { }
-    public static void Init() {
-        FFU_BR_Defs.InitConfig();
-        orig_Init();
     }
 }
 
