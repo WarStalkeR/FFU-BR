@@ -62,3 +62,51 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
         }
     }
 }
+
+// Reference ILSpy Output
+/*
+public override void SetData(CondOwner co)
+{
+	if (co == null || co.mapConds == null)
+	{
+		_IsMarkedForDestroy = true;
+		return;
+	}
+	_numbList.Clear();
+	_co = co;
+	int num = 0;
+	foreach (Condition value in co.mapConds.Values)
+	{
+		if (value.nDisplayType == 1)
+		{
+			NumbElement component = Object.Instantiate(_numberElement, _tfNumbContainer.transform).GetComponent<NumbElement>();
+			string strData = (value.fCount * (double)value.fConversionFactor).ToString("N3") + value.strDisplayBonus;
+			component.SetData(value.strNameFriendly, value.strName, strData, value.strDesc, DataHandler.GetColor(value.strColor));
+			_numbList.Add(component);
+			num++;
+			LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+			component.ForceMeshUpdate();
+		}
+	}
+	LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+	LayoutRebuilder.ForceRebuildLayoutImmediate(base.transform.parent.GetComponent<RectTransform>());
+	if (num == 0)
+	{
+		_IsMarkedForDestroy = true;
+	}
+}
+
+protected override void OnUpdateUI()
+{
+	if (_numbList.Count == 0)
+	{
+		return;
+	}
+	foreach (NumbElement numb in _numbList)
+	{
+		Condition cond = DataHandler.GetCond(numb.CondName);
+		numb.SetData(cond.strNameFriendly, numb.CondName, (_co.GetCondAmount(numb.CondName) * (double)cond.fConversionFactor).ToString("N3") + cond.strDisplayBonus, cond.strDesc, DataHandler.GetColor(cond.strColor));
+	}
+	LayoutRebuilder.MarkLayoutForRebuild(base.transform.parent.GetComponent<RectTransform>());
+}
+*/

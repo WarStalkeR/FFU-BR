@@ -44,3 +44,41 @@ public class patch_Interaction : Interaction {
         bCTThemModifierCalculated = true;
     }
 }
+
+// Reference ILSpy Output
+/*
+private void CalcRate()
+{
+	if (strActionGroup != "Work" || bCTThemModifierCalculated)
+	{
+		return;
+	}
+	fCTThemModifierUs = 1f;
+	if (strCTThemMultCondUs != null)
+	{
+		fCTThemModifierUs = (float)objUs.GetCondAmount(strCTThemMultCondUs);
+	}
+	fCTThemModifierUs = Mathf.Clamp(fCTThemModifierUs, 1f, 10f);
+	fCTThemModifierTools = 1f;
+	if (strCTThemMultCondTools != null)
+	{
+		fCTThemModifierTools = 0f;
+		if (aLootItemUseContract != null)
+		{
+			foreach (CondOwner item in aLootItemUseContract)
+			{
+				if (item != null && strCTThemMultCondTools != null)
+				{
+					fCTThemModifierTools += (float)item.GetCondAmount(strCTThemMultCondTools);
+				}
+			}
+		}
+	}
+	fCTThemModifierPenalty = (float)objUs.GetCondAmount("StatWorkSpeedPenalty");
+	if ((double)fCTThemModifierPenalty > 0.99)
+	{
+		fCTThemModifierPenalty = 0.99f;
+	}
+	bCTThemModifierCalculated = true;
+}
+*/
