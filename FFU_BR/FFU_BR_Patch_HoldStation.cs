@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS0108
+#pragma warning disable CS0114
 #pragma warning disable CS0162
 #pragma warning disable CS0414
 #pragma warning disable CS0618
@@ -17,7 +18,7 @@ using UnityEngine;
 namespace Ostranauts.Ships.Commands {
     public class patch_HoldStationAutoPilot : HoldStationAutoPilot {
         [MonoModIgnore] public patch_HoldStationAutoPilot(IAICharacter pilot) : base(pilot) { }
-        public override CommandCode RunCommand() {
+        public CommandCode RunCommand() {
             Ship shipStationKeepingTarget = base.ShipUs.shipStationKeepingTarget;
             if (shipStationKeepingTarget == null || shipStationKeepingTarget.objSS == null || base.ShipUs == null) {
                 return CommandCode.Cancelled;

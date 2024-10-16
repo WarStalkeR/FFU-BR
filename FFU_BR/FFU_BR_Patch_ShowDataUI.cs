@@ -1,4 +1,5 @@
 ﻿#pragma warning disable CS0108
+#pragma warning disable CS0114
 #pragma warning disable CS0162
 #pragma warning disable CS0414
 #pragma warning disable CS0618
@@ -15,7 +16,7 @@ using UnityEngine.UI;
 
 namespace Ostranauts.UI.MegaToolTip.DataModules {
     public class patch_NumberModule : NumberModule {
-        public override void SetData(CondOwner co) {
+        public void SetData(CondOwner co) {
             if (co == null || co.mapConds == null) {
                 _IsMarkedForDestroy = true;
                 return;
@@ -45,8 +46,7 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
                 _IsMarkedForDestroy = true;
             }
         }
-
-        public override void OnUpdateUI() {
+        protected void OnUpdateUI() {
             if (_numbList.Count == 0) return;
             foreach (NumbElement element in _numbList) {
                 Condition cond = DataHandler.GetCond(element.CondName);
