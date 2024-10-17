@@ -293,9 +293,16 @@ public static class patch_DataHandler {
 					validModInfos.Add(queuedPath[1]);
                     validModPaths.Add(queuedPath[0]);
                     validDataPaths.Add(queuedPath[0] + "data/");
-                    Debug.Log($"Valid Queue Added: {queuedPath[1]} => {queuedPath[0]}");
-                } else Debug.LogWarning($"WARNING! Mod data folder '{queuedPath[0]}data/' not exists! Ignoring.");
-			} else Debug.LogError($"ERROR! Received 'refQueuedPaths' data set is invalid!");
+                    Debug.Log($"Data Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
+                }
+				else if (Directory.Exists(queuedPath[0] + "images/") ||
+                    Directory.Exists(queuedPath[0] + "audio/") ||
+                    Directory.Exists(queuedPath[0] + "mesh/")) {
+                    validModInfos.Add(queuedPath[1]);
+                    validModPaths.Add(queuedPath[0]);
+                    Debug.Log($"Asset Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
+                } else Debug.LogWarning($"WARNING! Mod folder '{queuedPath[0]}' has no data or assets! Ignoring.");
+			} else Debug.LogError($"ERROR! Received 'refQueuedPaths' data set is invalid! Ignoring.");
         }
 
 		// List All Valid Data Paths
@@ -307,7 +314,7 @@ public static class patch_DataHandler {
 			foreach (string dataPath in validDataPaths) ConsoleToGUI.instance.LogInfo(dataPath);
         }
 
-		// Sync Load Mods Data
+        // Sync Load Mods Data
         foreach (string modPath in validModPaths) DataHandler.aModPaths.Insert(0, modPath);
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "colors/", DataHandler.dictJsonColors, aIgnorePatterns);
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "lights/", DataHandler.dictLights, aIgnorePatterns);
@@ -405,32 +412,24 @@ public static class patch_DataHandler {
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "racing/leagues/", DataHandler.dictRacingLeagues, aIgnorePatterns);
         Dictionary<string, JsonInstallable> listInstallables = new Dictionary<string, JsonInstallable>();
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "installables/", listInstallables, aIgnorePatterns);
-        foreach (KeyValuePair<string, JsonInstallable> refInstallable in listInstallables) {
-            Installables.Create(refInstallable.Value);
-        }
+        foreach (KeyValuePair<string, JsonInstallable> refInstallable in listInstallables) Installables.Create(refInstallable.Value);
         listInstallables.Clear();
         listInstallables = null;
         Dictionary<string, JsonInteractionOverride> listInteractions = new Dictionary<string, JsonInteractionOverride>();
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "interaction_overrides/", listInteractions, aIgnorePatterns);
-        foreach (KeyValuePair<string, JsonInteractionOverride> refInteraction in listInteractions) {
-            refInteraction.Value.Generate();
-        }
+        foreach (KeyValuePair<string, JsonInteractionOverride> refInteraction in listInteractions) refInteraction.Value.Generate();
         listInteractions.Clear();
         listInteractions = null;
         Dictionary<string, JsonPlotBeatOverride> listPlotBeats = new Dictionary<string, JsonPlotBeatOverride>();
         foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "plot_beat_overrides/", listPlotBeats, aIgnorePatterns);
-        foreach (KeyValuePair<string, JsonPlotBeatOverride> refPlotBeat in listPlotBeats) {
-            refPlotBeat.Value.Generate();
-        }
+        foreach (KeyValuePair<string, JsonPlotBeatOverride> refPlotBeat in listPlotBeats) refPlotBeat.Value.Generate();
         listPlotBeats.Clear();
         listPlotBeats = null;
-        foreach (CondTrigger refTrigger in DataHandler.dictCTs.Values) {
-            refTrigger.PostInit();
-        }
+        foreach (CondTrigger refTrigger in DataHandler.dictCTs.Values) refTrigger.PostInit();
 
-		// Finalize Mod Load Status
-		foreach (string modName in validModInfos) {
-			JsonModInfo refModInfo = refModInfos[modName];
+        // Finalize Mod Load Status
+        foreach (string modName in validModInfos) {
+            JsonModInfo refModInfo = refModInfos[modName];
             if (refModInfo.Status == GUIModRow.ModStatus.Missing) {
                 refModInfo.Status = GUIModRow.ModStatus.Missing;
             } else if (numConsoleErrors < ConsoleToGUI.instance.ErrorCount) {
