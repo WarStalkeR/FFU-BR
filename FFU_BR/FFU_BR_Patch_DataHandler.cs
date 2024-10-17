@@ -23,8 +23,7 @@ using System.Reflection;
 using System.Text;
 
 public static class patch_DataHandler {
-    [MonoModReplace]
-    public static void Init() {
+    [MonoModReplace] public static void Init() {
         // Early Access Build Info
         try {
             Debug.Log("#Info# Getting build info.");
@@ -444,8 +443,7 @@ public static class patch_DataHandler {
         }
     }
 
-    [MonoModReplace]
-    public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
+    [MonoModReplace] public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
         Debug.Log("#Info# Loading json: " + strFile);
         string rawDump = string.Empty;
         try {
