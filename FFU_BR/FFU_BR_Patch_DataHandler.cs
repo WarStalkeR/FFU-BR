@@ -23,7 +23,8 @@ using System.Reflection;
 using System.Text;
 
 public static class patch_DataHandler {
-    [MonoModReplace] public static void Init() {
+    [MonoModReplace]
+    public static void Init() {
         // Early Access Build Info
         try {
             Debug.Log("#Info# Getting build info.");
@@ -36,7 +37,7 @@ public static class patch_DataHandler {
 
         // Custom Mod Configuration
         FFU_BR_Defs.InitConfig();
-		List<string[]> modQueuedPaths = new List<string[]>();
+        List<string[]> modQueuedPaths = new List<string[]>();
 
         // Initializing Data Variables
         DataHandler.strAssetPath = Application.streamingAssetsPath + "/";
@@ -142,7 +143,7 @@ public static class patch_DataHandler {
         DataHandler.dictSettings.Remove("DefaultUserSettings");
         DataHandler.SaveUserSettings();
 
-		// Mod List Initialization
+        // Mod List Initialization
         bool isModded = false;
         DataHandler.strModFolder = DataHandler.dictSettings["UserSettings"].strPathMods;
         if (DataHandler.strModFolder == null || DataHandler.strModFolder == string.Empty) {
@@ -151,7 +152,7 @@ public static class patch_DataHandler {
         string directoryName = Path.GetDirectoryName(DataHandler.strModFolder);
         directoryName = Path.Combine(directoryName, "loading_order.json");
 
-		// Creating Mod Placeholder
+        // Creating Mod Placeholder
         JsonModInfo coreModInfo = new JsonModInfo();
         coreModInfo.strName = "Core";
         DataHandler.dictModInfos["core"] = coreModInfo;
@@ -177,11 +178,11 @@ public static class patch_DataHandler {
                 }
                 string[] aLoadOrder = newModList.aLoadOrder;
 
-				// Go Through Each Mod Entry
+                // Go Through Each Mod Entry
                 foreach (string aLoadEntry in aLoadOrder) {
                     isModded = true;
 
-					// Handle Dedicated/Invalid Settings
+                    // Handle Dedicated/Invalid Settings
                     if (aLoadEntry == "core") {
                         modQueuedPaths.Add(new string[] { DataHandler.strAssetPath, aLoadEntry });
                         continue;
@@ -191,7 +192,7 @@ public static class patch_DataHandler {
                         continue;
                     }
 
-					// Prepare Mod Information
+                    // Prepare Mod Information
                     string aLoadPath = aLoadEntry.TrimStart(Path.DirectorySeparatorChar);
                     aLoadPath = aLoadEntry.TrimStart(Path.AltDirectorySeparatorChar);
                     aLoadPath += "/";
@@ -220,16 +221,16 @@ public static class patch_DataHandler {
                         }
                     }
 
-					// Queue Mod's Path For Loading
+                    // Queue Mod's Path For Loading
                     modQueuedPaths.Add(new string[] { modFolderPath, aLoadEntry });
                 }
 
-				// Sync Load All Mod Data
-				LoadSyncMods(modQueuedPaths, newModList.aIgnorePatterns, DataHandler.dictModInfos);
+                // Sync Load All Mod Data
+                LoadSyncMods(modQueuedPaths, newModList.aIgnorePatterns, DataHandler.dictModInfos);
             }
         }
 
-		// Default Non-Modded Loading
+        // Default Non-Modded Loading
         if (!isModded) {
             if (isConsoleExists) {
                 ConsoleToGUI.instance.LogInfo("No loading_order.json found. Beginning default game data load from " + DataHandler.strAssetPath);
@@ -242,7 +243,7 @@ public static class patch_DataHandler {
             DataHandler.LoadMod(DataHandler.strAssetPath, cleanModList.aIgnorePatterns, coreModInfo);
         }
 
-		// Load Various Interactions
+        // Load Various Interactions
         DataHandler.dictSocialStats = new Dictionary<string, SocialStats>();
         foreach (JsonInteraction refInteraction in DataHandler.dictInteractions.Values) {
             if (refInteraction.bSocial) {
@@ -250,7 +251,7 @@ public static class patch_DataHandler {
             }
         }
 
-		// Load Other Data/Settings
+        // Load Other Data/Settings
         JsonInteraction skillInteraction = null;
         JsonInteraction careerInteraction = null;
         CondTrigger skillTrigger = null;
@@ -281,41 +282,40 @@ public static class patch_DataHandler {
             careerInteraction.aInverse = careerList.ToArray();
         }
 
-		// Finish Loading Process
+        // Finish Loading Process
         DataHandler.bLoaded = true;
     }
 
     private static void LoadSyncMods(List<string[]> refQueuedPaths, string[] aIgnorePatterns, Dictionary<string, JsonModInfo> refModInfos) {
-		List<string> validModInfos = new List<string>();
+        List<string> validModInfos = new List<string>();
         List<string> validModPaths = new List<string>();
         List<string> validDataPaths = new List<string>();
 
         // Parse Validate Data Paths
         foreach (string[] queuedPath in refQueuedPaths) {
-			if (queuedPath.Length == 2) {
-				if (Directory.Exists(queuedPath[0] + "data/")) {
-					validModInfos.Add(queuedPath[1]);
+            if (queuedPath.Length == 2) {
+                if (Directory.Exists(queuedPath[0] + "data/")) {
+                    validModInfos.Add(queuedPath[1]);
                     validModPaths.Add(queuedPath[0]);
                     validDataPaths.Add(queuedPath[0] + "data/");
                     Debug.Log($"Data Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
-                }
-				else if (Directory.Exists(queuedPath[0] + "images/") ||
-                    Directory.Exists(queuedPath[0] + "audio/") ||
-                    Directory.Exists(queuedPath[0] + "mesh/")) {
+                } else if (Directory.Exists(queuedPath[0] + "images/") ||
+                      Directory.Exists(queuedPath[0] + "audio/") ||
+                      Directory.Exists(queuedPath[0] + "mesh/")) {
                     validModInfos.Add(queuedPath[1]);
                     validModPaths.Add(queuedPath[0]);
                     Debug.Log($"Asset Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
                 } else Debug.LogWarning($"WARNING! Mod folder '{queuedPath[0]}' has no data or assets! Ignoring.");
-			} else Debug.LogError($"ERROR! Received 'refQueuedPaths' data set is invalid! Ignoring.");
+            } else Debug.LogError($"ERROR! Received 'refQueuedPaths' data set is invalid! Ignoring.");
         }
 
-		// List All Valid Data Paths
+        // List All Valid Data Paths
         bool isConsoleExists = ConsoleToGUI.instance != null;
         int numConsoleErrors = 0;
         if (isConsoleExists) {
             numConsoleErrors = ConsoleToGUI.instance.ErrorCount;
             ConsoleToGUI.instance.LogInfo("Begin loading data from these paths:");
-			foreach (string dataPath in validDataPaths) ConsoleToGUI.instance.LogInfo(dataPath);
+            foreach (string dataPath in validDataPaths) ConsoleToGUI.instance.LogInfo(dataPath);
         }
 
         // Sync Load Mods Data
@@ -444,14 +444,15 @@ public static class patch_DataHandler {
         }
     }
 
-    [MonoModReplace] public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
+    [MonoModReplace]
+    public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
         Debug.Log("#Info# Loading json: " + strFile);
         string rawDump = string.Empty;
         try {
-			// Raw JSON to Data Array
+            // Raw JSON to Data Array
             string dataFile = File.ReadAllText(strFile, Encoding.UTF8);
             rawDump += "Converting json into Array...\n";
-			string[] rawData = dataFile.Split(new string[] { "}," }, StringSplitOptions.None);
+            string[] rawData = dataFile.Split(new string[] { "}," }, StringSplitOptions.None);
             TJson[] fileData = JsonMapper.ToObject<TJson[]>(dataFile);
             TJson[] fileDataRef = fileData;
 
@@ -462,14 +463,14 @@ public static class patch_DataHandler {
                 rawDump += "Getting key: ";
                 string dataKey = null;
 
-				// Validating Data Block
+                // Validating Data Block
                 PropertyInfo dataProperty = dataBlock.GetType()?.GetProperty("strName");
                 if (dataProperty == null) {
                     JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
-					continue;
+                    continue;
                 }
 
-				// Data Allocation Subroutine
+                // Data Allocation Subroutine
                 object dataValue = dataProperty.GetValue(dataBlock, null);
                 dataKey = dataValue.ToString();
                 rawDump = rawDump + dataKey + "\n";
@@ -483,32 +484,32 @@ public static class patch_DataHandler {
                         // Ignore Identifier Property
                         if (currProperty.Name == "strName") continue;
 
-						// New Data Property Validation
+                        // New Data Property Validation
                         PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
-						if (newProperty != null) {
+                        if (newProperty != null) {
                             object newValue = newProperty.GetValue(dataBlock, null);
-							object currValue = currProperty.GetValue(dict[dataKey], null);
-							if (newValue != null && rawBlock.IndexOf(currProperty.Name) >= 0) {
-								Debug.Log($"#Info# #Block# {dataKey}, #Property# {currProperty.Name}: {currValue} => {newValue}");
-								currProperty.SetValue(dict[dataKey], newValue, null);
-							}
-						}
+                            object currValue = currProperty.GetValue(dict[dataKey], null);
+                            if (newValue != null && rawBlock.IndexOf(currProperty.Name) >= 0) {
+                                Debug.Log($"#Info# #Block# {dataKey}, #Property# {currProperty.Name}: {currValue} => {newValue}");
+                                currProperty.SetValue(dict[dataKey], newValue, null);
+                            }
+                        }
                     }
 
-					// Iterate Over Fields
-					BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
-					foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
+                    // Iterate Over Fields
+                    BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
+                    foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
                         // Ignore Identifier Field
                         if (currField.Name == "strName") continue;
 
                         // New Data Field Validation
-						FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
-						if (newField != null) {
+                        FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
+                        if (newField != null) {
                             object newValue = newField.GetValue(dataBlock);
                             object currValue = currField.GetValue(dict[dataKey]);
-							if (newValue != null && rawBlock.IndexOf(currField.Name) >= 0) {
+                            if (newValue != null && rawBlock.IndexOf(currField.Name) >= 0) {
                                 Debug.Log($"#Info# #Block# {dataKey}, #Field# {currField.Name}: {currValue} => {newValue}");
-								currField.SetValue(dict[dataKey], newValue);
+                                currField.SetValue(dict[dataKey], newValue);
                             }
                         }
                     }
@@ -518,7 +519,7 @@ public static class patch_DataHandler {
                 }
             }
 
-			// Resetting Data Variables
+            // Resetting Data Variables
             fileData = null;
             dataFile = null;
         } catch (Exception ex) {
@@ -529,7 +530,7 @@ public static class patch_DataHandler {
             Debug.LogError(rawDump + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
         }
 
-		// Specific File Dump
+        // Specific File Dump
         if (strFile.IndexOf("osSGv1") >= 0) {
             Debug.Log(rawDump);
         }
@@ -540,459 +541,459 @@ public static class patch_DataHandler {
 /*
 public static void Init()
 {
-	string empty = string.Empty;
-	try
-	{
-		Debug.Log("#Info# Getting build info.");
-		TextAsset textAsset = (TextAsset)Resources.Load("version", typeof(TextAsset));
-		strBuild = "Early Access Build: " + textAsset.text;
-		Debug.Log(strBuild);
-	}
-	catch (Exception ex)
-	{
-		Debug.Log(empty + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
-	}
-	strAssetPath = Application.streamingAssetsPath + "/";
-	dictImages = new Dictionary<string, Texture2D>();
-	dictColors = new Dictionary<string, Color>();
-	dictJsonColors = new Dictionary<string, JsonColor>();
-	dictLights = new Dictionary<string, JsonLight>();
-	dictShips = new Dictionary<string, JsonShip>();
-	dictShipImages = new Dictionary<string, Dictionary<string, Texture2D>>();
-	dictConds = new Dictionary<string, JsonCond>();
-	dictItemDefs = new Dictionary<string, JsonItemDef>();
-	dictCTs = new Dictionary<string, CondTrigger>();
-	dictCOs = new Dictionary<string, JsonCondOwner>();
-	dictDataCoCollections = new Dictionary<string, DataCoCollection>();
-	dictCOSaves = new Dictionary<string, JsonCondOwnerSave>();
-	dictInteractions = new Dictionary<string, JsonInteraction>();
-	dictLoot = new Dictionary<string, Loot>();
-	dictProductionMaps = new Dictionary<string, JsonProductionMap>();
-	dictMarketConfigs = new Dictionary<string, JsonMarketActorConfig>();
-	dictCargoSpecs = new Dictionary<string, JsonCargoSpec>();
-	dictGasRespires = new Dictionary<string, JsonGasRespire>();
-	dictPowerInfo = new Dictionary<string, JsonPowerInfo>();
-	dictGUIPropMaps = new Dictionary<string, Dictionary<string, string>>();
-	dictNamesFirst = new Dictionary<string, string>();
-	dictNamesLast = new Dictionary<string, string>();
-	dictNamesRobots = new Dictionary<string, string>();
-	dictNamesFull = new Dictionary<string, string>();
-	dictNamesShip = new Dictionary<string, string>();
-	dictNamesShipAdjectives = new Dictionary<string, string>();
-	dictNamesShipNouns = new Dictionary<string, string>();
-	dictManPages = new Dictionary<string, string[]>();
-	dictHomeworlds = new Dictionary<string, JsonHomeworld>();
-	dictCareers = new Dictionary<string, JsonCareer>();
-	dictLifeEvents = new Dictionary<string, JsonLifeEvent>();
-	dictPersonSpecs = new Dictionary<string, JsonPersonSpec>();
-	dictShipSpecs = new Dictionary<string, JsonShipSpec>();
-	dictTraitScores = new Dictionary<string, int[]>();
-	dictRoomSpec = new Dictionary<string, RoomSpec>();
-	dictStrings = new Dictionary<string, string>();
-	dictSlotEffects = new Dictionary<string, JsonSlotEffects>();
-	dictSlots = new Dictionary<string, JsonSlot>();
-	dictTickers = new Dictionary<string, JsonTicker>();
-	dictCondRules = new Dictionary<string, CondRule>();
-	dictMaterials = new Dictionary<string, Material>();
-	dictAudioEmitters = new Dictionary<string, JsonAudioEmitter>();
-	dictCrewSkins = new Dictionary<string, string>();
-	dictAds = new Dictionary<string, JsonAd>();
-	dictHeadlines = new Dictionary<string, JsonHeadline>();
-	dictMusicTags = new Dictionary<string, List<string>>();
-	dictMusic = new Dictionary<string, JsonMusic>();
-	dictComputerEntries = new Dictionary<string, JsonComputerEntry>();
-	dictCOOverlays = new Dictionary<string, JsonCOOverlay>();
-	dictDataCOs = new Dictionary<string, DataCO>();
-	dictLedgerDefs = new Dictionary<string, JsonLedgerDef>();
-	dictPledges = new Dictionary<string, JsonPledge>();
-	dictJobitems = new Dictionary<string, JsonJobItems>();
-	dictJobs = new Dictionary<string, JsonJob>();
-	dictSettings = new Dictionary<string, JsonUserSettings>();
-	dictModList = new Dictionary<string, JsonModList>();
-	dictModInfos = new Dictionary<string, JsonModInfo>();
-	aModPaths = new List<string>();
-	dictInstallables2 = new Dictionary<string, JsonInstallable>();
-	dictAIPersonalities = new Dictionary<string, JsonAIPersonality>();
-	dictTransit = new Dictionary<string, JsonTransit>();
-	dictPlotManager = new Dictionary<string, JsonPlotManagerSettings>();
-	dictStarSystems = new Dictionary<string, JsonStarSystemSave>();
-	dictParallax = new Dictionary<string, JsonParallax>();
-	dictContext = new Dictionary<string, JsonContext>();
-	dictChargeProfiles = new Dictionary<string, JsonChargeProfile>();
-	dictWounds = new Dictionary<string, JsonWound>();
-	dictAModes = new Dictionary<string, JsonAttackMode>();
-	dictPDAAppIcons = new Dictionary<string, JsonPDAAppIcon>();
-	dictZoneTriggers = new Dictionary<string, JsonZoneTrigger>();
-	dictTips = new Dictionary<string, JsonTip>();
-	dictCrimes = new Dictionary<string, JsonCrime>();
-	dictPlots = new Dictionary<string, JsonPlot>();
-	dictPlotBeats = new Dictionary<string, JsonPlotBeat>();
-	dictRaceTracks = new Dictionary<string, JsonRaceTrack>();
-	dictRacingLeagues = new Dictionary<string, JsonRacingLeague>();
-	dictSimple = new Dictionary<string, JsonSimple>();
-	dictGUIPropMapUnparsed = new Dictionary<string, JsonGUIPropMap>();
-	mapCOs = new Dictionary<string, CondOwner>();
-	ObjReader.use.scaleFactor = new Vector3(0.0625f, 0.0625f, 0.0625f);
-	ObjReader.use.objRotation = new Vector3(90f, 0f, 180f);
-	_interactionObjectTracker = new InteractionObjectTracker();
-	dictSettings["DefaultUserSettings"] = new JsonUserSettings();
-	dictSettings["DefaultUserSettings"].Init();
-	if (File.Exists(Application.persistentDataPath + "/settings.json"))
-	{
-		JsonToData(Application.persistentDataPath + "/settings.json", dictSettings);
-	}
-	else
-	{
-		Debug.LogWarning("WARNING: settings.json not found. Resorting to default values.");
-		dictSettings["UserSettings"] = new JsonUserSettings();
-	}
-	if (!dictSettings.ContainsKey("UserSettings") || dictSettings["UserSettings"] == null)
-	{
-		Debug.LogError("ERROR: Malformed settings.json. Resorting to default values.");
-		dictSettings["UserSettings"] = new JsonUserSettings();
-	}
-	dictSettings["DefaultUserSettings"].CopyTo(GetUserSettings());
-	dictSettings.Remove("DefaultUserSettings");
-	SaveUserSettings();
-	bool flag = false;
-	strModFolder = dictSettings["UserSettings"].strPathMods;
-	if (strModFolder == null || strModFolder == string.Empty)
-	{
-		strModFolder = Path.Combine(Application.dataPath, "Mods/");
-	}
-	string directoryName = Path.GetDirectoryName(strModFolder);
-	directoryName = Path.Combine(directoryName, "loading_order.json");
-	JsonModInfo jsonModInfo = new JsonModInfo();
-	jsonModInfo.strName = "Core";
-	dictModInfos["core"] = jsonModInfo;
-	bool flag2 = ConsoleToGUI.instance != null;
-	if (flag2)
-	{
-		ConsoleToGUI.instance.LogInfo("Attempting to load " + directoryName + "...");
-	}
-	if (File.Exists(directoryName))
-	{
-		if (flag2)
-		{
-			ConsoleToGUI.instance.LogInfo("loading_order.json found. Beginning mod load.");
-		}
-		JsonToData(directoryName, dictModList);
-		JsonModList value = null;
-		if (dictModList.TryGetValue("Mod Loading Order", out value))
-		{
-			if (value.aIgnorePatterns != null)
-			{
-				for (int i = 0; i < value.aIgnorePatterns.Length; i++)
-				{
-					value.aIgnorePatterns[i] = PathSanitize(value.aIgnorePatterns[i]);
-				}
-			}
-			string[] aLoadOrder = value.aLoadOrder;
-			foreach (string text in aLoadOrder)
-			{
-				flag = true;
-				if (text == "core")
-				{
-					LoadMod(strAssetPath, value.aIgnorePatterns, jsonModInfo);
-					continue;
-				}
-				if (text == null || text == string.Empty)
-				{
-					Debug.LogError("ERROR: Invalid mod folder specified: " + text + "; Skipping...");
-					continue;
-				}
-				string text2 = text.TrimStart(Path.DirectorySeparatorChar);
-				text2 = text.TrimStart(Path.AltDirectorySeparatorChar);
-				text2 += "/";
-				string directoryName2 = Path.GetDirectoryName(strModFolder);
-				directoryName2 = Path.Combine(directoryName2, text2);
-				Dictionary<string, JsonModInfo> dictionary = new Dictionary<string, JsonModInfo>();
-				string text3 = Path.Combine(directoryName2, "mod_info.json");
-				if (File.Exists(text3))
-				{
-					JsonToData(text3, dictionary);
-				}
-				if (dictionary.Count < 1)
-				{
-					JsonModInfo jsonModInfo2 = new JsonModInfo();
-					jsonModInfo2.strName = text;
-					dictionary[jsonModInfo2.strName] = jsonModInfo2;
-					Debug.LogWarning("WARNING: Missing mod_info.json in folder: " + text + "; Using default name: " + jsonModInfo2.strName);
-				}
-				using (Dictionary<string, JsonModInfo>.ValueCollection.Enumerator enumerator = dictionary.Values.GetEnumerator())
-				{
-					if (enumerator.MoveNext())
-					{
-						JsonModInfo current = enumerator.Current;
-						dictModInfos[text] = current;
-						if (flag2)
-						{
-							ConsoleToGUI.instance.LogInfo("Loading mod: " + dictModInfos[text].strName + " from directory: " + text);
-						}
-					}
-				}
-				LoadMod(directoryName2, value.aIgnorePatterns, dictModInfos[text]);
-			}
-		}
-	}
-	if (!flag)
-	{
-		if (flag2)
-		{
-			ConsoleToGUI.instance.LogInfo("No loading_order.json found. Beginning default game data load from " + strAssetPath);
-		}
-		JsonModList jsonModList = new JsonModList();
-		jsonModList.strName = "Default";
-		jsonModList.aLoadOrder = new string[1] { "core" };
-		jsonModList.aIgnorePatterns = new string[0];
-		dictModList["Mod Loading Order"] = jsonModList;
-		LoadMod(strAssetPath, jsonModList.aIgnorePatterns, jsonModInfo);
-	}
-	dictSocialStats = new Dictionary<string, SocialStats>();
-	foreach (JsonInteraction value5 in dictInteractions.Values)
-	{
-		if (value5.bSocial)
-		{
-			dictSocialStats[value5.strName] = new SocialStats(value5.strName);
-		}
-	}
-	JsonInteraction value2 = null;
-	JsonInteraction value3 = null;
-	CondTrigger value4 = null;
-	dictInteractions.TryGetValue("SOCAskCareer", out value3);
-	dictInteractions.TryGetValue("SOCTellSkill_TEMP", out value2);
-	dictCTs.TryGetValue("TIsSOCTalkSkillTEMPUs", out value4);
-	if (value2 != null && value4 != null && value3 != null)
-	{
-		List<string> list = new List<string>();
-		List<string> lootNames = GetLoot("CONDSocialGUIFilterSkills").GetLootNames();
-		foreach (string item2 in lootNames)
-		{
-			JsonInteraction jsonInteraction = value2.Clone();
-			CondTrigger condTrigger = value4.Clone();
-			Condition cond = GetCond(item2);
-			condTrigger.strName = "TIsSOCTalk" + item2 + "Us";
-			condTrigger.aReqs = new string[1] { item2 };
-			jsonInteraction.strName = "SOCTell" + item2;
-			jsonInteraction.strTitle = cond.strNameFriendly;
-			jsonInteraction.strDesc = cond.strDesc;
-			jsonInteraction.CTTestUs = condTrigger.strName;
-			dictInteractions[jsonInteraction.strName] = jsonInteraction;
-			dictCTs[condTrigger.strName] = condTrigger;
-			list.Add(jsonInteraction.strName);
-		}
-		string[] aInverse = value3.aInverse;
-		foreach (string item in aInverse)
-		{
-			list.Add(item);
-		}
-		value3.aInverse = list.ToArray();
-	}
-	bLoaded = true;
+    string empty = string.Empty;
+    try
+    {
+        Debug.Log("#Info# Getting build info.");
+        TextAsset textAsset = (TextAsset)Resources.Load("version", typeof(TextAsset));
+        strBuild = "Early Access Build: " + textAsset.text;
+        Debug.Log(strBuild);
+    }
+    catch (Exception ex)
+    {
+        Debug.Log(empty + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
+    }
+    strAssetPath = Application.streamingAssetsPath + "/";
+    dictImages = new Dictionary<string, Texture2D>();
+    dictColors = new Dictionary<string, Color>();
+    dictJsonColors = new Dictionary<string, JsonColor>();
+    dictLights = new Dictionary<string, JsonLight>();
+    dictShips = new Dictionary<string, JsonShip>();
+    dictShipImages = new Dictionary<string, Dictionary<string, Texture2D>>();
+    dictConds = new Dictionary<string, JsonCond>();
+    dictItemDefs = new Dictionary<string, JsonItemDef>();
+    dictCTs = new Dictionary<string, CondTrigger>();
+    dictCOs = new Dictionary<string, JsonCondOwner>();
+    dictDataCoCollections = new Dictionary<string, DataCoCollection>();
+    dictCOSaves = new Dictionary<string, JsonCondOwnerSave>();
+    dictInteractions = new Dictionary<string, JsonInteraction>();
+    dictLoot = new Dictionary<string, Loot>();
+    dictProductionMaps = new Dictionary<string, JsonProductionMap>();
+    dictMarketConfigs = new Dictionary<string, JsonMarketActorConfig>();
+    dictCargoSpecs = new Dictionary<string, JsonCargoSpec>();
+    dictGasRespires = new Dictionary<string, JsonGasRespire>();
+    dictPowerInfo = new Dictionary<string, JsonPowerInfo>();
+    dictGUIPropMaps = new Dictionary<string, Dictionary<string, string>>();
+    dictNamesFirst = new Dictionary<string, string>();
+    dictNamesLast = new Dictionary<string, string>();
+    dictNamesRobots = new Dictionary<string, string>();
+    dictNamesFull = new Dictionary<string, string>();
+    dictNamesShip = new Dictionary<string, string>();
+    dictNamesShipAdjectives = new Dictionary<string, string>();
+    dictNamesShipNouns = new Dictionary<string, string>();
+    dictManPages = new Dictionary<string, string[]>();
+    dictHomeworlds = new Dictionary<string, JsonHomeworld>();
+    dictCareers = new Dictionary<string, JsonCareer>();
+    dictLifeEvents = new Dictionary<string, JsonLifeEvent>();
+    dictPersonSpecs = new Dictionary<string, JsonPersonSpec>();
+    dictShipSpecs = new Dictionary<string, JsonShipSpec>();
+    dictTraitScores = new Dictionary<string, int[]>();
+    dictRoomSpec = new Dictionary<string, RoomSpec>();
+    dictStrings = new Dictionary<string, string>();
+    dictSlotEffects = new Dictionary<string, JsonSlotEffects>();
+    dictSlots = new Dictionary<string, JsonSlot>();
+    dictTickers = new Dictionary<string, JsonTicker>();
+    dictCondRules = new Dictionary<string, CondRule>();
+    dictMaterials = new Dictionary<string, Material>();
+    dictAudioEmitters = new Dictionary<string, JsonAudioEmitter>();
+    dictCrewSkins = new Dictionary<string, string>();
+    dictAds = new Dictionary<string, JsonAd>();
+    dictHeadlines = new Dictionary<string, JsonHeadline>();
+    dictMusicTags = new Dictionary<string, List<string>>();
+    dictMusic = new Dictionary<string, JsonMusic>();
+    dictComputerEntries = new Dictionary<string, JsonComputerEntry>();
+    dictCOOverlays = new Dictionary<string, JsonCOOverlay>();
+    dictDataCOs = new Dictionary<string, DataCO>();
+    dictLedgerDefs = new Dictionary<string, JsonLedgerDef>();
+    dictPledges = new Dictionary<string, JsonPledge>();
+    dictJobitems = new Dictionary<string, JsonJobItems>();
+    dictJobs = new Dictionary<string, JsonJob>();
+    dictSettings = new Dictionary<string, JsonUserSettings>();
+    dictModList = new Dictionary<string, JsonModList>();
+    dictModInfos = new Dictionary<string, JsonModInfo>();
+    aModPaths = new List<string>();
+    dictInstallables2 = new Dictionary<string, JsonInstallable>();
+    dictAIPersonalities = new Dictionary<string, JsonAIPersonality>();
+    dictTransit = new Dictionary<string, JsonTransit>();
+    dictPlotManager = new Dictionary<string, JsonPlotManagerSettings>();
+    dictStarSystems = new Dictionary<string, JsonStarSystemSave>();
+    dictParallax = new Dictionary<string, JsonParallax>();
+    dictContext = new Dictionary<string, JsonContext>();
+    dictChargeProfiles = new Dictionary<string, JsonChargeProfile>();
+    dictWounds = new Dictionary<string, JsonWound>();
+    dictAModes = new Dictionary<string, JsonAttackMode>();
+    dictPDAAppIcons = new Dictionary<string, JsonPDAAppIcon>();
+    dictZoneTriggers = new Dictionary<string, JsonZoneTrigger>();
+    dictTips = new Dictionary<string, JsonTip>();
+    dictCrimes = new Dictionary<string, JsonCrime>();
+    dictPlots = new Dictionary<string, JsonPlot>();
+    dictPlotBeats = new Dictionary<string, JsonPlotBeat>();
+    dictRaceTracks = new Dictionary<string, JsonRaceTrack>();
+    dictRacingLeagues = new Dictionary<string, JsonRacingLeague>();
+    dictSimple = new Dictionary<string, JsonSimple>();
+    dictGUIPropMapUnparsed = new Dictionary<string, JsonGUIPropMap>();
+    mapCOs = new Dictionary<string, CondOwner>();
+    ObjReader.use.scaleFactor = new Vector3(0.0625f, 0.0625f, 0.0625f);
+    ObjReader.use.objRotation = new Vector3(90f, 0f, 180f);
+    _interactionObjectTracker = new InteractionObjectTracker();
+    dictSettings["DefaultUserSettings"] = new JsonUserSettings();
+    dictSettings["DefaultUserSettings"].Init();
+    if (File.Exists(Application.persistentDataPath + "/settings.json"))
+    {
+        JsonToData(Application.persistentDataPath + "/settings.json", dictSettings);
+    }
+    else
+    {
+        Debug.LogWarning("WARNING: settings.json not found. Resorting to default values.");
+        dictSettings["UserSettings"] = new JsonUserSettings();
+    }
+    if (!dictSettings.ContainsKey("UserSettings") || dictSettings["UserSettings"] == null)
+    {
+        Debug.LogError("ERROR: Malformed settings.json. Resorting to default values.");
+        dictSettings["UserSettings"] = new JsonUserSettings();
+    }
+    dictSettings["DefaultUserSettings"].CopyTo(GetUserSettings());
+    dictSettings.Remove("DefaultUserSettings");
+    SaveUserSettings();
+    bool flag = false;
+    strModFolder = dictSettings["UserSettings"].strPathMods;
+    if (strModFolder == null || strModFolder == string.Empty)
+    {
+        strModFolder = Path.Combine(Application.dataPath, "Mods/");
+    }
+    string directoryName = Path.GetDirectoryName(strModFolder);
+    directoryName = Path.Combine(directoryName, "loading_order.json");
+    JsonModInfo jsonModInfo = new JsonModInfo();
+    jsonModInfo.strName = "Core";
+    dictModInfos["core"] = jsonModInfo;
+    bool flag2 = ConsoleToGUI.instance != null;
+    if (flag2)
+    {
+        ConsoleToGUI.instance.LogInfo("Attempting to load " + directoryName + "...");
+    }
+    if (File.Exists(directoryName))
+    {
+        if (flag2)
+        {
+            ConsoleToGUI.instance.LogInfo("loading_order.json found. Beginning mod load.");
+        }
+        JsonToData(directoryName, dictModList);
+        JsonModList value = null;
+        if (dictModList.TryGetValue("Mod Loading Order", out value))
+        {
+            if (value.aIgnorePatterns != null)
+            {
+                for (int i = 0; i < value.aIgnorePatterns.Length; i++)
+                {
+                    value.aIgnorePatterns[i] = PathSanitize(value.aIgnorePatterns[i]);
+                }
+            }
+            string[] aLoadOrder = value.aLoadOrder;
+            foreach (string text in aLoadOrder)
+            {
+                flag = true;
+                if (text == "core")
+                {
+                    LoadMod(strAssetPath, value.aIgnorePatterns, jsonModInfo);
+                    continue;
+                }
+                if (text == null || text == string.Empty)
+                {
+                    Debug.LogError("ERROR: Invalid mod folder specified: " + text + "; Skipping...");
+                    continue;
+                }
+                string text2 = text.TrimStart(Path.DirectorySeparatorChar);
+                text2 = text.TrimStart(Path.AltDirectorySeparatorChar);
+                text2 += "/";
+                string directoryName2 = Path.GetDirectoryName(strModFolder);
+                directoryName2 = Path.Combine(directoryName2, text2);
+                Dictionary<string, JsonModInfo> dictionary = new Dictionary<string, JsonModInfo>();
+                string text3 = Path.Combine(directoryName2, "mod_info.json");
+                if (File.Exists(text3))
+                {
+                    JsonToData(text3, dictionary);
+                }
+                if (dictionary.Count < 1)
+                {
+                    JsonModInfo jsonModInfo2 = new JsonModInfo();
+                    jsonModInfo2.strName = text;
+                    dictionary[jsonModInfo2.strName] = jsonModInfo2;
+                    Debug.LogWarning("WARNING: Missing mod_info.json in folder: " + text + "; Using default name: " + jsonModInfo2.strName);
+                }
+                using (Dictionary<string, JsonModInfo>.ValueCollection.Enumerator enumerator = dictionary.Values.GetEnumerator())
+                {
+                    if (enumerator.MoveNext())
+                    {
+                        JsonModInfo current = enumerator.Current;
+                        dictModInfos[text] = current;
+                        if (flag2)
+                        {
+                            ConsoleToGUI.instance.LogInfo("Loading mod: " + dictModInfos[text].strName + " from directory: " + text);
+                        }
+                    }
+                }
+                LoadMod(directoryName2, value.aIgnorePatterns, dictModInfos[text]);
+            }
+        }
+    }
+    if (!flag)
+    {
+        if (flag2)
+        {
+            ConsoleToGUI.instance.LogInfo("No loading_order.json found. Beginning default game data load from " + strAssetPath);
+        }
+        JsonModList jsonModList = new JsonModList();
+        jsonModList.strName = "Default";
+        jsonModList.aLoadOrder = new string[1] { "core" };
+        jsonModList.aIgnorePatterns = new string[0];
+        dictModList["Mod Loading Order"] = jsonModList;
+        LoadMod(strAssetPath, jsonModList.aIgnorePatterns, jsonModInfo);
+    }
+    dictSocialStats = new Dictionary<string, SocialStats>();
+    foreach (JsonInteraction value5 in dictInteractions.Values)
+    {
+        if (value5.bSocial)
+        {
+            dictSocialStats[value5.strName] = new SocialStats(value5.strName);
+        }
+    }
+    JsonInteraction value2 = null;
+    JsonInteraction value3 = null;
+    CondTrigger value4 = null;
+    dictInteractions.TryGetValue("SOCAskCareer", out value3);
+    dictInteractions.TryGetValue("SOCTellSkill_TEMP", out value2);
+    dictCTs.TryGetValue("TIsSOCTalkSkillTEMPUs", out value4);
+    if (value2 != null && value4 != null && value3 != null)
+    {
+        List<string> list = new List<string>();
+        List<string> lootNames = GetLoot("CONDSocialGUIFilterSkills").GetLootNames();
+        foreach (string item2 in lootNames)
+        {
+            JsonInteraction jsonInteraction = value2.Clone();
+            CondTrigger condTrigger = value4.Clone();
+            Condition cond = GetCond(item2);
+            condTrigger.strName = "TIsSOCTalk" + item2 + "Us";
+            condTrigger.aReqs = new string[1] { item2 };
+            jsonInteraction.strName = "SOCTell" + item2;
+            jsonInteraction.strTitle = cond.strNameFriendly;
+            jsonInteraction.strDesc = cond.strDesc;
+            jsonInteraction.CTTestUs = condTrigger.strName;
+            dictInteractions[jsonInteraction.strName] = jsonInteraction;
+            dictCTs[condTrigger.strName] = condTrigger;
+            list.Add(jsonInteraction.strName);
+        }
+        string[] aInverse = value3.aInverse;
+        foreach (string item in aInverse)
+        {
+            list.Add(item);
+        }
+        value3.aInverse = list.ToArray();
+    }
+    bLoaded = true;
 }
 
 private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, JsonModInfo jmi)
 {
-	if (!Directory.Exists(strFolderPath + "data/"))
-	{
-		Debug.LogError("ERROR: Mod folder not found: " + strFolderPath + "data/");
-		jmi.Status = GUIModRow.ModStatus.Missing;
-		return;
-	}
-	bool flag = ConsoleToGUI.instance != null;
-	int num = 0;
-	if (flag)
-	{
-		num = ConsoleToGUI.instance.ErrorCount;
-		ConsoleToGUI.instance.LogInfo("Begin loading data from: " + strFolderPath);
-	}
-	aModPaths.Insert(0, strFolderPath);
-	strFolderPath += "data/";
-	LoadModJsons(strFolderPath + "colors/", dictJsonColors, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "lights/", dictLights, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "gasrespires/", dictGasRespires, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "powerinfos/", dictPowerInfo, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "guipropmaps/", dictGUIPropMapUnparsed, aIgnorePatterns);
-	ParseGUIPropMaps();
-	LoadModJsons(strFolderPath + "conditions/", dictConds, aIgnorePatterns);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "conditions_simple/", dictSimple, aIgnorePatterns);
-	ParseConditionsSimple();
-	LoadModJsons(strFolderPath + "items/", dictItemDefs, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "condtrigs/", dictCTs, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "interactions/", dictInteractions, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "condowners/", dictCOs, aIgnorePatterns);
-	Dictionary<string, JsonRoomSpec> dictionary = new Dictionary<string, JsonRoomSpec>();
-	LoadModJsons(strFolderPath + "rooms/", dictionary, aIgnorePatterns);
-	ParseRoomSpecs(dictionary);
-	LoadModJsons(strFolderPath + "ships/", dictShips, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "loot/", dictLoot, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "market/Production/", dictProductionMaps, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "market/", dictMarketConfigs, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "market/CargoSpecs/", dictCargoSpecs, aIgnorePatterns);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_last/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesLast);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_robots/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesRobots);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_first/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesFirst);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_full/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesFull);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "manpages/", dictSimple, aIgnorePatterns);
-	ParseManPages();
-	LoadModJsons(strFolderPath + "homeworlds/", dictHomeworlds, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "careers/", dictCareers, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "lifeevents/", dictLifeEvents, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "personspecs/", dictPersonSpecs, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "shipspecs/", dictShipSpecs, aIgnorePatterns);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "traitscores/", dictSimple, aIgnorePatterns);
-	ParseTraitScores();
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "strings/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictStrings);
-	LoadModJsons(strFolderPath + "slot_effects/", dictSlotEffects, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "slots/", dictSlots, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "tickers/", dictTickers, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "condrules/", dictCondRules, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "audioemitters/", dictAudioEmitters, aIgnorePatterns);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "crewskins/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictCrewSkins);
-	LoadModJsons(strFolderPath + "ads/", dictAds, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "headlines/", dictHeadlines, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "music/", dictMusic, aIgnorePatterns);
-	ParseMusic();
-	LoadModJsons(strFolderPath + "cooverlays/", dictCOOverlays, aIgnorePatterns);
-	Dictionary<string, JsonDCOCollection> dictionary2 = new Dictionary<string, JsonDCOCollection>();
-	LoadModJsons(strFolderPath + "market/CoCollections/", dictionary2, aIgnorePatterns);
-	BuildMarketDCOCollection(dictionary2);
-	LoadModJsons(strFolderPath + "ledgerdefs/", dictLedgerDefs, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "pledges/", dictPledges, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "jobitems/", dictJobitems, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "jobs/", dictJobs, aIgnorePatterns);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_ship/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesShip);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_ship_adjectives/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesShipAdjectives);
-	dictSimple.Clear();
-	LoadModJsons(strFolderPath + "names_ship_nouns/", dictSimple, aIgnorePatterns);
-	ParseSimpleIntoStringDict(dictSimple, dictNamesShipNouns);
-	LoadModJsons(strFolderPath + "ai_training/", dictAIPersonalities, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "transit/", dictTransit, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "plot_manager/", dictPlotManager, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "star_systems/", dictStarSystems, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "parallax/", dictParallax, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "context/", dictContext, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "chargeprofiles/", dictChargeProfiles, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "wounds/", dictWounds, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "attackmodes/", dictAModes, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "pda_apps/", dictPDAAppIcons, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "zone_triggers/", dictZoneTriggers, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "tips/", dictTips, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "crime/", dictCrimes, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "plots/", dictPlots, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "plot_beats/", dictPlotBeats, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "racing/tracks/", dictRaceTracks, aIgnorePatterns);
-	LoadModJsons(strFolderPath + "racing/leagues/", dictRacingLeagues, aIgnorePatterns);
-	Dictionary<string, JsonInstallable> dictionary3 = new Dictionary<string, JsonInstallable>();
-	LoadModJsons(strFolderPath + "installables/", dictionary3, aIgnorePatterns);
-	foreach (KeyValuePair<string, JsonInstallable> item in dictionary3)
-	{
-		Installables.Create(item.Value);
-	}
-	dictionary3.Clear();
-	dictionary3 = null;
-	Dictionary<string, JsonInteractionOverride> dictionary4 = new Dictionary<string, JsonInteractionOverride>();
-	LoadModJsons(strFolderPath + "interaction_overrides/", dictionary4, aIgnorePatterns);
-	foreach (KeyValuePair<string, JsonInteractionOverride> item2 in dictionary4)
-	{
-		item2.Value.Generate();
-	}
-	dictionary4.Clear();
-	dictionary4 = null;
-	Dictionary<string, JsonPlotBeatOverride> dictionary5 = new Dictionary<string, JsonPlotBeatOverride>();
-	LoadModJsons(strFolderPath + "plot_beat_overrides/", dictionary5, aIgnorePatterns);
-	foreach (KeyValuePair<string, JsonPlotBeatOverride> item3 in dictionary5)
-	{
-		item3.Value.Generate();
-	}
-	dictionary5.Clear();
-	dictionary5 = null;
-	foreach (CondTrigger value in dictCTs.Values)
-	{
-		value.PostInit();
-	}
-	if (jmi.Status == GUIModRow.ModStatus.Missing)
-	{
-		jmi.Status = GUIModRow.ModStatus.Missing;
-	}
-	else if (num < ConsoleToGUI.instance.ErrorCount)
-	{
-		jmi.Status = GUIModRow.ModStatus.Error;
-	}
-	else
-	{
-		jmi.Status = GUIModRow.ModStatus.Loaded;
-	}
+    if (!Directory.Exists(strFolderPath + "data/"))
+    {
+        Debug.LogError("ERROR: Mod folder not found: " + strFolderPath + "data/");
+        jmi.Status = GUIModRow.ModStatus.Missing;
+        return;
+    }
+    bool flag = ConsoleToGUI.instance != null;
+    int num = 0;
+    if (flag)
+    {
+        num = ConsoleToGUI.instance.ErrorCount;
+        ConsoleToGUI.instance.LogInfo("Begin loading data from: " + strFolderPath);
+    }
+    aModPaths.Insert(0, strFolderPath);
+    strFolderPath += "data/";
+    LoadModJsons(strFolderPath + "colors/", dictJsonColors, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "lights/", dictLights, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "gasrespires/", dictGasRespires, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "powerinfos/", dictPowerInfo, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "guipropmaps/", dictGUIPropMapUnparsed, aIgnorePatterns);
+    ParseGUIPropMaps();
+    LoadModJsons(strFolderPath + "conditions/", dictConds, aIgnorePatterns);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "conditions_simple/", dictSimple, aIgnorePatterns);
+    ParseConditionsSimple();
+    LoadModJsons(strFolderPath + "items/", dictItemDefs, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "condtrigs/", dictCTs, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "interactions/", dictInteractions, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "condowners/", dictCOs, aIgnorePatterns);
+    Dictionary<string, JsonRoomSpec> dictionary = new Dictionary<string, JsonRoomSpec>();
+    LoadModJsons(strFolderPath + "rooms/", dictionary, aIgnorePatterns);
+    ParseRoomSpecs(dictionary);
+    LoadModJsons(strFolderPath + "ships/", dictShips, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "loot/", dictLoot, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "market/Production/", dictProductionMaps, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "market/", dictMarketConfigs, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "market/CargoSpecs/", dictCargoSpecs, aIgnorePatterns);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_last/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesLast);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_robots/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesRobots);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_first/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesFirst);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_full/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesFull);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "manpages/", dictSimple, aIgnorePatterns);
+    ParseManPages();
+    LoadModJsons(strFolderPath + "homeworlds/", dictHomeworlds, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "careers/", dictCareers, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "lifeevents/", dictLifeEvents, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "personspecs/", dictPersonSpecs, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "shipspecs/", dictShipSpecs, aIgnorePatterns);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "traitscores/", dictSimple, aIgnorePatterns);
+    ParseTraitScores();
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "strings/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictStrings);
+    LoadModJsons(strFolderPath + "slot_effects/", dictSlotEffects, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "slots/", dictSlots, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "tickers/", dictTickers, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "condrules/", dictCondRules, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "audioemitters/", dictAudioEmitters, aIgnorePatterns);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "crewskins/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictCrewSkins);
+    LoadModJsons(strFolderPath + "ads/", dictAds, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "headlines/", dictHeadlines, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "music/", dictMusic, aIgnorePatterns);
+    ParseMusic();
+    LoadModJsons(strFolderPath + "cooverlays/", dictCOOverlays, aIgnorePatterns);
+    Dictionary<string, JsonDCOCollection> dictionary2 = new Dictionary<string, JsonDCOCollection>();
+    LoadModJsons(strFolderPath + "market/CoCollections/", dictionary2, aIgnorePatterns);
+    BuildMarketDCOCollection(dictionary2);
+    LoadModJsons(strFolderPath + "ledgerdefs/", dictLedgerDefs, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "pledges/", dictPledges, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "jobitems/", dictJobitems, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "jobs/", dictJobs, aIgnorePatterns);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_ship/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesShip);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_ship_adjectives/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesShipAdjectives);
+    dictSimple.Clear();
+    LoadModJsons(strFolderPath + "names_ship_nouns/", dictSimple, aIgnorePatterns);
+    ParseSimpleIntoStringDict(dictSimple, dictNamesShipNouns);
+    LoadModJsons(strFolderPath + "ai_training/", dictAIPersonalities, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "transit/", dictTransit, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "plot_manager/", dictPlotManager, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "star_systems/", dictStarSystems, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "parallax/", dictParallax, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "context/", dictContext, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "chargeprofiles/", dictChargeProfiles, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "wounds/", dictWounds, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "attackmodes/", dictAModes, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "pda_apps/", dictPDAAppIcons, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "zone_triggers/", dictZoneTriggers, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "tips/", dictTips, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "crime/", dictCrimes, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "plots/", dictPlots, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "plot_beats/", dictPlotBeats, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "racing/tracks/", dictRaceTracks, aIgnorePatterns);
+    LoadModJsons(strFolderPath + "racing/leagues/", dictRacingLeagues, aIgnorePatterns);
+    Dictionary<string, JsonInstallable> dictionary3 = new Dictionary<string, JsonInstallable>();
+    LoadModJsons(strFolderPath + "installables/", dictionary3, aIgnorePatterns);
+    foreach (KeyValuePair<string, JsonInstallable> item in dictionary3)
+    {
+        Installables.Create(item.Value);
+    }
+    dictionary3.Clear();
+    dictionary3 = null;
+    Dictionary<string, JsonInteractionOverride> dictionary4 = new Dictionary<string, JsonInteractionOverride>();
+    LoadModJsons(strFolderPath + "interaction_overrides/", dictionary4, aIgnorePatterns);
+    foreach (KeyValuePair<string, JsonInteractionOverride> item2 in dictionary4)
+    {
+        item2.Value.Generate();
+    }
+    dictionary4.Clear();
+    dictionary4 = null;
+    Dictionary<string, JsonPlotBeatOverride> dictionary5 = new Dictionary<string, JsonPlotBeatOverride>();
+    LoadModJsons(strFolderPath + "plot_beat_overrides/", dictionary5, aIgnorePatterns);
+    foreach (KeyValuePair<string, JsonPlotBeatOverride> item3 in dictionary5)
+    {
+        item3.Value.Generate();
+    }
+    dictionary5.Clear();
+    dictionary5 = null;
+    foreach (CondTrigger value in dictCTs.Values)
+    {
+        value.PostInit();
+    }
+    if (jmi.Status == GUIModRow.ModStatus.Missing)
+    {
+        jmi.Status = GUIModRow.ModStatus.Missing;
+    }
+    else if (num < ConsoleToGUI.instance.ErrorCount)
+    {
+        jmi.Status = GUIModRow.ModStatus.Error;
+    }
+    else
+    {
+        jmi.Status = GUIModRow.ModStatus.Loaded;
+    }
 }
 
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
 {
-	Debug.Log("#Info# Loading json: " + strFile);
-	string text = string.Empty;
-	try
-	{
-		string json = File.ReadAllText(strFile, Encoding.UTF8);
-		text += "Converting json into Array...\n";
-		TJson[] array = JsonMapper.ToObject<TJson[]>(json);
-		TJson[] array2 = array;
-		for (int i = 0; i < array2.Length; i++)
-		{
-			TJson val = array2[i];
-			text += "Getting key: ";
-			string text2 = null;
-			Type type = val.GetType();
-			PropertyInfo property = type.GetProperty("strName");
-			if (property == null)
-			{
-				JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
-			}
-			object value = property.GetValue(val, null);
-			text2 = value.ToString();
-			text = text + text2 + "\n";
-			if (dict.ContainsKey(text2))
-			{
-				Debug.Log("Warning: Trying to add " + text2 + " twice.");
-				dict[text2] = val;
-			}
-			else
-			{
-				dict.Add(text2, val);
-			}
-		}
-		array = null;
-		json = null;
-	}
-	catch (Exception ex)
-	{
-		JsonLogger.ReportProblem(strFile, ReportTypes.SourceInfo);
-		if (text.Length > 1000)
-		{
-			text = text.Substring(text.Length - 1000);
-		}
-		Debug.LogError(text + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
-	}
-	if (strFile.IndexOf("osSGv1") >= 0)
-	{
-		Debug.Log(text);
-	}
+    Debug.Log("#Info# Loading json: " + strFile);
+    string text = string.Empty;
+    try
+    {
+        string json = File.ReadAllText(strFile, Encoding.UTF8);
+        text += "Converting json into Array...\n";
+        TJson[] array = JsonMapper.ToObject<TJson[]>(json);
+        TJson[] array2 = array;
+        for (int i = 0; i < array2.Length; i++)
+        {
+            TJson val = array2[i];
+            text += "Getting key: ";
+            string text2 = null;
+            Type type = val.GetType();
+            PropertyInfo property = type.GetProperty("strName");
+            if (property == null)
+            {
+                JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
+            }
+            object value = property.GetValue(val, null);
+            text2 = value.ToString();
+            text = text + text2 + "\n";
+            if (dict.ContainsKey(text2))
+            {
+                Debug.Log("Warning: Trying to add " + text2 + " twice.");
+                dict[text2] = val;
+            }
+            else
+            {
+                dict.Add(text2, val);
+            }
+        }
+        array = null;
+        json = null;
+    }
+    catch (Exception ex)
+    {
+        JsonLogger.ReportProblem(strFile, ReportTypes.SourceInfo);
+        if (text.Length > 1000)
+        {
+            text = text.Substring(text.Length - 1000);
+        }
+        Debug.LogError(text + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
+    }
+    if (strFile.IndexOf("osSGv1") >= 0)
+    {
+        Debug.Log(text);
+    }
 }
 */

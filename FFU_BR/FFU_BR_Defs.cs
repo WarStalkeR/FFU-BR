@@ -38,10 +38,10 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"Loading Mod Configuration...");
 
             // Load Quality Settings
-            InfoCelsiusKelvin = ModDefs.Bind("QualitySettings", "InfoCelsiusKelvin", InfoCelsiusKelvin, 
+            InfoCelsiusKelvin = ModDefs.Bind("QualitySettings", "InfoCelsiusKelvin", InfoCelsiusKelvin,
                 "Allows to show temperature in Celsius beside Kelvin value.").Value;
             TowBraceAllowsKeep = ModDefs.Bind("QualitySettings", "TowBraceAllowsKeep", TowBraceAllowsKeep,
-                "Allows to use station keeping command, while tow braced to another vessel.").Value; 
+                "Allows to use station keeping command, while tow braced to another vessel.").Value;
             ModLog.Info($"QualitySettings => InfoCelsiusKelvin: {InfoCelsiusKelvin}");
             ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
 
