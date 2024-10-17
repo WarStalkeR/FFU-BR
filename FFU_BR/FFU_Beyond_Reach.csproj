@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net20</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>9.0</LangVersion>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -9,6 +9,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="@echo off&#xD;&#xA;setlocal&#xD;&#xA;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;) else if $(ConfigurationName) == DebugMM (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    &quot;$(SolutionDir)..\MonoMod\MonoMod.exe&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.FFU_BR.mm.dll&quot; /F&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.pdb&quot; /F&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.dll&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp-FFU_BR.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.dll&quot; /F&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;)" />
@@ -46,6 +50,15 @@
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\..\BepInEx\core\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\System.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>..\..\..\Ostranauts_Data\Managed\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\Ostranauts_Data\Managed\UnityEngine.dll</HintPath>

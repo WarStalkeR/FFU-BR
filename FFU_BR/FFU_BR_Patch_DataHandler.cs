@@ -17,6 +17,10 @@ using System.IO;
 using System;
 using MonoMod;
 using UnityEngine;
+using LitJson;
+using Ostranauts.Tools;
+using System.Reflection;
+using System.Text;
 
 public static class patch_DataHandler {
     [MonoModReplace] public static void Init() {
@@ -439,6 +443,97 @@ public static class patch_DataHandler {
             }
         }
     }
+
+    [MonoModReplace] public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
+        Debug.Log("#Info# Loading json: " + strFile);
+        string rawDump = string.Empty;
+        try {
+			// Raw JSON to Data Array
+            string dataFile = File.ReadAllText(strFile, Encoding.UTF8);
+            rawDump += "Converting json into Array...\n";
+			string[] rawData = dataFile.Split(new string[] { "}," }, StringSplitOptions.None);
+            TJson[] fileData = JsonMapper.ToObject<TJson[]>(dataFile);
+            TJson[] fileDataRef = fileData;
+
+            // Parsing Each Data Block
+            for (int i = 0; i < fileDataRef.Length; i++) {
+                TJson dataBlock = fileDataRef[i];
+                string rawBlock = rawData[i];
+                rawDump += "Getting key: ";
+                string dataKey = null;
+
+				// Validating Data Block
+                PropertyInfo dataProperty = dataBlock.GetType()?.GetProperty("strName");
+                if (dataProperty == null) {
+                    JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
+					continue;
+                }
+
+				// Data Allocation Subroutine
+                object dataValue = dataProperty.GetValue(dataBlock, null);
+                dataKey = dataValue.ToString();
+                rawDump = rawDump + dataKey + "\n";
+                if (dict.ContainsKey(dataKey)) {
+                    // Modify Existing Data
+                    Type newDataType = dataBlock.GetType();
+                    Type currDataType = dict[dataKey].GetType();
+
+                    // Iterate Over Properties
+                    foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
+                        // Ignore Identifier Property
+                        if (currProperty.Name == "strName") continue;
+
+						// New Data Property Validation
+                        PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
+						if (newProperty != null) {
+                            object newValue = newProperty.GetValue(dataBlock, null);
+							object currValue = currProperty.GetValue(dict[dataKey], null);
+							if (newValue != null && rawBlock.IndexOf(currProperty.Name) >= 0) {
+								Debug.Log($"#Info# #Block# {dataKey}, #Property# {currProperty.Name}: {currValue} => {newValue}");
+								currProperty.SetValue(dict[dataKey], newValue, null);
+							}
+						}
+                    }
+
+					// Iterate Over Fields
+					BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
+					foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
+                        // Ignore Identifier Field
+                        if (currField.Name == "strName") continue;
+
+                        // New Data Field Validation
+						FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
+						if (newField != null) {
+                            object newValue = newField.GetValue(dataBlock);
+                            object currValue = currField.GetValue(dict[dataKey]);
+							if (newValue != null && rawBlock.IndexOf(currField.Name) >= 0) {
+                                Debug.Log($"#Info# #Block# {dataKey}, #Field# {currField.Name}: {currValue} => {newValue}");
+								currField.SetValue(dict[dataKey], newValue);
+                            }
+                        }
+                    }
+                } else {
+                    // Add New Data Entry
+                    dict.Add(dataKey, dataBlock);
+                }
+            }
+
+			// Resetting Data Variables
+            fileData = null;
+            dataFile = null;
+        } catch (Exception ex) {
+            JsonLogger.ReportProblem(strFile, ReportTypes.SourceInfo);
+            if (rawDump.Length > 1000) {
+                rawDump = rawDump.Substring(rawDump.Length - 1000);
+            }
+            Debug.LogError(rawDump + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
+        }
+
+		// Specific File Dump
+        if (strFile.IndexOf("osSGv1") >= 0) {
+            Debug.Log(rawDump);
+        }
+    }
 }
 
 // Reference ILSpy Output
@@ -846,6 +941,58 @@ private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, Json
 	else
 	{
 		jmi.Status = GUIModRow.ModStatus.Loaded;
+	}
+}
+
+public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
+{
+	Debug.Log("#Info# Loading json: " + strFile);
+	string text = string.Empty;
+	try
+	{
+		string json = File.ReadAllText(strFile, Encoding.UTF8);
+		text += "Converting json into Array...\n";
+		TJson[] array = JsonMapper.ToObject<TJson[]>(json);
+		TJson[] array2 = array;
+		for (int i = 0; i < array2.Length; i++)
+		{
+			TJson val = array2[i];
+			text += "Getting key: ";
+			string text2 = null;
+			Type type = val.GetType();
+			PropertyInfo property = type.GetProperty("strName");
+			if (property == null)
+			{
+				JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
+			}
+			object value = property.GetValue(val, null);
+			text2 = value.ToString();
+			text = text + text2 + "\n";
+			if (dict.ContainsKey(text2))
+			{
+				Debug.Log("Warning: Trying to add " + text2 + " twice.");
+				dict[text2] = val;
+			}
+			else
+			{
+				dict.Add(text2, val);
+			}
+		}
+		array = null;
+		json = null;
+	}
+	catch (Exception ex)
+	{
+		JsonLogger.ReportProblem(strFile, ReportTypes.SourceInfo);
+		if (text.Length > 1000)
+		{
+			text = text.Substring(text.Length - 1000);
+		}
+		Debug.LogError(text + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
+	}
+	if (strFile.IndexOf("osSGv1") >= 0)
+	{
+		Debug.Log(text);
 	}
 }
 */
