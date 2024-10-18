@@ -507,60 +507,43 @@ public static class patch_DataHandler {
                 TJson dataBlock = fileData[i];
                 string rawBlock = isMod ? rawData[i] : null;
                 rawDump += "Getting key: ";
+                string referenceKey = null;
                 string dataKey = null;
 
                 // Validating Data Block
-                PropertyInfo dataProperty = dataBlock.GetType()?.GetProperty("strName");
-                if (dataProperty == null) {
+                PropertyInfo referenceProperty = dataBlock.GetType()?.GetProperty("strReference");
+                PropertyInfo nameProperty = dataBlock.GetType()?.GetProperty("strName");
+                if (nameProperty == null) {
                     JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
                     continue;
                 }
 
                 // Data Allocation Subroutine
-                object dataValue = dataProperty.GetValue(dataBlock, null);
-                dataKey = dataValue.ToString();
+                object referenceValue = referenceProperty?.GetValue(dataBlock, null);
+                object nameValue = nameProperty.GetValue(dataBlock, null);
+                referenceKey = referenceValue?.ToString();
+                dataKey = nameValue.ToString();
                 rawDump = rawDump + dataKey + "\n";
-                if (dataDict.ContainsKey(dataKey)) {
+                if (isMod && dataDict.ContainsKey(dataKey)) {
                     // Modify Existing Data
-                    Type newDataType = dataBlock.GetType();
-                    Type currDataType = dataDict[dataKey].GetType();
-
-                    // Iterate Over Properties
-                    foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
-                        // Ignore Identifier Property
-                        if (currProperty.Name == "strName") continue;
-
-                        // New Data Property Validation
-                        PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
-                        if (newProperty != null) {
-                            object newValue = newProperty.GetValue(dataBlock, null);
-                            object currValue = currProperty.GetValue(dataDict[dataKey], null);
-                            if (isMod && rawBlock.IndexOf(currProperty.Name) >= 0) {
-                                Debug.Log($"#Info# #Block# {dataKey}, #Property# {currProperty.Name}: {currValue} => {newValue}");
-                                currProperty.SetValue(dataDict[dataKey], newValue, null);
-                            }
+                    SyncSafe(dataDict[dataKey], dataBlock, ref rawBlock, ref dataKey, true);
+                } else if (isMod && !dataDict.ContainsKey(dataKey)) {
+                    // Reference Deep Copy + Apply Changes
+                    if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
+                        string deepCopy = JsonMapper.ToJson(dataDict[referenceKey]);
+                        TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
+                        PropertyInfo copyProperty = deepCopyBlock.GetType()?.GetProperty("strName");
+                        if (copyProperty != null) {
+                            Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
+                            copyProperty.SetValue(deepCopyBlock, dataKey, null);
+                            SyncSafe(deepCopyBlock, dataBlock, ref rawBlock, ref dataKey);
+                            dataDict.Add(dataKey, deepCopyBlock);
                         }
-                    }
-
-                    // Iterate Over Fields
-                    BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
-                    foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
-                        // Ignore Identifier Field
-                        if (currField.Name == "strName") continue;
-
-                        // New Data Field Validation
-                        FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
-                        if (newField != null) {
-                            object newValue = newField.GetValue(dataBlock);
-                            object currValue = currField.GetValue(dataDict[dataKey]);
-                            if (isMod && rawBlock.IndexOf(currField.Name) >= 0) {
-                                Debug.Log($"#Info# #Block# {dataKey}, #Field# {currField.Name}: {currValue} => {newValue}");
-                                currField.SetValue(dataDict[dataKey], newValue);
-                            }
-                        }
+                    } else {
+                        dataDict.Add(dataKey, dataBlock);
                     }
                 } else {
-                    // Add New Data Entry
+                    // Add New Core Data Entry
                     dataDict.Add(dataKey, dataBlock);
                 }
             }
@@ -579,6 +562,48 @@ public static class patch_DataHandler {
         // Specific File Dump
         if (strFile.IndexOf("osSGv1") >= 0) {
             Debug.Log(rawDump);
+        }
+    }
+
+    public static void SyncSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, ref string dataKey, bool logValues = false) {
+        Type currDataType = currDataSet.GetType();
+        Type newDataType = newDataSet.GetType();
+
+        // Iterate Over Properties
+        foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
+            // Ignore Identifier Property
+            if (currProperty.Name == "strName" ||
+                currProperty.Name == "strReference") continue;
+
+            // New Data Property Validation
+            PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
+            if (newProperty != null) {
+                object newValue = newProperty.GetValue(newDataSet, null);
+                object currValue = currProperty.GetValue(currDataSet, null);
+                if (rawDataSet.IndexOf(currProperty.Name) >= 0) {
+                    if (logValues) Debug.Log($"#Info# Data Block [{dataKey}], Property [{currProperty.Name}]: {currValue} => {newValue}");
+                    currProperty.SetValue(currDataSet, newValue, null);
+                }
+            }
+        }
+
+        // Iterate Over Fields
+        BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
+        foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
+            // Ignore Identifier Field
+            if (currField.Name == "strName" ||
+                currField.Name == "strReference") continue;
+
+            // New Data Field Validation
+            FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
+            if (newField != null) {
+                object newValue = newField.GetValue(newDataSet);
+                object currValue = currField.GetValue(currDataSet);
+                if (rawDataSet.IndexOf(currField.Name) >= 0) {
+                    if (logValues) Debug.Log($"#Info# Data Block [{dataKey}], Field [{currField.Name}]: {currValue} => {newValue}");
+                    currField.SetValue(currDataSet, newValue);
+                }
+            }
         }
     }
 }
