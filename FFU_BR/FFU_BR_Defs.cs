@@ -15,11 +15,14 @@ using System.IO;
 namespace FFU_Beyond_Reach {
     public class FFU_BR_Defs {
         public static readonly string ModName = "BepInEx: Beyond Reach";
-        public static readonly string ModVersion = "0.0.1.0";
+        public static readonly string ModVersion = "0.1.0.0";
 
         private static ConfigFile ModDefs = null;
         public static ConfigEntry<bool> cfgEntryExample;
-        public static bool InfoCelsiusKelvin = true;
+        public static bool AltTempEnabled = true;
+        public static string AltTempSymbol = "C";
+        public static float AltTempMult = 1.0f;
+        public static float AltTempShift = -273.15f;
         public static bool TowBraceAllowsKeep = true;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
@@ -38,11 +41,20 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"Loading Mod Configuration...");
 
             // Load Quality Settings
-            InfoCelsiusKelvin = ModDefs.Bind("QualitySettings", "InfoCelsiusKelvin", InfoCelsiusKelvin,
-                "Allows to show temperature in Celsius beside Kelvin value.").Value;
+            AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
+                "Allows to show temperature in alternative measure beside Kelvin value.").Value;
+            AltTempSymbol = ModDefs.Bind("QualitySettings", "AltTempSymbol", AltTempSymbol,
+                "What symbol will represent alternative temperature measure.").Value;
+            AltTempMult = ModDefs.Bind("QualitySettings", "AltTempMult", AltTempMult,
+                "Alternative temperature multiplier for conversion from Kelvin.").Value;
+            AltTempShift = ModDefs.Bind("QualitySettings", "AltTempShift", AltTempShift,
+                "Alternative temperature value shift for conversion from Kelvin.").Value;
             TowBraceAllowsKeep = ModDefs.Bind("QualitySettings", "TowBraceAllowsKeep", TowBraceAllowsKeep,
                 "Allows to use station keeping command, while tow braced to another vessel.").Value;
-            ModLog.Info($"QualitySettings => InfoCelsiusKelvin: {InfoCelsiusKelvin}");
+            ModLog.Info($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
+            ModLog.Info($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
+            ModLog.Info($"QualitySettings => AltTempMult: {AltTempMult}");
+            ModLog.Info($"QualitySettings => AltTempShift: {AltTempShift}");
             ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
 
             // Load Gameplay Settings

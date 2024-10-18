@@ -28,9 +28,10 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
                 if (cond.nDisplayType == 1) {
                     NumbElement component = Object.Instantiate(_numberElement, _tfNumbContainer.transform).GetComponent<NumbElement>();
                     string strData;
-                    if (FFU_BR_Defs.InfoCelsiusKelvin && cond.strName == "StatGasTemp") {
+                    if (FFU_BR_Defs.AltTempEnabled && cond.strName == "StatGasTemp") {
                         double amount = cond.fCount * cond.fConversionFactor;
-                        strData = amount.ToString("N3") + cond.strDisplayBonus + " | " + (amount - 273.15d).ToString("N1") + "C";
+                        double altAmount = cond.fCount * FFU_BR_Defs.AltTempMult + FFU_BR_Defs.AltTempShift;
+                        strData = amount.ToString("N3") + cond.strDisplayBonus + " | " + altAmount.ToString("N1") + FFU_BR_Defs.AltTempSymbol;
                     } else strData = (cond.fCount * cond.fConversionFactor).ToString("N3") + cond.strDisplayBonus;
                     component.SetData(cond.strNameFriendly, cond.strName, strData, cond.strDesc, DataHandler.GetColor(cond.strColor));
                     _numbList.Add(component);
@@ -50,10 +51,12 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
             foreach (NumbElement element in _numbList) {
                 Condition cond = DataHandler.GetCond(element.CondName);
                 string strData;
-                if (FFU_BR_Defs.InfoCelsiusKelvin && cond.strName == "StatGasTemp") {
-                    double amount = _co.GetCondAmount(element.CondName) * cond.fConversionFactor;
-                    strData = amount.ToString("N3") + cond.strDisplayBonus + " | " + (amount - 273.15d).ToString("N1") + "C";
-                } else strData = (_co.GetCondAmount(element.CondName) * cond.fConversionFactor).ToString("N3") + cond.strDisplayBonus;
+                double condAmount = _co.GetCondAmount(element.CondName);
+                if (FFU_BR_Defs.AltTempEnabled && cond.strName == "StatGasTemp") {
+                    double amount = condAmount * cond.fConversionFactor;
+                    double altAmount = condAmount * FFU_BR_Defs.AltTempMult + FFU_BR_Defs.AltTempShift;
+                    strData = amount.ToString("N3") + cond.strDisplayBonus + " | " + altAmount.ToString("N1") + FFU_BR_Defs.AltTempSymbol;
+                } else strData = (condAmount * cond.fConversionFactor).ToString("N3") + cond.strDisplayBonus;
                 element.SetData(cond.strNameFriendly, element.CondName, strData, cond.strDesc, DataHandler.GetColor(cond.strColor));
             }
             LayoutRebuilder.MarkLayoutForRebuild(base.transform.parent.GetComponent<RectTransform>());
