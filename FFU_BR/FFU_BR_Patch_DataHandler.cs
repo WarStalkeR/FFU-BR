@@ -21,8 +21,10 @@ using LitJson;
 using Ostranauts.Tools;
 using System.Reflection;
 using System.Text;
+using Ostranauts.Ships.Commands;
 
 public static class patch_DataHandler {
+    public static string strModsPath = string.Empty;
     [MonoModReplace] public static void Init() {
         // Early Access Build Info
         try {
@@ -148,6 +150,7 @@ public static class patch_DataHandler {
         if (DataHandler.strModFolder == null || DataHandler.strModFolder == string.Empty) {
             DataHandler.strModFolder = Path.Combine(Application.dataPath, "Mods/");
         }
+        strModsPath = DataHandler.strModFolder.Replace("loading_order.json", string.Empty);
         string directoryName = Path.GetDirectoryName(DataHandler.strModFolder);
         directoryName = Path.Combine(directoryName, "loading_order.json");
 
@@ -225,7 +228,7 @@ public static class patch_DataHandler {
                 }
 
                 // Sync Load All Mod Data
-                LoadSyncMods(modQueuedPaths, newModList.aIgnorePatterns, DataHandler.dictModInfos);
+                SyncLoadMods(modQueuedPaths, newModList.aIgnorePatterns);
             }
         }
 
@@ -285,7 +288,7 @@ public static class patch_DataHandler {
         DataHandler.bLoaded = true;
     }
 
-    private static void LoadSyncMods(List<string[]> refQueuedPaths, string[] aIgnorePatterns, Dictionary<string, JsonModInfo> refModInfos) {
+    private static void SyncLoadMods(List<string[]> refQueuedPaths, string[] aIgnorePatterns) {
         List<string> validModInfos = new List<string>();
         List<string> validModPaths = new List<string>();
         List<string> validDataPaths = new List<string>();
@@ -319,112 +322,112 @@ public static class patch_DataHandler {
 
         // Sync Load Mods Data
         foreach (string modPath in validModPaths) DataHandler.aModPaths.Insert(0, modPath);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "colors/", DataHandler.dictJsonColors, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "lights/", DataHandler.dictLights, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "gasrespires/", DataHandler.dictGasRespires, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "powerinfos/", DataHandler.dictPowerInfo, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "guipropmaps/", DataHandler.dictGUIPropMapUnparsed, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "colors/", DataHandler.dictJsonColors, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "lights/", DataHandler.dictLights, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "gasrespires/", DataHandler.dictGasRespires, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "powerinfos/", DataHandler.dictPowerInfo, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "guipropmaps/", DataHandler.dictGUIPropMapUnparsed, aIgnorePatterns);
         DataHandler.ParseGUIPropMaps();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "conditions/", DataHandler.dictConds, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "conditions/", DataHandler.dictConds, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "conditions_simple/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "conditions_simple/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseConditionsSimple();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "items/", DataHandler.dictItemDefs, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "condtrigs/", DataHandler.dictCTs, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "interactions/", DataHandler.dictInteractions, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "condowners/", DataHandler.dictCOs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "items/", DataHandler.dictItemDefs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "condtrigs/", DataHandler.dictCTs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "interactions/", DataHandler.dictInteractions, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "condowners/", DataHandler.dictCOs, aIgnorePatterns);
         Dictionary<string, JsonRoomSpec> listRooms = new Dictionary<string, JsonRoomSpec>();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "rooms/", listRooms, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "rooms/", listRooms, aIgnorePatterns);
         DataHandler.ParseRoomSpecs(listRooms);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "ships/", DataHandler.dictShips, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "loot/", DataHandler.dictLoot, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "market/Production/", DataHandler.dictProductionMaps, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "market/", DataHandler.dictMarketConfigs, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "market/CargoSpecs/", DataHandler.dictCargoSpecs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "ships/", DataHandler.dictShips, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "loot/", DataHandler.dictLoot, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "market/Production/", DataHandler.dictProductionMaps, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "market/", DataHandler.dictMarketConfigs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "market/CargoSpecs/", DataHandler.dictCargoSpecs, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_last/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_last/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesLast);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_robots/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_robots/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesRobots);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_first/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_first/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesFirst);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_full/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_full/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesFull);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "manpages/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "manpages/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseManPages();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "homeworlds/", DataHandler.dictHomeworlds, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "careers/", DataHandler.dictCareers, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "lifeevents/", DataHandler.dictLifeEvents, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "personspecs/", DataHandler.dictPersonSpecs, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "shipspecs/", DataHandler.dictShipSpecs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "homeworlds/", DataHandler.dictHomeworlds, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "careers/", DataHandler.dictCareers, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "lifeevents/", DataHandler.dictLifeEvents, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "personspecs/", DataHandler.dictPersonSpecs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "shipspecs/", DataHandler.dictShipSpecs, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "traitscores/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "traitscores/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseTraitScores();
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "strings/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "strings/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictStrings);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "slot_effects/", DataHandler.dictSlotEffects, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "slots/", DataHandler.dictSlots, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "tickers/", DataHandler.dictTickers, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "condrules/", DataHandler.dictCondRules, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "audioemitters/", DataHandler.dictAudioEmitters, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "slot_effects/", DataHandler.dictSlotEffects, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "slots/", DataHandler.dictSlots, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "tickers/", DataHandler.dictTickers, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "condrules/", DataHandler.dictCondRules, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "audioemitters/", DataHandler.dictAudioEmitters, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "crewskins/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "crewskins/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictCrewSkins);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "ads/", DataHandler.dictAds, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "headlines/", DataHandler.dictHeadlines, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "music/", DataHandler.dictMusic, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "ads/", DataHandler.dictAds, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "headlines/", DataHandler.dictHeadlines, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "music/", DataHandler.dictMusic, aIgnorePatterns);
         DataHandler.ParseMusic();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "cooverlays/", DataHandler.dictCOOverlays, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "cooverlays/", DataHandler.dictCOOverlays, aIgnorePatterns);
         Dictionary<string, JsonDCOCollection> listCollections = new Dictionary<string, JsonDCOCollection>();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "market/CoCollections/", listCollections, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "market/CoCollections/", listCollections, aIgnorePatterns);
         DataHandler.BuildMarketDCOCollection(listCollections);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "ledgerdefs/", DataHandler.dictLedgerDefs, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "pledges/", DataHandler.dictPledges, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "jobitems/", DataHandler.dictJobitems, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "jobs/", DataHandler.dictJobs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "ledgerdefs/", DataHandler.dictLedgerDefs, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "pledges/", DataHandler.dictPledges, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "jobitems/", DataHandler.dictJobitems, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "jobs/", DataHandler.dictJobs, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_ship/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_ship/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesShip);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_ship_adjectives/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_ship_adjectives/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesShipAdjectives);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "names_ship_nouns/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "names_ship_nouns/", DataHandler.dictSimple, aIgnorePatterns);
         DataHandler.ParseSimpleIntoStringDict(DataHandler.dictSimple, DataHandler.dictNamesShipNouns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "ai_training/", DataHandler.dictAIPersonalities, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "transit/", DataHandler.dictTransit, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "plot_manager/", DataHandler.dictPlotManager, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "star_systems/", DataHandler.dictStarSystems, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "parallax/", DataHandler.dictParallax, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "context/", DataHandler.dictContext, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "chargeprofiles/", DataHandler.dictChargeProfiles, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "wounds/", DataHandler.dictWounds, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "attackmodes/", DataHandler.dictAModes, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "pda_apps/", DataHandler.dictPDAAppIcons, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "zone_triggers/", DataHandler.dictZoneTriggers, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "tips/", DataHandler.dictTips, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "crime/", DataHandler.dictCrimes, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "plots/", DataHandler.dictPlots, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "plot_beats/", DataHandler.dictPlotBeats, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "racing/tracks/", DataHandler.dictRaceTracks, aIgnorePatterns);
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "racing/leagues/", DataHandler.dictRacingLeagues, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "ai_training/", DataHandler.dictAIPersonalities, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "transit/", DataHandler.dictTransit, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "plot_manager/", DataHandler.dictPlotManager, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "star_systems/", DataHandler.dictStarSystems, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "parallax/", DataHandler.dictParallax, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "context/", DataHandler.dictContext, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "chargeprofiles/", DataHandler.dictChargeProfiles, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "wounds/", DataHandler.dictWounds, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "attackmodes/", DataHandler.dictAModes, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "pda_apps/", DataHandler.dictPDAAppIcons, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "zone_triggers/", DataHandler.dictZoneTriggers, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "tips/", DataHandler.dictTips, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "crime/", DataHandler.dictCrimes, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "plots/", DataHandler.dictPlots, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "plot_beats/", DataHandler.dictPlotBeats, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "racing/tracks/", DataHandler.dictRaceTracks, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "racing/leagues/", DataHandler.dictRacingLeagues, aIgnorePatterns);
         Dictionary<string, JsonInstallable> listInstallables = new Dictionary<string, JsonInstallable>();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "installables/", listInstallables, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "installables/", listInstallables, aIgnorePatterns);
         foreach (KeyValuePair<string, JsonInstallable> refInstallable in listInstallables) Installables.Create(refInstallable.Value);
         listInstallables.Clear();
         listInstallables = null;
         Dictionary<string, JsonInteractionOverride> listInteractions = new Dictionary<string, JsonInteractionOverride>();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "interaction_overrides/", listInteractions, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "interaction_overrides/", listInteractions, aIgnorePatterns);
         foreach (KeyValuePair<string, JsonInteractionOverride> refInteraction in listInteractions) refInteraction.Value.Generate();
         listInteractions.Clear();
         listInteractions = null;
         Dictionary<string, JsonPlotBeatOverride> listPlotBeats = new Dictionary<string, JsonPlotBeatOverride>();
-        foreach (string dataPath in validDataPaths) DataHandler.LoadModJsons(dataPath + "plot_beat_overrides/", listPlotBeats, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "plot_beat_overrides/", listPlotBeats, aIgnorePatterns);
         foreach (KeyValuePair<string, JsonPlotBeatOverride> refPlotBeat in listPlotBeats) refPlotBeat.Value.Generate();
         listPlotBeats.Clear();
         listPlotBeats = null;
@@ -432,7 +435,7 @@ public static class patch_DataHandler {
 
         // Finalize Mod Load Status
         foreach (string modName in validModInfos) {
-            JsonModInfo refModInfo = refModInfos[modName];
+            JsonModInfo refModInfo = DataHandler.dictModInfos[modName];
             if (refModInfo.Status == GUIModRow.ModStatus.Missing) {
                 refModInfo.Status = GUIModRow.ModStatus.Missing;
             } else if (numConsoleErrors < ConsoleToGUI.instance.ErrorCount) {
@@ -443,21 +446,66 @@ public static class patch_DataHandler {
         }
     }
 
-    [MonoModReplace] public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict) {
-        Debug.Log("#Info# Loading json: " + strFile);
+    private static void SyncLoadJSONs<TJson>(string strFolderPath, string subFolder, Dictionary<string, TJson> dataDict, string[] aIgnorePatterns) {
+        // Prepare Reference Data
+        string modName = strFolderPath.Contains("StreamingAssets") ? null :
+            strFolderPath.Remove(strFolderPath.Length - 6).Replace("\\", "").Replace("/", "")
+            .Replace(strModsPath.Replace("\\", "").Replace("/", ""), "");
+        string fileType = subFolder.Remove(subFolder.Length - 1);
+
+        // Per Mod Data Removal
+        patch_JsonModInfo refModInfo = modName != null ? DataHandler.dictModInfos[modName] as patch_JsonModInfo : null;
+        if (refModInfo != null && refModInfo.removeIds != null && refModInfo.removeIds.ContainsKey(fileType)) {
+            foreach (string removeId in refModInfo.removeIds[fileType]) {
+                bool wasRemoved = dataDict.Remove(removeId);
+                if (wasRemoved) Debug.Log($"Removed existing '{fileType}' entry: {removeId}");
+            }
+        }
+
+        // Ignore Missing Folder
+        string strSubFolderPath = strFolderPath + subFolder;
+        if (!Directory.Exists(strSubFolderPath)) return;
+
+        // Parse Folder Contents
+        string[] subFiles = Directory.GetFiles(strSubFolderPath, "*.json", SearchOption.AllDirectories);
+        foreach (string subFile in subFiles) {
+            string filePath = DataHandler.PathSanitize(subFile);
+
+            // Check Ignored Patterns
+            bool isIgnoredPath = false;
+            if (aIgnorePatterns != null) {
+                foreach (string ignorePattern in aIgnorePatterns) {
+                    if (filePath.IndexOf(ignorePattern) >= 0) {
+                        isIgnoredPath = true;
+                        break;
+                    }
+                }
+            }
+
+            // Data Loading Subroutine
+            if (isIgnoredPath) {
+                Debug.LogWarning("Ignore Pattern match: " + filePath + "; Skipping...");
+            } else {
+                SyncToData(filePath, modName != null, dataDict);
+            }
+        }
+    }
+
+    public static void SyncToData<TJson>(string strFile, bool isMod, Dictionary<string, TJson> dataDict) {
+        Debug.Log("#Info# Loading JSON: " + strFile);
         string rawDump = string.Empty;
         try {
             // Raw JSON to Data Array
             string dataFile = File.ReadAllText(strFile, Encoding.UTF8);
-            rawDump += "Converting json into Array...\n";
-            string[] rawData = dataFile.Split(new string[] { "}," }, StringSplitOptions.None);
+            rawDump += "Converting JSON into Array...\n";
+            string[] rawData = isMod ? dataFile.Replace("\n", "").Replace("\r", "").Replace("\t", "")
+                .Replace(" ", "").Split(new string[] { "},{" }, StringSplitOptions.None) : null;
             TJson[] fileData = JsonMapper.ToObject<TJson[]>(dataFile);
-            TJson[] fileDataRef = fileData;
 
             // Parsing Each Data Block
-            for (int i = 0; i < fileDataRef.Length; i++) {
-                TJson dataBlock = fileDataRef[i];
-                string rawBlock = rawData[i];
+            for (int i = 0; i < fileData.Length; i++) {
+                TJson dataBlock = fileData[i];
+                string rawBlock = isMod ? rawData[i] : null;
                 rawDump += "Getting key: ";
                 string dataKey = null;
 
@@ -472,10 +520,10 @@ public static class patch_DataHandler {
                 object dataValue = dataProperty.GetValue(dataBlock, null);
                 dataKey = dataValue.ToString();
                 rawDump = rawDump + dataKey + "\n";
-                if (dict.ContainsKey(dataKey)) {
+                if (dataDict.ContainsKey(dataKey)) {
                     // Modify Existing Data
                     Type newDataType = dataBlock.GetType();
-                    Type currDataType = dict[dataKey].GetType();
+                    Type currDataType = dataDict[dataKey].GetType();
 
                     // Iterate Over Properties
                     foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
@@ -486,10 +534,10 @@ public static class patch_DataHandler {
                         PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
                         if (newProperty != null) {
                             object newValue = newProperty.GetValue(dataBlock, null);
-                            object currValue = currProperty.GetValue(dict[dataKey], null);
-                            if (newValue != null && rawBlock.IndexOf(currProperty.Name) >= 0) {
+                            object currValue = currProperty.GetValue(dataDict[dataKey], null);
+                            if (isMod && rawBlock.IndexOf(currProperty.Name) >= 0) {
                                 Debug.Log($"#Info# #Block# {dataKey}, #Property# {currProperty.Name}: {currValue} => {newValue}");
-                                currProperty.SetValue(dict[dataKey], newValue, null);
+                                currProperty.SetValue(dataDict[dataKey], newValue, null);
                             }
                         }
                     }
@@ -504,16 +552,16 @@ public static class patch_DataHandler {
                         FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
                         if (newField != null) {
                             object newValue = newField.GetValue(dataBlock);
-                            object currValue = currField.GetValue(dict[dataKey]);
-                            if (newValue != null && rawBlock.IndexOf(currField.Name) >= 0) {
+                            object currValue = currField.GetValue(dataDict[dataKey]);
+                            if (isMod && rawBlock.IndexOf(currField.Name) >= 0) {
                                 Debug.Log($"#Info# #Block# {dataKey}, #Field# {currField.Name}: {currValue} => {newValue}");
-                                currField.SetValue(dict[dataKey], newValue);
+                                currField.SetValue(dataDict[dataKey], newValue);
                             }
                         }
                     }
                 } else {
                     // Add New Data Entry
-                    dict.Add(dataKey, dataBlock);
+                    dataDict.Add(dataKey, dataBlock);
                 }
             }
 
@@ -941,6 +989,40 @@ private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, Json
     {
         jmi.Status = GUIModRow.ModStatus.Loaded;
     }
+}
+
+private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string, TJson> dict, string[] aIgnorePatterns)
+{
+	if (!Directory.Exists(strFolderPath))
+	{
+		return;
+	}
+	string[] files = Directory.GetFiles(strFolderPath, "*.json", SearchOption.AllDirectories);
+	string[] array = files;
+	foreach (string strIn in array)
+	{
+		string text = PathSanitize(strIn);
+		bool flag = false;
+		if (aIgnorePatterns != null)
+		{
+			foreach (string value in aIgnorePatterns)
+			{
+				if (text.IndexOf(value) >= 0)
+				{
+					flag = true;
+					break;
+				}
+			}
+		}
+		if (flag)
+		{
+			Debug.LogWarning("Ignore Pattern match: " + text + "; Skipping...");
+		}
+		else
+		{
+			JsonToData(text, dict);
+		}
+	}
 }
 
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
