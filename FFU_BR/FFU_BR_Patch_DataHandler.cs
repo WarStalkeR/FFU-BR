@@ -639,6 +639,11 @@ public static class patch_DataHandler {
             string[] refData = refItem.Split('=');
             bool isDataValue = refData.Length == 2;
             if (noArrayOps) noArrayOps = arrayOp == SyncArrayOp.None;
+            if (noArrayOps) {
+                if (refArray.IndexOf(refItem) > 0) Debug.LogWarning($"Non/Ops Array mixing for " +
+                    $"Data Block [{dataKey}], Property [{entryName}] is not permitted! Ignoring.");
+                break;
+            }
             if (isDataValue) {
                 switch (arrayOp) {
                     // Modify Existing Item
@@ -648,8 +653,8 @@ public static class patch_DataHandler {
                             string[] itemData = modArray[i].Split('=');
                             if (itemData[0] == refData[0]) {
                                 if (doLog) Debug.Log($"#Info# " +
-                                    $"Data Block [{dataKey}], Property [{entryName}], " +
-                                    $"Parameter [{refData[0]}]: {itemData[1]} => {refData[1]}");
+                                    $"Data Block [{dataKey}], Property [{entryName}], Parameter " +
+                                    $"[{refData[0]}]: {itemData[1]} => {refData[1]}");
                                 modArray[i] = refItem;
                                 isReplaced = true;
                                 break;
@@ -681,19 +686,55 @@ public static class patch_DataHandler {
                             }
                         }
                         if (isFound) {
-                            if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}] was " +
-                                $"removed from Data Block [{dataKey}], Property [{entryName}]");
+                            if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}] was removed " +
+                                $"from Data Block [{dataKey}], Property [{entryName}]");
                             modArray.RemoveAt(removeIndex);
                         } else {
-                            Debug.LogWarning($"Parameter [{refData[0]}] was not " +
-                                $"found in Data Block [{dataKey}], Property [{entryName}]!");
+                            Debug.LogWarning($"Parameter [{refData[0]}] was not found " +
+                                $"in Data Block [{dataKey}], Property [{entryName}]!");
                         }
                         break;
                     }
                 }
-            } else if (!noArrayOps) {
-                Debug.LogWarning($"Entry [{refItem}] in Data Block [{dataKey}], " +
-                    $"Property [{entryName}] is not a data value! Ignoring.");
+            } else {
+                switch (arrayOp) {
+                    // Modify Existing Disabled
+                    case SyncArrayOp.Mod: {
+                        Debug.LogWarning($"Non-data [{refItem}] in Data Block [{dataKey}], Property " +
+                            $"[{entryName}] doesn't support '--MOD--' operation! Ignoring.");
+                        break;
+                    }
+
+                    // Add New Item Entry
+                    case SyncArrayOp.Add: {
+                        if (doLog) Debug.Log($"#Info# Parameter [{refItem}] was added " +
+                            $"to Data Block [{dataKey}], Property [{entryName}]");
+                        modArray.Add(refItem);
+                        break;
+                    }
+
+                    // Remove Existing Item
+                    case SyncArrayOp.Del: {
+                        bool isFound = false;
+                        int removeIndex = 0;
+                        for (int i = 0; i < modArray.Count; i++) {
+                            if (modArray[i] == refItem) {
+                                removeIndex = i;
+                                isFound = true;
+                                break;
+                            }
+                        }
+                        if (isFound) {
+                            if (doLog) Debug.Log($"#Info# Parameter [{refItem}] was removed " +
+                                $"from Data Block [{dataKey}], Property [{entryName}]");
+                            modArray.RemoveAt(removeIndex);
+                        } else {
+                            Debug.LogWarning($"Parameter [{refItem}] was not found in " +
+                                $"Data Block [{dataKey}], Property [{entryName}]!");
+                        }
+                        break;
+                    }
+                }
             }
         }
 
