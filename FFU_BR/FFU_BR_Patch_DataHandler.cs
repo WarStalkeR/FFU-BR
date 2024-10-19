@@ -21,7 +21,7 @@ using LitJson;
 using Ostranauts.Tools;
 using System.Reflection;
 using System.Text;
-using Ostranauts.Ships.Commands;
+using System.Linq;
 
 public static class patch_DataHandler {
     public static string strModsPath = string.Empty;
@@ -526,7 +526,8 @@ public static class patch_DataHandler {
                 rawDump = rawDump + dataKey + "\n";
                 if (isMod && dataDict.ContainsKey(dataKey)) {
                     // Modify Existing Data
-                    SyncSafe(dataDict[dataKey], dataBlock, ref rawBlock, ref dataKey, true);
+                    SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, dataKey, 
+                        FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModChanges);
                 } else if (isMod && !dataDict.ContainsKey(dataKey)) {
                     // Reference Deep Copy + Apply Changes
                     if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
@@ -536,7 +537,8 @@ public static class patch_DataHandler {
                         if (copyProperty != null) {
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
                             copyProperty.SetValue(deepCopyBlock, dataKey, null);
-                            SyncSafe(deepCopyBlock, dataBlock, ref rawBlock, ref dataKey);
+                            SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, 
+                                FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy);
                             dataDict.Add(dataKey, deepCopyBlock);
                         }
                     } else {
@@ -565,7 +567,7 @@ public static class patch_DataHandler {
         }
     }
 
-    public static void SyncSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, ref string dataKey, bool logValues = false) {
+    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string dataKey, bool doLog = false) {
         Type currDataType = currDataSet.GetType();
         Type newDataType = newDataSet.GetType();
 
@@ -581,7 +583,11 @@ public static class patch_DataHandler {
                 object newValue = newProperty.GetValue(newDataSet, null);
                 object currValue = currProperty.GetValue(currDataSet, null);
                 if (rawDataSet.IndexOf(currProperty.Name) >= 0) {
-                    if (logValues) Debug.Log($"#Info# Data Block [{dataKey}], Property [{currProperty.Name}]: {currValue} => {newValue}");
+                    if (newValue is string[])
+                        SyncArrayOps(ref newValue, ref currValue, dataKey, currProperty.Name, doLog);
+                    else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
+                        $"Property [{currProperty.Name}]: {currValue} => {newValue}");
+                    // Overwrite Existing Value
                     currProperty.SetValue(currDataSet, newValue, null);
                 }
             }
@@ -600,11 +606,110 @@ public static class patch_DataHandler {
                 object newValue = newField.GetValue(newDataSet);
                 object currValue = currField.GetValue(currDataSet);
                 if (rawDataSet.IndexOf(currField.Name) >= 0) {
-                    if (logValues) Debug.Log($"#Info# Data Block [{dataKey}], Field [{currField.Name}]: {currValue} => {newValue}");
+                    if (newValue is string[]) 
+                        SyncArrayOps(ref newValue, ref currValue, dataKey, currField.Name, doLog);
+                    else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
+                        $"Field [{currField.Name}]: {currValue} => {newValue}");
+                    // Overwrite Existing Value
                     currField.SetValue(currDataSet, newValue);
                 }
             }
         }
+    }
+
+    public static void SyncArrayOps(ref object newValue, ref object currValue, string dataKey, string entryName, bool doLog) {
+        List<string> origArray = (currValue as string[]).ToList();
+        List<string> modArray = (currValue as string[]).ToList();
+        List<string> refArray = (newValue as string[]).ToList();
+        SyncArrayOp arrayOp = SyncArrayOp.None;
+        bool noArrayOps = true;
+
+        // Array Operations Subroutine
+        foreach (var refItem in refArray) {
+            if (refItem.StartsWith("--")) {
+                switch (refItem) {
+                    case "--MOD--": arrayOp = SyncArrayOp.Mod; break;
+                    case "--ADD--": arrayOp = SyncArrayOp.Add; break;
+                    case "--DEL--": arrayOp = SyncArrayOp.Del; break;
+                }
+                continue;
+            }
+
+            // Execute Array Operation
+            string[] refData = refItem.Split('=');
+            bool isDataValue = refData.Length == 2;
+            if (noArrayOps) noArrayOps = arrayOp == SyncArrayOp.None;
+            if (isDataValue) {
+                switch (arrayOp) {
+                    // Modify Existing Item
+                    case SyncArrayOp.Mod: {
+                        bool isReplaced = false;
+                        for (int i = 0; i < modArray.Count; i++) {
+                            string[] itemData = modArray[i].Split('=');
+                            if (itemData[0] == refData[0]) {
+                                if (doLog) Debug.Log($"#Info# " +
+                                    $"Data Block [{dataKey}], Property [{entryName}], " +
+                                    $"Parameter [{refData[0]}]: {itemData[1]} => {refData[1]}");
+                                modArray[i] = refItem;
+                                isReplaced = true;
+                                break;
+                            }
+                        }
+                        if (!isReplaced) Debug.LogWarning($"Parameter [{refData[0]}] was not " +
+                            $"found in Data Block [{dataKey}], Property [{entryName}]!");
+                        break;
+                    }
+
+                    // Add New Item Entry
+                    case SyncArrayOp.Add: {
+                        if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}], Value[{refData[1]}] " +
+                            $"was added to Data Block [{dataKey}], Property [{entryName}]");
+                        modArray.Add(refItem);
+                        break;
+                    }
+
+                    // Remove Existing Item
+                    case SyncArrayOp.Del: {
+                        bool isFound = false;
+                        int removeIndex = 0;
+                        for (int i = 0; i < modArray.Count; i++) {
+                            string[] itemData = modArray[i].Split('=');
+                            if (itemData[0] == refData[0]) {
+                                removeIndex = i;
+                                isFound = true;
+                                break;
+                            }
+                        }
+                        if (isFound) {
+                            if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}] was " +
+                                $"removed from Data Block [{dataKey}], Property [{entryName}]");
+                            modArray.RemoveAt(removeIndex);
+                        } else {
+                            Debug.LogWarning($"Parameter [{refData[0]}] was not " +
+                                $"found in Data Block [{dataKey}], Property [{entryName}]!");
+                        }
+                        break;
+                    }
+                }
+            } else if (!noArrayOps) {
+                Debug.LogWarning($"Entry [{refItem}] in Data Block [{dataKey}], " +
+                    $"Property [{entryName}] is not a data value! Ignoring.");
+            }
+        }
+
+        // Overwriting Existing Value
+        if (noArrayOps) {
+            if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
+                $"Property [{entryName}]: String[{origArray.Count}] => String[{refArray.Count}]");
+            newValue = refArray.ToArray();
+        } else newValue = modArray.ToArray();
+    }
+
+    public enum SyncArrayOp {
+        None,
+        Mod,
+        Add,
+        Del
     }
 }
 

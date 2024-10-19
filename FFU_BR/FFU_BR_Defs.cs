@@ -18,7 +18,7 @@ namespace FFU_Beyond_Reach {
         public static readonly string ModVersion = "0.1.0.0";
 
         private static ConfigFile ModDefs = null;
-        public static ConfigEntry<bool> cfgEntryExample;
+        public static SyncLogs SyncLogging = SyncLogs.None;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
@@ -39,6 +39,10 @@ namespace FFU_Beyond_Reach {
 
             // Logging Start
             ModLog.Info($"Loading Mod Configuration...");
+
+            // Load Logging Settings
+            SyncLogging = ModDefs.Bind("ConfigSettings", "SyncLogging", SyncLogging,
+                "Defines what changes will show in log during sync loading.").Value;
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
@@ -65,24 +69,30 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
             ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
 
-            // Load Cheat Settings
-            NoSkillTraitCost = ModDefs.Bind("CheatSettings", "NoSkillTraitCost", NoSkillTraitCost,
+            // Load Super Settings
+            NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
                 "Makes all trait and/or skill changes free, regardless of their cost.").Value;
-            AllowSuperChars = ModDefs.Bind("CheatSettings", "AllowSuperChars", AllowSuperChars,
+            AllowSuperChars = ModDefs.Bind("SuperSettings", "AllowSuperChars", AllowSuperChars,
                 "Allows existence of super characters with extreme performance bonuses.").Value;
-            SuperCharMultiplier = ModDefs.Bind("CheatSettings", "SuperCharMultiplier", SuperCharMultiplier,
+            SuperCharMultiplier = ModDefs.Bind("SuperSettings", "SuperCharMultiplier", SuperCharMultiplier,
                 "Defines the bonus multiplier for super characters performance.").Value;
-            ModLog.Info($"CheatSettings => NoSkillTraitCost: {NoSkillTraitCost}");
-            ModLog.Info($"CheatSettings => AllowSuperChars: {AllowSuperChars}");
-            ModLog.Info($"CheatSettings => SuperCharMultiplier: {SuperCharMultiplier}");
+            ModLog.Info($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
+            ModLog.Info($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
+            ModLog.Info($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
 
             // Load List of Super Chars
-            string refCharString = ModDefs.Bind("CheatSettings", "SuperCharacters", string.Join("|", SuperCharacters),
+            string refCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
                 "Lower-case list of super characters that will receive boost on name basis.").Value;
             if (!string.IsNullOrEmpty(refCharString)) {
                 SuperCharacters = refCharString.Split('|');
             }
-            ModLog.Info($"CheatSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
+            ModLog.Info($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
+        }
+
+        public enum SyncLogs {
+            None,
+            ModChanges,
+            DeepCopy
         }
     }
 }
