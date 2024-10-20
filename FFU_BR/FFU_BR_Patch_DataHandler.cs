@@ -22,6 +22,8 @@ using Ostranauts.Tools;
 using System.Reflection;
 using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Parallax;
 
 public static class patch_DataHandler {
     public static string strModsPath = string.Empty;
@@ -486,12 +488,12 @@ public static class patch_DataHandler {
             if (isIgnoredPath) {
                 Debug.LogWarning("Ignore Pattern match: " + filePath + "; Skipping...");
             } else {
-                SyncToData(filePath, modName != null, dataDict);
+                SyncToData(filePath, fileType, modName != null, dataDict);
             }
         }
     }
 
-    public static void SyncToData<TJson>(string strFile, bool isMod, Dictionary<string, TJson> dataDict) {
+    public static void SyncToData<TJson>(string strFile, string strType, bool isMod, Dictionary<string, TJson> dataDict) {
         Debug.Log("#Info# Loading JSON: " + strFile);
         string rawDump = string.Empty;
         try {
@@ -532,11 +534,18 @@ public static class patch_DataHandler {
                     // Reference Deep Copy + Apply Changes
                     if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
                         string deepCopy = JsonMapper.ToJson(dataDict[referenceKey]);
-                        TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
-                        PropertyInfo copyProperty = deepCopyBlock.GetType()?.GetProperty("strName");
-                        if (copyProperty != null) {
+                        bool isDeepCopySuccess = false;
+                        deepCopy = Regex.Replace(deepCopy, "(\"strName\":)\"[^\"]*\"", match => {
+                            isDeepCopySuccess = true;
+                            return $"{match.Groups[1].Value}\"{dataKey}\"";
+                        });
+                        if (isDeepCopySuccess) {
+                            string[] constsToClean = SyncConstants(strType);
+                            if (constsToClean != null && constsToClean.Length > 0)
+                                foreach (string vConst in constsToClean)
+                                    deepCopy = Regex.Replace(deepCopy, $",\"{vConst}\":\"[^\"]*\"?", "");
+                            TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
-                            copyProperty.SetValue(deepCopyBlock, dataKey, null);
                             SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, 
                                 FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy);
                             dataDict.Add(dataKey, deepCopyBlock);
@@ -744,6 +753,16 @@ public static class patch_DataHandler {
                 $"Property [{entryName}]: String[{origArray.Count}] => String[{refArray.Count}]");
             newValue = refArray.ToArray();
         } else newValue = modArray.ToArray();
+    }
+
+    public static string[] SyncConstants(string constants) {
+        return constants switch {
+            "loot" => new string[] {
+                "NAME_BLANK", "TYPE_TRIGGER", "TYPE_COND", "TYPE_CONDRULE", 
+                "TYPE_ITEM", "TYPE_INTERACTION", "TYPE_TEXT", "TYPE_REL", 
+                "TYPE_LIFEEVENT", "TYPE_SHIP", "TYPE_Data" },
+            _ => null
+        };
     }
 
     public enum SyncArrayOp {
