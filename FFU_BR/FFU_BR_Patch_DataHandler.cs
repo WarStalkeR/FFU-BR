@@ -676,7 +676,7 @@ public static class patch_DataHandler {
 
                     // Add New Item Entry
                     case SyncArrayOp.Add: {
-                        if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}], Value[{refData[1]}] " +
+                        if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}], Value [{refData[1]}] " +
                             $"was added to Data Block [{dataKey}], Property [{entryName}]");
                         modArray.Add(refItem);
                         break;
