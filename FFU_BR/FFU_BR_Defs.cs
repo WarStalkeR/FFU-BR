@@ -92,7 +92,8 @@ namespace FFU_Beyond_Reach {
         public enum SyncLogs {
             None,
             ModChanges,
-            DeepCopy
+            DeepCopy,
+            ObjectsDump
         }
     }
 }
