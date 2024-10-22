@@ -64,7 +64,7 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
     }
 }
 
-// Reference ILSpy Output
+// Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 public override void SetData(CondOwner co)
 {

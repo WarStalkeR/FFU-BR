@@ -45,7 +45,7 @@ public class patch_Interaction : Interaction {
     }
 }
 
-// Reference ILSpy Output
+// Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 private void CalcRate()
 {

@@ -800,7 +800,7 @@ public static class patch_DataHandler {
     }
 }
 
-// Reference ILSpy Output
+// Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 public static void Init()
 {
@@ -1210,36 +1210,36 @@ private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, Json
 
 private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string, TJson> dict, string[] aIgnorePatterns)
 {
-	if (!Directory.Exists(strFolderPath))
-	{
-		return;
-	}
-	string[] files = Directory.GetFiles(strFolderPath, "*.json", SearchOption.AllDirectories);
-	string[] array = files;
-	foreach (string strIn in array)
-	{
-		string text = PathSanitize(strIn);
-		bool flag = false;
-		if (aIgnorePatterns != null)
-		{
-			foreach (string value in aIgnorePatterns)
-			{
-				if (text.IndexOf(value) >= 0)
-				{
-					flag = true;
-					break;
-				}
-			}
-		}
-		if (flag)
-		{
-			Debug.LogWarning("Ignore Pattern match: " + text + "; Skipping...");
-		}
-		else
-		{
-			JsonToData(text, dict);
-		}
-	}
+    if (!Directory.Exists(strFolderPath))
+    {
+        return;
+    }
+    string[] files = Directory.GetFiles(strFolderPath, "*.json", SearchOption.AllDirectories);
+    string[] array = files;
+    foreach (string strIn in array)
+    {
+        string text = PathSanitize(strIn);
+        bool flag = false;
+        if (aIgnorePatterns != null)
+        {
+            foreach (string value in aIgnorePatterns)
+            {
+                if (text.IndexOf(value) >= 0)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+        }
+        if (flag)
+        {
+            Debug.LogWarning("Ignore Pattern match: " + text + "; Skipping...");
+        }
+        else
+        {
+            JsonToData(text, dict);
+        }
+    }
 }
 
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
