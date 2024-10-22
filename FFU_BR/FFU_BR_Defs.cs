@@ -43,7 +43,19 @@ namespace FFU_Beyond_Reach {
 
             // Load Logging Settings
             SyncLogging = ModDefs.Bind("ConfigSettings", "SyncLogging", SyncLogging,
-                "Defines what changes will show in log during sync loading.").Value;
+                "Defines what changes will be shown in log during sync loading.").Value;
+
+            // Load Gameplay Settings
+            DynamicRandomRange = ModDefs.Bind("GameplaySettings", "DynamicRandomRange", DynamicRandomRange,
+                "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
+                "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
+                "random range beyond 1f, to the total sum of all chances in the loot table.").Value;
+            ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,
+                "Allows to change skill and trait modifier upper limit value.").Value;
+            BonusUpperLimit = ModDefs.Bind("GameplaySettings", "BonusUpperLimit", BonusUpperLimit,
+                "Defines the upper limit for skill and trait modifier. Original value is 10.").Value;
+            ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
+            ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
@@ -61,18 +73,6 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"QualitySettings => AltTempMult: {AltTempMult}");
             ModLog.Info($"QualitySettings => AltTempShift: {AltTempShift}");
             ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
-
-            // Load Gameplay Settings
-            DynamicRandomRange = ModDefs.Bind("GameplaySettings", "DynamicRandomRange", DynamicRandomRange,
-                "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
-                "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
-                "random range beyond 1f, to the total sum of all chances in the loot table.").Value;
-            ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,
-                "Allows to change skill and trait modifier upper limit value.").Value;
-            BonusUpperLimit = ModDefs.Bind("GameplaySettings", "BonusUpperLimit", BonusUpperLimit,
-                "Defines the upper limit for skill and trait modifier. Original value is 10.").Value;
-            ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
-            ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
 
             // Load Super Settings
             NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
