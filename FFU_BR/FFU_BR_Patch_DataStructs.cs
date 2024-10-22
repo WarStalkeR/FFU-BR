@@ -62,10 +62,6 @@ public class patch_JsonShip : JsonShip {
     public string strReference { get; set; }
 }
 
-public class patch_Loot : Loot {
-    public string strReference { get; set; }
-}
-
 public class patch_JsonProductionMap : JsonProductionMap {
     public string strReference { get; set; }
 }

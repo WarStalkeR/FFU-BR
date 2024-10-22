@@ -24,6 +24,7 @@ namespace FFU_Beyond_Reach {
         public static float AltTempMult = 1.0f;
         public static float AltTempShift = -273.15f;
         public static bool TowBraceAllowsKeep = true;
+        public static bool DynamicRandomRange = true;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
         public static bool NoSkillTraitCost = false;
@@ -62,6 +63,10 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
 
             // Load Gameplay Settings
+            DynamicRandomRange = ModDefs.Bind("GameplaySettings", "DynamicRandomRange", DynamicRandomRange,
+                "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
+                "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
+                "random range beyond 1f, to the total sum of all chances in the loot table.").Value;
             ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,
                 "Allows to change skill and trait modifier upper limit value.").Value;
             BonusUpperLimit = ModDefs.Bind("GameplaySettings", "BonusUpperLimit", BonusUpperLimit,
