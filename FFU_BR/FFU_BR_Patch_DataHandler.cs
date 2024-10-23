@@ -309,8 +309,8 @@ public static class patch_DataHandler {
                     validModInfos.Add(queuedPath[1]);
                     validModPaths.Add(queuedPath[0]);
                     Debug.Log($"Asset Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
-                } else Debug.LogWarning($"WARNING! Mod folder '{queuedPath[0]}' has no data or assets! Ignoring.");
-            } else Debug.LogError($"ERROR! Received 'refQueuedPaths' data set is invalid! Ignoring.");
+                } else Debug.LogWarning($"Mod folder '{queuedPath[0]}' has no data or assets! Ignoring.");
+            } else Debug.LogError($"Received 'refQueuedPaths' data set is invalid! Ignoring.");
         }
 
         // List All Valid Data Paths
@@ -332,7 +332,7 @@ public static class patch_DataHandler {
         DataHandler.ParseGUIPropMaps();
         foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "conditions/", DataHandler.dictConds, aIgnorePatterns);
         DataHandler.dictSimple.Clear();
-        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "conditions_simple/", DataHandler.dictSimple, aIgnorePatterns);
+        foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "conditions_simple/", DataHandler.dictSimple, aIgnorePatterns, true);
         DataHandler.ParseConditionsSimple();
         foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "items/", DataHandler.dictItemDefs, aIgnorePatterns);
         foreach (string dataPath in validDataPaths) SyncLoadJSONs(dataPath, "condtrigs/", DataHandler.dictCTs, aIgnorePatterns);
@@ -448,7 +448,7 @@ public static class patch_DataHandler {
         }
     }
 
-    private static void SyncLoadJSONs<TJson>(string strFolderPath, string subFolder, Dictionary<string, TJson> dataDict, string[] aIgnorePatterns) {
+    private static void SyncLoadJSONs<TJson>(string strFolderPath, string subFolder, Dictionary<string, TJson> dataDict, string[] aIgnorePatterns, bool extData = false) {
         // Prepare Reference Data
         string modName = strFolderPath.Contains("StreamingAssets") ? null :
             strFolderPath.Remove(strFolderPath.Length - 6).Replace("\\", "").Replace("/", "")
@@ -488,12 +488,12 @@ public static class patch_DataHandler {
             if (isIgnoredPath) {
                 Debug.LogWarning("Ignore Pattern match: " + filePath + "; Skipping...");
             } else {
-                SyncToData(filePath, fileType, modName != null, dataDict);
+                SyncToData(filePath, fileType, modName != null, dataDict, extData);
             }
         }
     }
 
-    public static void SyncToData<TJson>(string strFile, string strType, bool isMod, Dictionary<string, TJson> dataDict) {
+    public static void SyncToData<TJson>(string strFile, string strType, bool isMod, Dictionary<string, TJson> dataDict, bool extData) {
         Debug.Log("#Info# Loading JSON: " + strFile);
         bool logModded = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModChanges;
         bool logRefCopy = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy;
@@ -531,14 +531,19 @@ public static class patch_DataHandler {
                 rawDump = rawDump + dataKey + "\n";
                 if (isMod && dataDict.ContainsKey(dataKey)) {
                     // Modify Existing Data
-                    if (logObjects) Debug.Log($"MOD-DATA DUMP (BEFORE): {JsonMapper.ToJson(dataDict[dataKey])}");
-                    SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, dataKey, logModded);
-                    if (logObjects) Debug.Log($"MOD-DATA DUMP (AFTER): {JsonMapper.ToJson(dataDict[dataKey])}");
+                    if (logObjects) Debug.Log($"Modification Data Dump (Before): {JsonMapper.ToJson(dataDict[dataKey])}");
+                    try {
+                        SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, dataKey, extData, logModded);
+                        if (logObjects) Debug.Log($"Modification Data Dump (After): {JsonMapper.ToJson(dataDict[dataKey])}");
+                    } catch (Exception ex) {
+                        Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
+                        $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                    }
                 } else if (isMod && !dataDict.ContainsKey(dataKey)) {
                     // Reference Deep Copy + Apply Changes
                     if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
                         string deepCopy = JsonMapper.ToJson(dataDict[referenceKey]);
-                        if (logObjects) Debug.Log($"REF-DATA DUMP (BEFORE): {deepCopy}");
+                        if (logObjects) Debug.Log($"Reference Data Dump (Before): {deepCopy}");
                         bool isDeepCopySuccess = false;
                         deepCopy = Regex.Replace(deepCopy, "(\"strName\":)\"[^\"]*\"", match => {
                             isDeepCopySuccess = true;
@@ -551,8 +556,13 @@ public static class patch_DataHandler {
                                     deepCopy = Regex.Replace(deepCopy, $",\"{vConst}\":\"[^\"]*\"?", "");
                             TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
-                            SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, logRefCopy);
-                            if (logObjects) Debug.Log($"REF-DATA DUMP (AFTER): {JsonMapper.ToJson(deepCopyBlock)}");
+                            try {
+                                SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, extData, logRefCopy);
+                                if (logObjects) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
+                            } catch (Exception ex) {
+                                Debug.LogWarning($" Reference sync for Data Block [{dataKey}] " +
+                                $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                            }
                             dataDict.Add(dataKey, deepCopyBlock);
                         }
                     } else {
@@ -581,7 +591,7 @@ public static class patch_DataHandler {
         }
     }
 
-    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string dataKey, bool doLog = false) {
+    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string dataKey, bool extData, bool doLog = false) {
         Type currDataType = currDataSet.GetType();
         Type newDataType = newDataSet.GetType();
 
@@ -597,12 +607,17 @@ public static class patch_DataHandler {
                 object newValue = newProperty.GetValue(newDataSet, null);
                 object currValue = currProperty.GetValue(currDataSet, null);
                 if (rawDataSet.IndexOf(currProperty.Name) >= 0) {
-                    if (newValue is string[])
-                        SyncArrays(ref newValue, ref currValue, dataKey, currProperty.Name, doLog);
-                    else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
-                        $"Property [{currProperty.Name}]: {currValue} => {newValue}");
-                    // Overwrite Existing Value
-                    currProperty.SetValue(currDataSet, newValue, null);
+                    try {
+                        if (newValue is string[])
+                            SyncArrays(ref newValue, ref currValue, dataKey, currProperty.Name, extData, doLog);
+                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
+                            $"Property [{currProperty.Name}]: {currValue} => {newValue}");
+                        // Overwrite Existing Value
+                        currProperty.SetValue(currDataSet, newValue, null);
+                    } catch (Exception ex) {
+                        Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
+                        $"[{currProperty.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }
@@ -620,18 +635,24 @@ public static class patch_DataHandler {
                 object newValue = newField.GetValue(newDataSet);
                 object currValue = currField.GetValue(currDataSet);
                 if (rawDataSet.IndexOf(currField.Name) >= 0) {
-                    if (newValue is string[]) 
-                        SyncArrays(ref newValue, ref currValue, dataKey, currField.Name, doLog);
-                    else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
-                        $"Field [{currField.Name}]: {currValue} => {newValue}");
-                    // Overwrite Existing Value
-                    currField.SetValue(currDataSet, newValue);
+                    try {
+                        if (newValue is string[])
+                            SyncArrays(ref newValue, ref currValue, dataKey, currField.Name, extData, doLog);
+                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
+                            $"Field [{currField.Name}]: {currValue} => {newValue}");
+                        // Overwrite Existing Value
+                        currField.SetValue(currDataSet, newValue);
+                    } catch (Exception ex) {
+                        Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
+                        $"[{currField.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                    }
                 }
             }
         }
     }
 
-    public static void SyncArrays(ref object newValue, ref object currValue, string dataKey, string propName, bool doLog) {
+    public static void SyncArrays(ref object newValue, ref object currValue, string dataKey, string propName, bool extData, bool doLog) {
+        SyncArrayOp defaultOp = extData ? SyncArrayOp.Add : SyncArrayOp.None;
         List<string> modArray = (currValue as string[]).ToList();
         List<string> refArray = (newValue as string[]).ToList();
         List<string> origArray = new List<string>(modArray);
@@ -649,7 +670,7 @@ public static class patch_DataHandler {
             if (rowIndex > 0) {
                 refSubArray.RemoveAt(0);
                 List<string> modSubArray = modArray[rowIndex - 1].Split('|').ToList();
-                SyncArrayOps(modSubArray, refSubArray, ref noArrayOps, dataKey, $"{propName}#{rowIndex}", doLog);
+                SyncArrayOps(modSubArray, refSubArray, ref noArrayOps, dataKey, $"{propName}#{rowIndex}", doLog, defaultOp);
                 if (noArrayOps) Debug.LogWarning($"You attempted to modify sub-array in Data Block " +
                     $"[{dataKey}], Property [{propName}#{rowIndex}], but performed no array operations. " +
                     $"Assume that something went horribly wrong and game is likely to crash.");
@@ -658,7 +679,7 @@ public static class patch_DataHandler {
         }
 
         // Perform Array Operations
-        SyncArrayOps(modArray, refArray, ref noArrayOps, dataKey, propName, doLog);
+        SyncArrayOps(modArray, refArray, ref noArrayOps, dataKey, propName, doLog, defaultOp);
 
         // Overwriting Existing Value
         if (noArrayOps) {
@@ -668,9 +689,7 @@ public static class patch_DataHandler {
         } else newValue = modArray.ToArray();
     }
 
-    public static void SyncArrayOps(List<string> modArray, List<string> refArray, ref bool noArrayOps, string dataKey, string propName, bool doLog) {
-        SyncArrayOp arrayOp = SyncArrayOp.None;
-
+    public static void SyncArrayOps(List<string> modArray, List<string> refArray, ref bool noArrayOps, string dataKey, string propName, bool doLog, SyncArrayOp arrayOp = SyncArrayOp.None) {
         // Array Operations Subroutine
         foreach (var refItem in refArray) {
             // Valid Sub-Arrays Ignored
