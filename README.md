@@ -210,7 +210,7 @@ Basically, due to the nature of the `Loot` class, you need to shove `=` everywhe
 if it isn't needed or used.
 
 # Installation
-1\. Download BepInEx v5.4.23.2 WINx64: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.2/  
+1\. Download BepInEx v5.4.23.2 WINx64: https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.2  
 2\. Unzip all contents into `Ostranauts` root folder. It should contain now `BepInEx`, `winhttp.dll` & etc.  
 3\. Download MonoMod Loader: https://github.com/BepInEx/BepInEx.MonoMod.Loader/releases/tag/v1.0.0.0  
 4\. Unzip all contents into `Ostranauts` root folder. `Ostranauts/BepInEx/core` should now contain `MonoMod.dll`.  
