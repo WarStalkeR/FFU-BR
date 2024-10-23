@@ -608,10 +608,10 @@ public static class patch_DataHandler {
                 object currValue = currProperty.GetValue(currDataSet, null);
                 if (rawDataSet.IndexOf(currProperty.Name) >= 0) {
                     try {
-                        if (newValue is string[])
+                        if (currValue != null && newValue is string[])
                             SyncArrays(ref newValue, ref currValue, dataKey, currProperty.Name, extData, doLog);
-                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
-                            $"Property [{currProperty.Name}]: {currValue} => {newValue}");
+                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], Property " +
+                            $"[{currProperty.Name}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
                         // Overwrite Existing Value
                         currProperty.SetValue(currDataSet, newValue, null);
                     } catch (Exception ex) {
@@ -636,10 +636,10 @@ public static class patch_DataHandler {
                 object currValue = currField.GetValue(currDataSet);
                 if (rawDataSet.IndexOf(currField.Name) >= 0) {
                     try {
-                        if (newValue is string[])
+                        if (currValue != null && newValue is string[])
                             SyncArrays(ref newValue, ref currValue, dataKey, currField.Name, extData, doLog);
-                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], " +
-                            $"Field [{currField.Name}]: {currValue} => {newValue}");
+                        else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], Field " +
+                            $"[{currField.Name}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
                         // Overwrite Existing Value
                         currField.SetValue(currDataSet, newValue);
                     } catch (Exception ex) {
@@ -660,6 +660,7 @@ public static class patch_DataHandler {
 
         // Perform Sub-Array Operations
         foreach (var refItem in refArray) {
+            if (string.IsNullOrEmpty(refItem)) continue;
             if (!char.IsDigit(refItem[0]) || !refItem.Contains('|')) continue;
 
             // Invalid Sub-Arrays Ignored
@@ -693,6 +694,7 @@ public static class patch_DataHandler {
         // Array Operations Subroutine
         foreach (var refItem in refArray) {
             // Valid Sub-Arrays Ignored
+            if (string.IsNullOrEmpty(refItem)) continue;
             if (char.IsDigit(refItem[0]) && refItem.Contains('|')) continue;
 
             // Get Operations Command
@@ -809,6 +811,13 @@ public static class patch_DataHandler {
                 "TYPE_LIFEEVENT", "TYPE_SHIP", "TYPE_Data" },
             _ => null
         };
+    }
+
+    public static object Sanitized(this object refObject) {
+        if (refObject is null) return "NULL";
+        else if (refObject is string && 
+            ((string)refObject).Length == 0) return "EMPTY";
+        else return refObject;
     }
 
     public enum SyncArrayOp {
