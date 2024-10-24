@@ -34,9 +34,6 @@ namespace FFU_Beyond_Reach {
         public static float AltTempMult = 1.0f;
         public static float AltTempShift = -273.15f;
         public static bool TowBraceAllowsKeep = true;
-        public static bool DynamicRandomRange = true;
-        public static bool ModifyUpperLimit = false;
-        public static float BonusUpperLimit = 1000f;
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;

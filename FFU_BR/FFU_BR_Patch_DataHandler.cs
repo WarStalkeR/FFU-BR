@@ -568,7 +568,7 @@ public static class patch_DataHandler {
                             }
                             dataDict.Add(dataKey, deepCopyBlock);
                         }
-                    } else {
+                    } else if (!string.IsNullOrEmpty(referenceKey)) {
                         Debug.LogWarning($"Reference key '{referenceKey}' " +
                         $"in Data Block [{dataKey}] is invalid! Ignoring.");
                     }
