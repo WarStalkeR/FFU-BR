@@ -501,6 +501,7 @@ public static class patch_DataHandler {
         bool logRefCopy = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy;
         bool logObjects = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump;
         bool logContent = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ContentDump;
+        bool logSource = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.SourceDump;
         string rawDump = string.Empty;
         try {
             // Raw JSON to Data Array
@@ -571,13 +572,22 @@ public static class patch_DataHandler {
                     } else if (!string.IsNullOrEmpty(referenceKey)) {
                         Debug.LogWarning($"Reference key '{referenceKey}' " +
                         $"in Data Block [{dataKey}] is invalid! Ignoring.");
+                    } else {
+                        // Add New Mod Data Entry
+                        try {
+                            if (logContent) Debug.Log($"Addendum Data Dump (Mod): {JsonMapper.ToJson(dataBlock)}");
+                        } catch (Exception ex) {
+                            Debug.LogWarning($"Addendum dump (mod) for Data Block " +
+                            $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                        }
+                        dataDict.Add(dataKey, dataBlock);
                     }
                 } else {
                     // Add New Core Data Entry
                     try { 
-                        if (logContent) Debug.Log($"Addendum Data Dump (Pre): {JsonMapper.ToJson(dataBlock)}"); 
+                        if (logSource) Debug.Log($"Addendum Data Dump (Core): {JsonMapper.ToJson(dataBlock)}"); 
                     } catch (Exception ex) { 
-                        Debug.LogWarning($"Addendum dump (pre) for Data Block " +
+                        Debug.LogWarning($"Addendum dump (core) for Data Block " +
                         $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}"); 
                     }
                     dataDict.Add(dataKey, dataBlock);
