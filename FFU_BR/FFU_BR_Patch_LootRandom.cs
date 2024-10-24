@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MonoMod;
 using FFU_Beyond_Reach;
+using System.Linq;
 
 public class patch_Loot : Loot {
     public string strReference { get; set; }
@@ -29,7 +30,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aCOLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -57,7 +59,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aOtherLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -88,7 +91,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aCOLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -116,7 +120,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aOtherLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -163,7 +168,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aCOLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -193,7 +199,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aOtherLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -232,7 +239,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aOtherLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);
@@ -276,7 +284,8 @@ public class patch_Loot : Loot {
             if (FFU_BR_Defs.DynamicRandomRange) {
                 float fNewMax = 0f;
                 foreach (LootUnit lootItm in aOtherLootUnit)
-                    fNewMax += lootItm.fChance;
+                    if (!FFU_BR_Defs.IgnoredKeys.Contains(lootItm.strName)) 
+                        fNewMax += lootItm.fChance;
                 fRandMax = fNewMax > 1f ? fNewMax : 1f;
             }
             float fRand = MathUtils.Rand(0f, fRandMax, MathUtils.RandType.Flat, lootId);

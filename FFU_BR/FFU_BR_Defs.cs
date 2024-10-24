@@ -11,6 +11,7 @@
 using BepInEx;
 using BepInEx.Configuration;
 using System.IO;
+using System.Linq;
 
 namespace FFU_Beyond_Reach {
     public class FFU_BR_Defs {
@@ -19,6 +20,15 @@ namespace FFU_Beyond_Reach {
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;
+        public static bool DynamicRandomRange = true;
+        public static string[] IgnoredKeys = new string[] {
+            "pbaseEyesMissing", "pbaseGlassesMissing", "pbaseHeadMissing", 
+            "pbaseLipsMissing", "pbaseNeckMissing", "pbaseNoseMissing", 
+            "pbasePupilsMissing", "pbaseScarMissing", "pbaseTeethMissing", 
+            "pbaseHairMissing", "pbaseBeardMissing"
+        };
+        public static bool ModifyUpperLimit = false;
+        public static float BonusUpperLimit = 1000f;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
@@ -31,8 +41,7 @@ namespace FFU_Beyond_Reach {
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
         public static string[] SuperCharacters = new string[] {
-            "von neuman",
-            "warstalker"
+            "von neuman", "warstalker"
         };
 
         public static void InitConfig() {
@@ -41,15 +50,20 @@ namespace FFU_Beyond_Reach {
             // Logging Start
             ModLog.Info($"Loading Mod Configuration...");
 
-            // Load Logging Settings
+            // Load Configuration Settings
             SyncLogging = ModDefs.Bind("ConfigSettings", "SyncLogging", SyncLogging,
                 "Defines what changes will be shown in log during sync loading.").Value;
-
-            // Load Gameplay Settings
-            DynamicRandomRange = ModDefs.Bind("GameplaySettings", "DynamicRandomRange", DynamicRandomRange,
+            DynamicRandomRange = ModDefs.Bind("ConfigSettings", "DynamicRandomRange", DynamicRandomRange,
                 "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
                 "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
                 "random range beyond 1f, to the total sum of all chances in the loot table.").Value;
+            string refIgnoreString = ModDefs.Bind("ConfigSettings", "IgnoredKeys", string.Join("|", IgnoredKeys),
+                "Case-sensitive list of entries for Dynamic Random Range feature to ignore (for avoiding " +
+                "errors). In the vanilla behavior, some items were expected to never appear due to random range " +
+                "being limited to 1f, but it isn't the case, if Dynamic Random Range is enabled.").Value;
+            if (!string.IsNullOrEmpty(refIgnoreString)) IgnoredKeys = refIgnoreString.Split('|');
+
+            // Load Gameplay Settings
             ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,
                 "Allows to change skill and trait modifier upper limit value.").Value;
             BonusUpperLimit = ModDefs.Bind("GameplaySettings", "BonusUpperLimit", BonusUpperLimit,
@@ -74,7 +88,7 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"QualitySettings => AltTempShift: {AltTempShift}");
             ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
 
-            // Load Super Settings
+            // Load Superiority Settings
             NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
                 "Makes all trait and/or skill changes free, regardless of their cost.").Value;
             AllowSuperChars = ModDefs.Bind("SuperSettings", "AllowSuperChars", AllowSuperChars,
@@ -88,9 +102,7 @@ namespace FFU_Beyond_Reach {
             // Load List of Super Chars
             string refCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
                 "Lower-case list of super characters that will receive boost on name basis.").Value;
-            if (!string.IsNullOrEmpty(refCharString)) {
-                SuperCharacters = refCharString.Split('|');
-            }
+            if (!string.IsNullOrEmpty(refCharString)) SuperCharacters = refCharString.Split('|');
             ModLog.Info($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
 
@@ -98,7 +110,8 @@ namespace FFU_Beyond_Reach {
             None,
             ModChanges,
             DeepCopy,
-            ObjectsDump
+            ModdedDump,
+            ContentDump
         }
     }
 }

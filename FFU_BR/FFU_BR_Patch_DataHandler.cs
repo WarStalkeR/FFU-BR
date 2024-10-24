@@ -23,7 +23,6 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Parallax;
 
 public static class patch_DataHandler {
     public static string strModsPath = string.Empty;
@@ -244,7 +243,10 @@ public static class patch_DataHandler {
             cleanModList.aLoadOrder = new string[1] { "core" };
             cleanModList.aIgnorePatterns = new string[0];
             DataHandler.dictModList["Mod Loading Order"] = cleanModList;
-            DataHandler.LoadMod(DataHandler.strAssetPath, cleanModList.aIgnorePatterns, coreModInfo);
+            modQueuedPaths.Add(new string[] { DataHandler.strAssetPath, "core" });
+
+            // Sync Load Core Data Only
+            SyncLoadMods(modQueuedPaths, cleanModList.aIgnorePatterns);
         }
 
         // Load Various Interactions
@@ -497,7 +499,8 @@ public static class patch_DataHandler {
         Debug.Log("#Info# Loading JSON: " + strFile);
         bool logModded = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModChanges;
         bool logRefCopy = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy;
-        bool logObjects = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ObjectsDump;
+        bool logObjects = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump;
+        bool logContent = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ContentDump;
         string rawDump = string.Empty;
         try {
             // Raw JSON to Data Array
@@ -536,7 +539,7 @@ public static class patch_DataHandler {
                         SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, dataKey, extData, logModded);
                         if (logObjects) Debug.Log($"Modification Data Dump (After): {JsonMapper.ToJson(dataDict[dataKey])}");
                     } catch (Exception ex) {
-                        Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
+                        Debug.LogWarning($"Modification sync for Data Block [{dataKey}] " +
                         $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
                     }
                 } else if (isMod && !dataDict.ContainsKey(dataKey)) {
@@ -560,16 +563,23 @@ public static class patch_DataHandler {
                                 SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, extData, logRefCopy);
                                 if (logObjects) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
                             } catch (Exception ex) {
-                                Debug.LogWarning($" Reference sync for Data Block [{dataKey}] " +
+                                Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
                                 $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
                             }
                             dataDict.Add(dataKey, deepCopyBlock);
                         }
                     } else {
-                        dataDict.Add(dataKey, dataBlock);
+                        Debug.LogWarning($"Reference key '{referenceKey}' " +
+                        $"in Data Block [{dataKey}] is invalid! Ignoring.");
                     }
                 } else {
                     // Add New Core Data Entry
+                    try { 
+                        if (logContent) Debug.Log($"Addendum Data Dump (Pre): {JsonMapper.ToJson(dataBlock)}"); 
+                    } catch (Exception ex) { 
+                        Debug.LogWarning($"Addendum dump (pre) for Data Block " +
+                        $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}"); 
+                    }
                     dataDict.Add(dataKey, dataBlock);
                 }
             }
