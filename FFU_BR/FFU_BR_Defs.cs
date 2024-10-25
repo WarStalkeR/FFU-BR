@@ -27,6 +27,7 @@ namespace FFU_Beyond_Reach {
             "pbasePupilsMissing", "pbaseScarMissing", "pbaseTeethMissing", 
             "pbaseHairMissing", "pbaseBeardMissing"
         };
+        public static int MaxLogTextSize = 16382;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
         public static bool AltTempEnabled = true;
@@ -59,6 +60,8 @@ namespace FFU_Beyond_Reach {
                 "errors). In the vanilla behavior, some items were expected to never appear due to random range " +
                 "being limited to 1f, but it isn't the case, if Dynamic Random Range is enabled.").Value;
             if (!string.IsNullOrEmpty(refIgnoreString)) IgnoredKeys = refIgnoreString.Split('|');
+            MaxLogTextSize = ModDefs.Bind("ConfigSettings", "MaxLogTextSize", MaxLogTextSize,
+                "Defines the max length of the text in the console. May impact performance.").Value;
 
             // Load Gameplay Settings
             ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,

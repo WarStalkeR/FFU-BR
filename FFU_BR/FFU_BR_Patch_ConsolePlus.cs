@@ -16,29 +16,97 @@ using UnityEngine;
 using System.IO;
 using System.Text;
 using System.Linq;
+using FFU_Beyond_Reach;
+using System;
 
 public class patch_ConsoleToGUI : ConsoleToGUI {
-	private string logHistoryPath = null;
-	private extern void orig_LoadJson();
-    private void LoadJson() {
-		orig_LoadJson();
-		logHistoryPath = Path.Combine(Application.dataPath, "console_history.txt");
-        if (logHistoryPath != null && File.Exists(logHistoryPath)) {
-			try {
-                prevInputs = File.ReadAllText(logHistoryPath, 
-					Encoding.UTF8).Split('\n').ToList();
-			} catch { }
+    private string logHistoryPath = null;
+	private bool configLoaded = false;
+    [MonoModReplace] private void DrawConsole(int window) {
+        if (HandleInput()) return;
+		if (!configLoaded) {
+            configLoaded = true;
+            mChars = FFU_BR_Defs.MaxLogTextSize;
+            scrollPos = new Vector2(0f, mChars / 4);
+            logHistoryPath = Path.Combine(Application.dataPath, "console_history.txt");
+            if (logHistoryPath != null && File.Exists(logHistoryPath)) {
+                try {
+                    prevInputs = File.ReadAllText(logHistoryPath,
+                        Encoding.UTF8).Split('\n').ToList();
+                } catch (Exception ex) {
+                    Debug.Log($"Failed to load console history!\n{ex.Message}\n{ex.StackTrace}");
+                }
+            }
         }
-    }
-
-	private extern void orig_DrawConsole(int window);
-    private void DrawConsole(int window) {
-        orig_DrawConsole(window);
+        Rect textView = new Rect(10f, 20f, Screen.width / 2 - 60, mChars / 4);
+        Rect scrollView = new Rect(10f, 30f, Screen.width / 2 - 40, Screen.height / 2 - 90);
+        Rect textField = new Rect(10f, scrollView.y + scrollView.height + 5f, Screen.width / 2 - 60, textSize + 10);
+        scrollPos = GUI.BeginScrollView(scrollView, scrollPos, textView, false, true);
+        GUI.TextArea(textView, myLog, mChars, logStyle);
+        GUI.EndScrollView();
+        GUI.SetNextControlName("command");
+        myInput = GUI.TextField(textField, myInput, txtStyle);
+        if (Event.current.isKey && GUI.GetNameOfFocusedControl() == "command") {
+            if (Event.current.keyCode == KeyCode.Return) {
+                string[] commands = myInput.Split(';');
+                if (commands.Length > 1) {
+                    myInput = "<color=" + multipleColor + "><b>[Command]</b></color>: " + myInput;
+                    myLog = myLog + "\n" + myInput;
+                }
+                myInput = string.Empty;
+                for (int i = 0; i < commands.Length; i++) {
+                    if (!(commands[i] == string.Empty)) {
+                        prevInputs.Add(commands[i]);
+                        if (prevInputs.Count > prevMax) 
+							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
+                        if (ConsoleResolver.ResolveString(ref commands[i])) 
+							commands[i] = "<color=" + commandColor + "><b>[Command]</b></color>: " + commands[i]; 
+						else commands[i] = "<color=" + failedColor + "><b>[Command]</b></color>: " + commands[i];
+                        myLog = myLog + "\n" + commands[i];
+                    }
+                }
+                prevPointer = 0;
+            } else if (Event.current.keyCode == KeyCode.UpArrow) {
+                if (prevInputs.Count > 0) {
+                    if (prevPointer == 0 && myInput != string.Empty) {
+                        prevInputs.Add(myInput);
+                        if (prevInputs.Count > prevMax) 
+							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
+                        prevPointer++;
+                    }
+                    prevPointer++;
+                    if (prevPointer > prevInputs.Count) prevPointer = 1;
+                    myInput = prevInputs[prevInputs.Count - prevPointer];
+                }
+            } else if (Event.current.keyCode == KeyCode.DownArrow) {
+                if (prevInputs.Count > 0) {
+                    if (prevPointer == 0 && myInput != string.Empty) {
+                        prevInputs.Add(myInput);
+                        if (prevInputs.Count > prevMax) 
+							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
+                        prevPointer--;
+                    }
+                    prevPointer--;
+                    if (prevPointer < 1) prevPointer = prevInputs.Count;
+                    myInput = prevInputs[prevInputs.Count - prevPointer];
+                }
+            } else prevPointer = 0;
+        }
+        if (doFocus) {
+            GUI.FocusControl("command");
+            doFocus = false;
+        }
+        if (GUI.GetNameOfFocusedControl() == "command") CrewSim.Typing = true;
+        else CrewSim.Typing = false;
         if (Event.current.keyCode == KeyCode.Return && logHistoryPath != null) {
-			try {
-				File.WriteAllText(logHistoryPath, string.Join("\n", prevInputs.ToArray()));
-			} catch { }
-		}
+            try {
+                File.WriteAllText(logHistoryPath, 
+					string.Join("\n", prevInputs.ToArray()));
+            } catch (Exception ex) {
+				Debug.Log($"Failed to save console history!\n{ex.Message}\n{ex.StackTrace}");
+			}
+        }
+        GUI.DragWindow();
     }
 }
 
@@ -106,30 +174,6 @@ public class patch_ConsoleResolver : ConsoleResolver {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
-private void LoadJson()
-{
-	ConsoleData consoleData = ConsoleData.CreateFromJSON("console_params.json");
-	if (consoleData != null)
-	{
-		myTitle = consoleData.consoleTitle;
-		myLog = consoleData.startTxt;
-		logName = consoleData.fileName;
-		doLogs = consoleData.enableLog;
-		doWarning = consoleData.enableWarning;
-		doException = consoleData.enableException;
-		doError = consoleData.enableError;
-		doAssert = consoleData.enableAssert;
-		doUnknown = consoleData.enableUnknown;
-		saveToFile = consoleData.saveToFile;
-		textSize = consoleData.textSize;
-		kChars = consoleData.maxMessage;
-		mChars = consoleData.maxTotal;
-		iconSize = consoleData.popUpSize;
-		guiButtonRect = new Rect(5f, 5f, iconSize, iconSize);
-		windowRect = new Rect(windowRect.x, iconSize + 10, windowRect.width, windowRect.height);
-	}
-}
-
 private void DrawConsole(int window)
 {
 	if (HandleInput())
