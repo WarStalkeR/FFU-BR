@@ -25,11 +25,17 @@ created after running Ostranauts for the first time with this mod installed).
 ## Configuration Settings
 **SyncLogging** - defines what logging type is used for when overwriting data and/or
 copy-referencing existing items into new items with various parameters overwriting.  
-
-## Gameplay Settings
 **DynamicRandomRange** - By default loot random range is limited to `1.0f`, thus preventing use of 
 loot tables, if total sum of their chances goes beyond `1.0f`. This feature allows to increase max 
 possible random range beyond `1.0f`, to the total sum of all chances in the loot table.  
+**IgnoredKeys** - Case-sensitive list of entries for Dynamic Random Range feature to ignore (for 
+avoiding errors). In the vanilla behavior, some items were expected to never appear due to random 
+range being limited to `1f`, but it isn't the case, if <u>Dynamic Random Range</u> is enabled.  
+**MaxLogTextSize** - Defines the max length of the text in the console. Needed in case if you want 
+to see the whole list of entries from the console commands without missing anything (whether it is
+`getcond` or any other command). May impact performance, if the value is too big.  
+
+## Gameplay Settings
 **ModifyUpperLimit** - Enables use of `BonusUpperLimit` to change skill and trait modifier upper limit value.
 **BonusUpperLimit** - Defines the upper limit for skill and trait modifier bonuses. Original value is **10**.
 
@@ -46,7 +52,7 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  
 **AllowSuperChars** - Option to allow character to be superior or utterly miserable.  
-**SuperCharMultiplier** - Set to above `1.0` to reach the starts, or below `1.0` to descent into abyss.
+**SuperCharMultiplier** - Set to above `1.0` to reach the starts, or below `1.0` to descent into abyss.  
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
 
 # Modding API Examples
