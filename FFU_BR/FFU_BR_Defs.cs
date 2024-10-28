@@ -30,6 +30,8 @@ namespace FFU_Beyond_Reach {
         public static int MaxLogTextSize = 16382;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
+        public static float SuitOxygenNotify = 25.0f;
+        public static float SuitPowerNotify = 25.0f;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
@@ -68,8 +70,18 @@ namespace FFU_Beyond_Reach {
                 "Allows to change skill and trait modifier upper limit value.").Value;
             BonusUpperLimit = ModDefs.Bind("GameplaySettings", "BonusUpperLimit", BonusUpperLimit,
                 "Defines the upper limit for skill and trait modifier. Original value is 10.").Value;
+            SuitOxygenNotify = ModDefs.Bind("GameplaySettings", "SuitOxygenNotify", SuitOxygenNotify,
+                "Specifies the oxygen level threshold (as a percentage) for the gauge of a sealed/airtight suit. " +
+                "When the oxygen level falls below this threshold, the wearer will receive a notification (via " +
+                "occasional beeps) about oxygen usage. If set to 0, no notification will be given at any time.").Value;
+            SuitPowerNotify = ModDefs.Bind("GameplaySettings", "SuitPowerNotify", SuitPowerNotify,
+                "Specifies the power level threshold (as a percentage) for the gauge of a sealed/airtight suit. " +
+                "When the power level falls below this threshold, the wearer will receive a notification (via " +
+                "frequent beeps) about power usage. If set to 0, no notification will be given at any time.").Value;
             ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
             ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
+            ModLog.Info($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
+            ModLog.Info($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
