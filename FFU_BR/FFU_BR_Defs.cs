@@ -31,7 +31,7 @@ namespace FFU_Beyond_Reach {
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
         public static float SuitOxygenNotify = 25.0f;
-        public static float SuitPowerNotify = 25.0f;
+        public static float SuitPowerNotify = 15.0f;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
