@@ -11,7 +11,6 @@
 using BepInEx;
 using BepInEx.Configuration;
 using System.IO;
-using System.Linq;
 
 namespace FFU_Beyond_Reach {
     public class FFU_BR_Defs {
