@@ -40,10 +40,10 @@ to see the whole list of entries from the console commands without missing anyth
 **BonusUpperLimit** - Defines the upper limit for skill and trait modifier bonuses. Original value is **10**.  
 **SuitOxygenNotify** - Specifies the oxygen level threshold (as a percentage) for the gauge of a sealed/airtight 
 suit. When the oxygen level falls below this threshold, the wearer will receive a notification (via occasional 
-beeps) about oxygen usage. If set to 0, no notification will be given at any time.  
+beeps) about oxygen usage. If set to `0`, no notification will be given at any time.  
 **SuitPowerNotify** - Specifies the power level threshold (as a percentage) for the gauge of a sealed/airtight 
 suit. When the power level falls below this threshold, the wearer will receive a notification (via frequent 
-beeps) about power usage. If set to 0, no notification will be given at any time.  
+beeps) about power usage. If set to `0`, no notification will be given at any time.  
 **ShowEachO2Battery** - Defines whether to show average percentage across all O2/Batteries or calculate each 
 O2/Battery independently and summarize their percentages. Affects how soon notifications will begin.  
 
