@@ -16,7 +16,7 @@ using System.Linq;
 namespace FFU_Beyond_Reach {
     public class FFU_BR_Defs {
         public static readonly string ModName = "BepInEx: Beyond Reach";
-        public static readonly string ModVersion = "0.2.2.5";
+        public static readonly string ModVersion = "0.2.5.0";
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;
@@ -32,6 +32,7 @@ namespace FFU_Beyond_Reach {
         public static float BonusUpperLimit = 1000f;
         public static float SuitOxygenNotify = 25.0f;
         public static float SuitPowerNotify = 15.0f;
+        public static bool ShowEachO2Battery = true;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
@@ -78,10 +79,14 @@ namespace FFU_Beyond_Reach {
                 "Specifies the power level threshold (as a percentage) for the gauge of a sealed/airtight suit. " +
                 "When the power level falls below this threshold, the wearer will receive a notification (via " +
                 "frequent beeps) about power usage. If set to 0, no notification will be given at any time.").Value;
+            ShowEachO2Battery = ModDefs.Bind("GameplaySettings", "ShowEachO2Battery", ShowEachO2Battery,
+                "Defines whether to show average percentage across all O2/Batteries or calculate each O2/Battery " +
+                "independently and summarize their percentages. Affects how soon notifications will begin.").Value;
             ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
             ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
             ModLog.Info($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
             ModLog.Info($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
+            ModLog.Info($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}%");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
