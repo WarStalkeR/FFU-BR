@@ -24,7 +24,7 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
 	private bool configLoaded = false;
     [MonoModReplace] private void DrawConsole(int window) {
         if (HandleInput()) return;
-		if (!configLoaded) {
+        if (!configLoaded) {
             configLoaded = true;
             mChars = FFU_BR_Defs.MaxLogTextSize;
             scrollPos = new Vector2(0f, mChars / 4);
@@ -49,6 +49,10 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
         if (Event.current.isKey && GUI.GetNameOfFocusedControl() == "command") {
             if (Event.current.keyCode == KeyCode.Return) {
                 string[] commands = myInput.Split(';');
+                if (!string.IsNullOrEmpty(myInput))
+                    prevInputs.Add(myInput);
+                if (prevInputs.Count > prevMax)
+                    prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
                 if (commands.Length > 1) {
                     myInput = "<color=" + multipleColor + "><b>[Command]</b></color>: " + myInput;
                     myLog = myLog + "\n" + myInput;
@@ -56,12 +60,10 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
                 myInput = string.Empty;
                 for (int i = 0; i < commands.Length; i++) {
                     if (!(commands[i] == string.Empty)) {
-                        prevInputs.Add(commands[i]);
-                        if (prevInputs.Count > prevMax) 
-							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
-                        if (ConsoleResolver.ResolveString(ref commands[i])) 
-							commands[i] = "<color=" + commandColor + "><b>[Command]</b></color>: " + commands[i]; 
-						else commands[i] = "<color=" + failedColor + "><b>[Command]</b></color>: " + commands[i];
+                        commands[i] = commands[i].Trim();
+                        if (ConsoleResolver.ResolveString(ref commands[i]))
+                            commands[i] = "<color=" + commandColor + "><b>[Command]</b></color>: " + commands[i];
+                        else commands[i] = "<color=" + failedColor + "><b>[Command]</b></color>: " + commands[i];
                         myLog = myLog + "\n" + commands[i];
                     }
                 }
@@ -70,8 +72,8 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
                 if (prevInputs.Count > 0) {
                     if (prevPointer == 0 && myInput != string.Empty) {
                         prevInputs.Add(myInput);
-                        if (prevInputs.Count > prevMax) 
-							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
+                        if (prevInputs.Count > prevMax)
+                            prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
                         prevPointer++;
                     }
                     prevPointer++;
@@ -82,8 +84,8 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
                 if (prevInputs.Count > 0) {
                     if (prevPointer == 0 && myInput != string.Empty) {
                         prevInputs.Add(myInput);
-                        if (prevInputs.Count > prevMax) 
-							prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
+                        if (prevInputs.Count > prevMax)
+                            prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
                         prevPointer--;
                     }
                     prevPointer--;
@@ -100,11 +102,11 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
         else CrewSim.Typing = false;
         if (Event.current.keyCode == KeyCode.Return && logHistoryPath != null) {
             try {
-                File.WriteAllText(logHistoryPath, 
-					string.Join("\n", prevInputs.ToArray()));
+                File.WriteAllText(logHistoryPath,
+                    string.Join("\n", prevInputs.ToArray()));
             } catch (Exception ex) {
-				Debug.Log($"Failed to save console history!\n{ex.Message}\n{ex.StackTrace}");
-			}
+                Debug.Log($"Failed to save console history!\n{ex.Message}\n{ex.StackTrace}");
+            }
         }
         GUI.DragWindow();
     }
