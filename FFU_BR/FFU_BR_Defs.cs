@@ -15,7 +15,7 @@ using System.IO;
 namespace FFU_Beyond_Reach {
     public class FFU_BR_Defs {
         public static readonly string ModName = "BepInEx: Beyond Reach";
-        public static readonly string ModVersion = "0.2.5.0";
+        public static readonly string ModVersion = "0.2.6.0";
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;

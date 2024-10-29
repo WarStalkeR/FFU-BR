@@ -13,8 +13,9 @@ Ostranauts Discord Server: https://discord.gg/bluebottlegames (#modding-discussi
 3\. Reference-based creation of new entries with applied values. No need to copy whole code block.  
 4\. Removal of specific data entries based on their IDs ('strName' parameter) via `mod_info.json`.  
 5\. Precision array modification via `--ADD--`, `--DEL--` and `--MOD--` (data values only) commands.  
-6\. Option to unlock max random range value that allows unrestricted random/loot lists.  
-7\. Other various options and settings to alter gameplay and/or make it easier/harder.  
+6\. Completely new parameters and properties that expand existing different gameplay mechanics.  
+7\. Option to unlock max random range value that allows unrestricted random/loot lists.  
+8\. Other various options and settings to alter gameplay and/or make it easier/harder.  
 
 **Note:** coding API examples can be viewed below, in relevant paragraph.  
 
@@ -30,7 +31,7 @@ loot tables, if total sum of their chances goes beyond `1.0f`. This feature allo
 possible random range beyond `1.0f`, to the total sum of all chances in the loot table.  
 **IgnoredKeys** - Case-sensitive list of entries for Dynamic Random Range feature to ignore (for 
 avoiding errors). In the vanilla behavior, some items were expected to never appear due to random 
-range being limited to `1f`, but it isn't the case, if <u>Dynamic Random Range</u> is enabled.  
+range being limited to `1f`, but it isn't the case, if Dynamic Random Range is enabled.  
 **MaxLogTextSize** - Defines the max length of the text in the console. Needed in case if you want 
 to see the whole list of entries from the console commands without missing anything (whether it is
 `getcond` or any other command). May impact performance, if the value is too big.  
@@ -62,6 +63,11 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 **AllowSuperChars** - Option to allow character to be superior or utterly miserable.  
 **SuperCharMultiplier** - Set to above `1.0` to reach the starts, or below `1.0` to descent into abyss.  
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
+
+# New Parameters & Properties
+**StatEmittedTemp** - a `simple condition` parameter that allow to override `StatSolidTemp` without changing 
+it. When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
+parameter.  
 
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
