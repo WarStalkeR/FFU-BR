@@ -310,353 +310,353 @@ public class patch_Loot : Loot {
 /*
 public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 {
-    List<CondTrigger> list = new List<CondTrigger>();
-    float num = 0f;
-    int num2 = 0;
-    foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
-    {
-        num = 0f;
-        string text = strRandID;
-        if (text != null)
-        {
-            text += num2;
-        }
-        num2++;
-        float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
-        foreach (LootUnit item in aCOLootUnit)
-        {
-            float num3 = item.GetAmount(num, fRand);
-            if (!item.bPositive)
-            {
-                num3 = 0f - num3;
-            }
-            num += item.fChance;
-            if (num3 > 0f)
-            {
-                CondTrigger condTrigger = null;
-                condTrigger = ((objUs == null || !(item.strName == "[us]")) ? DataHandler.GetCondTrigger(item.strName) : objUs.Clone());
-                condTrigger.fCount *= num3;
-                list.Add(condTrigger);
-                break;
-            }
-        }
-    }
-    num2 = 0;
-    foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
-    {
-        num = 0f;
-        string text2 = strRandID;
-        if (text2 != null)
-        {
-            text2 += num2;
-        }
-        num2++;
-        float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
-        foreach (LootUnit item2 in aOtherLootUnit)
-        {
-            float num4 = item2.GetAmount(num, fRand2);
-            if (!item2.bPositive)
-            {
-                num4 = 0f - num4;
-            }
-            num += item2.fChance;
-            if (!(num4 > 0f))
-            {
-                continue;
-            }
-            List<CondTrigger> cTLoot = DataHandler.GetLoot(item2.strName).GetCTLoot(objUs, strRandID);
-            foreach (CondTrigger item3 in cTLoot)
-            {
-                item3.fCount *= num4;
-            }
-            list.AddRange(cTLoot);
-            break;
-        }
-    }
-    return list;
+	List<CondTrigger> list = new List<CondTrigger>();
+	float num = 0f;
+	int num2 = 0;
+	foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
+	{
+		num = 0f;
+		string text = strRandID;
+		if (text != null)
+		{
+			text += num2;
+		}
+		num2++;
+		float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
+		foreach (LootUnit item in aCOLootUnit)
+		{
+			float num3 = item.GetAmount(num, fRand);
+			if (!item.bPositive)
+			{
+				num3 = 0f - num3;
+			}
+			num += item.fChance;
+			if (num3 > 0f)
+			{
+				CondTrigger condTrigger = null;
+				condTrigger = ((objUs == null || !(item.strName == "[us]")) ? DataHandler.GetCondTrigger(item.strName) : objUs.Clone());
+				condTrigger.fCount *= num3;
+				list.Add(condTrigger);
+				break;
+			}
+		}
+	}
+	num2 = 0;
+	foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
+	{
+		num = 0f;
+		string text2 = strRandID;
+		if (text2 != null)
+		{
+			text2 += num2;
+		}
+		num2++;
+		float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
+		foreach (LootUnit item2 in aOtherLootUnit)
+		{
+			float num4 = item2.GetAmount(num, fRand2);
+			if (!item2.bPositive)
+			{
+				num4 = 0f - num4;
+			}
+			num += item2.fChance;
+			if (!(num4 > 0f))
+			{
+				continue;
+			}
+			List<CondTrigger> cTLoot = DataHandler.GetLoot(item2.strName).GetCTLoot(objUs, strRandID);
+			foreach (CondTrigger item3 in cTLoot)
+			{
+				item3.fCount *= num4;
+			}
+			list.AddRange(cTLoot);
+			break;
+		}
+	}
+	return list;
 }
 
 public List<CondOwner> GetCOLoot(CondOwner objUs, bool bSuppressOverride, string strRandID = null)
 {
-    List<CondOwner> list = new List<CondOwner>();
-    float num = 0f;
-    int num2 = 0;
-    foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
-    {
-        num = 0f;
-        string text = strRandID;
-        if (text != null)
-        {
-            text += num2;
-        }
-        num2++;
-        float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
-        foreach (LootUnit item in aCOLootUnit)
-        {
-            float num3 = item.GetAmount(num, fRand);
-            if (!item.bPositive)
-            {
-                num3 = 0f - num3;
-            }
-            num += item.fChance;
-            if (!(num3 > 0f))
-            {
-                continue;
-            }
-            int num4 = Mathf.FloorToInt(num3);
-            for (int i = 0; i < num4; i++)
-            {
-                if (objUs != null && item.strName == "[us]")
-                {
-                    list.Add(objUs);
-                }
-                else
-                {
-                    list.Add(DataHandler.GetCondOwner(item.strName, null, null, !bSuppress || !bSuppressOverride));
-                }
-            }
-            break;
-        }
-    }
-    num2 = 0;
-    foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
-    {
-        num = 0f;
-        string text2 = strRandID;
-        if (text2 != null)
-        {
-            text2 += num2;
-        }
-        num2++;
-        float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
-        foreach (LootUnit item2 in aOtherLootUnit)
-        {
-            float num5 = item2.GetAmount(num, fRand2);
-            if (!item2.bPositive)
-            {
-                num5 = 0f - num5;
-            }
-            num += item2.fChance;
-            if (!(num5 > 0f))
-            {
-                continue;
-            }
-            for (int j = 0; (float)j < num5; j++)
-            {
-                Loot loot = DataHandler.GetLoot(item2.strName);
-                if (loot.strName != item2.strName)
-                {
-                    Debug.Log(strName + " expected loot: " + item2.strName + " but got " + loot.strName);
-                }
-                list.AddRange(loot.GetCOLoot(objUs, bSuppress && bSuppressOverride, strRandID));
-            }
-            break;
-        }
-    }
-    if (bNested)
-    {
-        for (int num6 = list.Count - 1; num6 > 0; num6--)
-        {
-            for (int num7 = num6 - 1; num7 >= 0; num7--)
-            {
-                list[num6] = list[num7].AddCO(list[num6], bEquip: true, bOverflow: true, bIgnoreLocks: true);
-                if (list[num6] == null)
-                {
-                    list.RemoveAt(num6);
-                    break;
-                }
-            }
-        }
-    }
-    return list;
+	List<CondOwner> list = new List<CondOwner>();
+	float num = 0f;
+	int num2 = 0;
+	foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
+	{
+		num = 0f;
+		string text = strRandID;
+		if (text != null)
+		{
+			text += num2;
+		}
+		num2++;
+		float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
+		foreach (LootUnit item in aCOLootUnit)
+		{
+			float num3 = item.GetAmount(num, fRand);
+			if (!item.bPositive)
+			{
+				num3 = 0f - num3;
+			}
+			num += item.fChance;
+			if (!(num3 > 0f))
+			{
+				continue;
+			}
+			int num4 = Mathf.FloorToInt(num3);
+			for (int i = 0; i < num4; i++)
+			{
+				if (objUs != null && item.strName == "[us]")
+				{
+					list.Add(objUs);
+				}
+				else
+				{
+					list.Add(DataHandler.GetCondOwner(item.strName, null, null, !bSuppress || !bSuppressOverride));
+				}
+			}
+			break;
+		}
+	}
+	num2 = 0;
+	foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
+	{
+		num = 0f;
+		string text2 = strRandID;
+		if (text2 != null)
+		{
+			text2 += num2;
+		}
+		num2++;
+		float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
+		foreach (LootUnit item2 in aOtherLootUnit)
+		{
+			float num5 = item2.GetAmount(num, fRand2);
+			if (!item2.bPositive)
+			{
+				num5 = 0f - num5;
+			}
+			num += item2.fChance;
+			if (!(num5 > 0f))
+			{
+				continue;
+			}
+			for (int j = 0; (float)j < num5; j++)
+			{
+				Loot loot = DataHandler.GetLoot(item2.strName);
+				if (loot.strName != item2.strName)
+				{
+					Debug.Log(strName + " expected loot: " + item2.strName + " but got " + loot.strName);
+				}
+				list.AddRange(loot.GetCOLoot(objUs, bSuppress && bSuppressOverride, strRandID));
+			}
+			break;
+		}
+	}
+	if (bNested)
+	{
+		for (int num6 = list.Count - 1; num6 > 0; num6--)
+		{
+			for (int num7 = num6 - 1; num7 >= 0; num7--)
+			{
+				list[num6] = list[num7].AddCO(list[num6], bEquip: true, bOverflow: true, bIgnoreLocks: true);
+				if (list[num6] == null)
+				{
+					list.RemoveAt(num6);
+					break;
+				}
+			}
+		}
+	}
+	return list;
 }
 
 public List<string> GetLootNames(string strRandID = null, bool bOnlyCOs = false, string type = null)
 {
-    List<string> list = new List<string>();
-    float num = 0f;
-    int num2 = 0;
-    foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
-    {
-        if (!string.IsNullOrEmpty(type) && strType != type)
-        {
-            break;
-        }
-        num = 0f;
-        string text = strRandID;
-        if (text != null)
-        {
-            text += num2;
-        }
-        num2++;
-        float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
-        foreach (LootUnit item in aCOLootUnit)
-        {
-            float num3 = item.GetAmount(num, fRand);
-            num += item.fChance;
-            string text2 = item.strName;
-            if (num3 < 0f)
-            {
-                text2 = "-" + text2;
-                num3 = 0f - num3;
-            }
-            if (num3 > 0f)
-            {
-                for (int i = 0; (float)i < num3; i++)
-                {
-                    list.Add(text2);
-                }
-                break;
-            }
-        }
-    }
-    if (bOnlyCOs)
-    {
-        return list;
-    }
-    num2 = 0;
-    foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
-    {
-        num = 0f;
-        string text3 = strRandID;
-        if (text3 != null)
-        {
-            text3 += num2;
-        }
-        num2++;
-        float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text3);
-        foreach (LootUnit item2 in aOtherLootUnit)
-        {
-            float num4 = item2.GetAmount(num, fRand2);
-            num += item2.fChance;
-            string text4 = item2.strName;
-            if (num4 < 0f)
-            {
-                text4 = "-" + text4;
-                num4 = 0f - num4;
-            }
-            if (!(num4 > 0f))
-            {
-                continue;
-            }
-            for (int j = 0; (float)j < num4; j++)
-            {
-                Loot loot = DataHandler.GetLoot(item2.strName);
-                if (string.IsNullOrEmpty(type) || !(loot.strType != type))
-                {
-                    list.AddRange(loot.GetLootNames(text3));
-                }
-            }
-            break;
-        }
-    }
-    return list;
+	List<string> list = new List<string>();
+	float num = 0f;
+	int num2 = 0;
+	foreach (List<LootUnit> aCOLootUnit in aCOLootUnits)
+	{
+		if (!string.IsNullOrEmpty(type) && strType != type)
+		{
+			break;
+		}
+		num = 0f;
+		string text = strRandID;
+		if (text != null)
+		{
+			text += num2;
+		}
+		num2++;
+		float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
+		foreach (LootUnit item in aCOLootUnit)
+		{
+			float num3 = item.GetAmount(num, fRand);
+			num += item.fChance;
+			string text2 = item.strName;
+			if (num3 < 0f)
+			{
+				text2 = "-" + text2;
+				num3 = 0f - num3;
+			}
+			if (num3 > 0f)
+			{
+				for (int i = 0; (float)i < num3; i++)
+				{
+					list.Add(text2);
+				}
+				break;
+			}
+		}
+	}
+	if (bOnlyCOs)
+	{
+		return list;
+	}
+	num2 = 0;
+	foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
+	{
+		num = 0f;
+		string text3 = strRandID;
+		if (text3 != null)
+		{
+			text3 += num2;
+		}
+		num2++;
+		float fRand2 = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text3);
+		foreach (LootUnit item2 in aOtherLootUnit)
+		{
+			float num4 = item2.GetAmount(num, fRand2);
+			num += item2.fChance;
+			string text4 = item2.strName;
+			if (num4 < 0f)
+			{
+				text4 = "-" + text4;
+				num4 = 0f - num4;
+			}
+			if (!(num4 > 0f))
+			{
+				continue;
+			}
+			for (int j = 0; (float)j < num4; j++)
+			{
+				Loot loot = DataHandler.GetLoot(item2.strName);
+				if (string.IsNullOrEmpty(type) || !(loot.strType != type))
+				{
+					list.AddRange(loot.GetLootNames(text3));
+				}
+			}
+			break;
+		}
+	}
+	return list;
 }
 
 public void ApplyCondLoot(CondOwner coUs, float fCoeff, string strRandID = null, float fCondRuleTrack = 0f)
 {
-    if (coUs == null || strType != "condition")
-    {
-        return;
-    }
-    string[] array = aCOs;
-    foreach (string strDef in array)
-    {
-        string text = coUs.ParseCondEquation(strDef, fCoeff, fCondRuleTrack);
-    }
-    int num = 0;
-    foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
-    {
-        float num2 = 0f;
-        string text2 = strRandID;
-        if (text2 != null)
-        {
-            text2 += num;
-        }
-        num++;
-        float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
-        foreach (LootUnit item in aOtherLootUnit)
-        {
-            float num3 = item.GetAmount(num2, fRand);
-            if (!item.bPositive)
-            {
-                num3 = 0f - num3;
-            }
-            num2 += item.fChance;
-            if (num3 > 0f)
-            {
-                for (int j = 0; (float)j < num3; j++)
-                {
-                    Loot loot = DataHandler.GetLoot(item.strName);
-                    loot.ApplyCondLoot(coUs, fCoeff, null, fCondRuleTrack);
-                }
-                break;
-            }
-        }
-    }
+	if (coUs == null || strType != "condition")
+	{
+		return;
+	}
+	string[] array = aCOs;
+	foreach (string strDef in array)
+	{
+		string text = coUs.ParseCondEquation(strDef, fCoeff, fCondRuleTrack);
+	}
+	int num = 0;
+	foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
+	{
+		float num2 = 0f;
+		string text2 = strRandID;
+		if (text2 != null)
+		{
+			text2 += num;
+		}
+		num++;
+		float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text2);
+		foreach (LootUnit item in aOtherLootUnit)
+		{
+			float num3 = item.GetAmount(num2, fRand);
+			if (!item.bPositive)
+			{
+				num3 = 0f - num3;
+			}
+			num2 += item.fChance;
+			if (num3 > 0f)
+			{
+				for (int j = 0; (float)j < num3; j++)
+				{
+					Loot loot = DataHandler.GetLoot(item.strName);
+					loot.ApplyCondLoot(coUs, fCoeff, null, fCondRuleTrack);
+				}
+				break;
+			}
+		}
+	}
 }
 
 public Dictionary<string, double> GetCondLoot(float fCoeff, Dictionary<string, double> dictOut, string strRandID = null)
 {
-    if (dictOut == null)
-    {
-        dictOut = new Dictionary<string, double>();
-    }
-    if (strType != "condition")
-    {
-        return dictOut;
-    }
-    string[] array = aCOs;
-    foreach (string strDef in array)
-    {
-        KeyValuePair<string, Tuple<double, double>> keyValuePair = ParseCondEquation(strDef);
-        double num = keyValuePair.Value.Item1;
-        if (keyValuePair.Value.Item2 != num)
-        {
-            num = MathUtils.Rand(keyValuePair.Value.Item1, keyValuePair.Value.Item2, MathUtils.RandType.Flat);
-        }
-        if (keyValuePair.Key != string.Empty && num != 0.0)
-        {
-            if (!dictOut.ContainsKey(keyValuePair.Key))
-            {
-                dictOut[keyValuePair.Key] = num * (double)fCoeff;
-            }
-            else
-            {
-                dictOut[keyValuePair.Key] += num * (double)fCoeff;
-            }
-        }
-    }
-    int num2 = 0;
-    foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
-    {
-        float num3 = 0f;
-        string text = strRandID;
-        if (text != null)
-        {
-            text += num2;
-        }
-        num2++;
-        float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
-        foreach (LootUnit item in aOtherLootUnit)
-        {
-            float num4 = item.GetAmount(num3, fRand);
-            if (!item.bPositive)
-            {
-                num4 = 0f - num4;
-            }
-            num3 += item.fChance;
-            if (num4 > 0f)
-            {
-                for (int j = 0; (float)j < num4; j++)
-                {
-                    Loot loot = DataHandler.GetLoot(item.strName);
-                    loot.GetCondLoot(fCoeff, dictOut);
-                }
-                break;
-            }
-        }
-    }
-    return dictOut;
+	if (dictOut == null)
+	{
+		dictOut = new Dictionary<string, double>();
+	}
+	if (strType != "condition")
+	{
+		return dictOut;
+	}
+	string[] array = aCOs;
+	foreach (string strDef in array)
+	{
+		KeyValuePair<string, Tuple<double, double>> keyValuePair = ParseCondEquation(strDef);
+		double num = keyValuePair.Value.Item1;
+		if (keyValuePair.Value.Item2 != num)
+		{
+			num = MathUtils.Rand(keyValuePair.Value.Item1, keyValuePair.Value.Item2, MathUtils.RandType.Flat);
+		}
+		if (keyValuePair.Key != string.Empty && num != 0.0)
+		{
+			if (!dictOut.ContainsKey(keyValuePair.Key))
+			{
+				dictOut[keyValuePair.Key] = num * (double)fCoeff;
+			}
+			else
+			{
+				dictOut[keyValuePair.Key] += num * (double)fCoeff;
+			}
+		}
+	}
+	int num2 = 0;
+	foreach (List<LootUnit> aOtherLootUnit in aOtherLootUnits)
+	{
+		float num3 = 0f;
+		string text = strRandID;
+		if (text != null)
+		{
+			text += num2;
+		}
+		num2++;
+		float fRand = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat, text);
+		foreach (LootUnit item in aOtherLootUnit)
+		{
+			float num4 = item.GetAmount(num3, fRand);
+			if (!item.bPositive)
+			{
+				num4 = 0f - num4;
+			}
+			num3 += item.fChance;
+			if (num4 > 0f)
+			{
+				for (int j = 0; (float)j < num4; j++)
+				{
+					Loot loot = DataHandler.GetLoot(item.strName);
+					loot.GetCondLoot(fCoeff, dictOut);
+				}
+				break;
+			}
+		}
+	}
+	return dictOut;
 }
 */

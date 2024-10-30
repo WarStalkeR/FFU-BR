@@ -182,9 +182,9 @@ private void DrawConsole(int window)
 	{
 		return;
 	}
-	Rect rect = new Rect(10f, 20f, Screen.width / 2 - 60, 4000f);
-	Rect position = new Rect(10f, 30f, Screen.width / 2 - 40, Screen.height / 2 - 90);
-	Rect position2 = new Rect(10f, position.y + position.height + 5f, Screen.width / 2 - 60, textSize + 10);
+	Rect rect = new Rect(10f, 20f, Screen.width / 2 - 40, 4000f);
+	Rect position = new Rect(10f, 30f, Screen.width / 2 - 20, (float)(Screen.height / 2) - (_textActual + 55f));
+	Rect position2 = new Rect(10f, position.y + position.height + 5f, Screen.width / 2 - 40, _textActual + 10f);
 	scrollPos = GUI.BeginScrollView(position, scrollPos, rect, alwaysShowHorizontal: false, alwaysShowVertical: true);
 	GUI.TextArea(rect, myLog, mChars, logStyle);
 	GUI.EndScrollView();

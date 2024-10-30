@@ -148,36 +148,39 @@ public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 				Style = HelmetStyle.Powered;
 				if (flag2)
 				{
-					list = condOwner.GetICOs(bAllowLocked: false);
+					list = condOwner.GetCOs(bAllowLocked: false);
 					bool flag4 = false;
-					foreach (CondOwner item in list)
+					if (list != null)
 					{
-						if (!flag4 && ctEVABottle.Triggered(item))
+						foreach (CondOwner item in list)
 						{
-							double num = item.GetCondAmount("StatGasMolO2") / item.GetCondAmount("StatRef") * 100.0;
-							txtO2.text = num.ToString("n2") + "%";
-							flag = false;
-							if (num != fO2Last)
+							if (!flag4 && ctEVABottle.Triggered(item))
 							{
-								asO2Beep.Play();
-								fO2Last = num;
+								double num = item.GetCondAmount("StatGasMolO2") / item.GetCondAmount("StatRef") * 100.0;
+								txtO2.text = num.ToString("n2") + "%";
+								flag = false;
+								if (num != fO2Last)
+								{
+									asO2Beep.Play();
+									fO2Last = num;
+								}
+								flag4 = true;
 							}
-							flag4 = true;
-						}
-						else if (ctEVABatt.Triggered(item))
-						{
-							Powered component = item.GetComponent<Powered>();
-							double num2 = item.GetCondAmount("StatPowerMax");
-							if (component != null)
+							else if (ctEVABatt.Triggered(item))
 							{
-								num2 = component.PowerStoredMax;
+								Powered component = item.GetComponent<Powered>();
+								double num2 = item.GetCondAmount("StatPowerMax");
+								if (component != null)
+								{
+									num2 = component.PowerStoredMax;
+								}
+								if (num2 == 0.0)
+								{
+									num2 = 1.0;
+								}
+								double num3 = item.GetCondAmount("StatPower") / num2 * 100.0;
+								txtBatt.text = num3.ToString("n2") + "%";
 							}
-							if (num2 == 0.0)
-							{
-								num2 = 1.0;
-							}
-							double num3 = item.GetCondAmount("StatPower") / num2 * 100.0;
-							txtBatt.text = num3.ToString("n2") + "%";
 						}
 					}
 				}
