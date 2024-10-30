@@ -33,62 +33,64 @@ public class patch_GUIHelmet : GUIHelmet {
                     CondOwner firstSlot = suitSlots[0];
                     isSuitHud = true;
                     Style = HelmetStyle.Powered;
-                    if (isSuitHud) {
-                        suitSlots = firstSlot.GetICOs(false);
-                        bool foundO2 = false;
-                        bool foundPwr = false;
-                        double currO2Total = 0;
-                        double currPwrTotal = 0;
-                        double maxO2Total = 0;
-                        double maxPwrTotal = 0;
-                        double percO2 = 0;
-                        double percPwr = 0;
-                        foreach (CondOwner slotItem in suitSlots) {
-                            if (ctEVABottle.Triggered(slotItem)) {
-                                if (!foundO2) foundO2 = true;
-                                double currO2 = slotItem.GetCondAmount("StatGasMolO2");
-                                double maxO2 = slotItem.GetCondAmount("StatRef");
-                                if (FFU_BR_Defs.ShowEachO2Battery) {
-                                    percO2 += currO2 / maxO2 * 100.0;
-                                } else {
-                                    currO2Total += currO2;
-                                    maxO2Total += maxO2;
-                                }
-                            } else if (ctEVABatt.Triggered(slotItem)) {
-                                if (!foundPwr) foundPwr = true;
-                                Powered refPower = slotItem.GetComponent<Powered>();
-                                double currPwr = slotItem.GetCondAmount("StatPower");
-                                double maxPwr = slotItem.GetCondAmount("StatPowerMax");
-                                if (refPower != null) maxPwr = refPower.PowerStoredMax;
-                                if (maxPwr == 0.0) maxPwr = 1.0;
-                                if (FFU_BR_Defs.ShowEachO2Battery) {
-                                    percPwr += currPwr / maxPwr * 100.0;
-                                } else {
-                                    currPwrTotal += currPwr;
-                                    maxPwrTotal += maxPwr;
-                                }
-                            }
-                        }
-                        if (foundO2) {
-                            noOxygen = false;
-                            if (!FFU_BR_Defs.ShowEachO2Battery)
-                                percO2 = currO2Total / maxO2Total * 100.0;
-                            txtO2.text = percO2.ToString("n2") + "%";
-                            if (percO2 != fO2Last) {
-                                if (percO2 < FFU_BR_Defs.SuitOxygenNotify) asO2Beep.Play();
-                                fO2Last = percO2;
-                            }
-                        }
-                        if (foundPwr) {
-                            if (!FFU_BR_Defs.ShowEachO2Battery)
-                                percPwr = currPwrTotal / maxPwrTotal * 100.0;
-                            txtBatt.text = percPwr.ToString("n2") + "%";
-                            if (percPwr != fPwrLast) {
-                                if (percPwr < FFU_BR_Defs.SuitPowerNotify) asO2Beep.Play();
-                                fPwrLast = percPwr;
-                            }
-                        }
-                    }
+					if (isSuitHud) {
+						suitSlots = firstSlot.GetCOs(false);
+						bool foundO2 = false;
+						bool foundPwr = false;
+						if (suitSlots != null) {
+							double currO2Total = 0;
+							double currPwrTotal = 0;
+							double maxO2Total = 0;
+							double maxPwrTotal = 0;
+							double percO2 = 0;
+							double percPwr = 0;
+							foreach (CondOwner slotItem in suitSlots) {
+								if (ctEVABottle.Triggered(slotItem)) {
+									if (!foundO2) foundO2 = true;
+									double currO2 = slotItem.GetCondAmount("StatGasMolO2");
+									double maxO2 = slotItem.GetCondAmount("StatRef");
+									if (FFU_BR_Defs.ShowEachO2Battery) {
+										percO2 += currO2 / maxO2 * 100.0;
+									} else {
+										currO2Total += currO2;
+										maxO2Total += maxO2;
+									}
+								} else if (ctEVABatt.Triggered(slotItem)) {
+									if (!foundPwr) foundPwr = true;
+									Powered refPower = slotItem.GetComponent<Powered>();
+									double currPwr = slotItem.GetCondAmount("StatPower");
+									double maxPwr = slotItem.GetCondAmount("StatPowerMax");
+									if (refPower != null) maxPwr = refPower.PowerStoredMax;
+									if (maxPwr == 0.0) maxPwr = 1.0;
+									if (FFU_BR_Defs.ShowEachO2Battery) {
+										percPwr += currPwr / maxPwr * 100.0;
+									} else {
+										currPwrTotal += currPwr;
+										maxPwrTotal += maxPwr;
+									}
+								}
+							}
+							if (foundO2) {
+								noOxygen = false;
+								if (!FFU_BR_Defs.ShowEachO2Battery)
+									percO2 = currO2Total / maxO2Total * 100.0;
+								txtO2.text = percO2.ToString("n2") + "%";
+								if (percO2 != fO2Last) {
+									if (percO2 < FFU_BR_Defs.SuitOxygenNotify) asO2Beep.Play();
+									fO2Last = percO2;
+								}
+							}
+							if (foundPwr) {
+								if (!FFU_BR_Defs.ShowEachO2Battery)
+									percPwr = currPwrTotal / maxPwrTotal * 100.0;
+								txtBatt.text = percPwr.ToString("n2") + "%";
+								if (percPwr != fPwrLast) {
+									if (percPwr < FFU_BR_Defs.SuitPowerNotify) asO2Beep.Play();
+									fPwrLast = percPwr;
+								}
+							}
+						}
+					}
                 } else Style = HelmetStyle.Unpowered;
             } else if (coRoomIn.HasCond("IsPSHUD")) {
                 isBasicHud = true;

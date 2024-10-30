@@ -38,9 +38,9 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
                 }
             }
         }
-        Rect textView = new Rect(10f, 20f, Screen.width / 2 - 60, mChars / 4);
-        Rect scrollView = new Rect(10f, 30f, Screen.width / 2 - 40, Screen.height / 2 - 90);
-        Rect textField = new Rect(10f, scrollView.y + scrollView.height + 5f, Screen.width / 2 - 60, textSize + 10);
+        Rect textView = new Rect(10f, 20f, Screen.width / 2 - 40, mChars / 4);
+        Rect scrollView = new Rect(10f, 30f, Screen.width / 2 - 20, Screen.height / 2 - (_textActual + 55f));
+        Rect textField = new Rect(10f, scrollView.y + scrollView.height + 5f, Screen.width / 2 - 40, _textActual + 10f);
         scrollPos = GUI.BeginScrollView(scrollView, scrollPos, textView, false, true);
         GUI.TextArea(textView, myLog, mChars, logStyle);
         GUI.EndScrollView();
