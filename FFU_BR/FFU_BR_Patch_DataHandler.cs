@@ -728,6 +728,7 @@ public static class patch_DataHandler {
     }
 
     public static void SyncArrayOps(List<string> modArray, List<string> refArray, ref bool noArrayOps, string dataKey, string propName, bool doLog, SyncArrayOp arrayOp = SyncArrayOp.None) {
+        int opIndex = 0;
         // Array Operations Subroutine
         foreach (var refItem in refArray) {
             // Valid Sub-Arrays Ignored
@@ -737,9 +738,19 @@ public static class patch_DataHandler {
             // Get Operations Command
             if (refItem.StartsWith("--")) {
                 switch (refItem.Substring(0, 7)) {
-                    case "--MOD--": arrayOp = SyncArrayOp.Mod; break;
-                    case "--ADD--": arrayOp = SyncArrayOp.Add; break;
-                    case "--DEL--": arrayOp = SyncArrayOp.Del; break;
+                    case OP_MOD: arrayOp = SyncArrayOp.Mod; break;
+                    case OP_ADD: arrayOp = SyncArrayOp.Add; break;
+                    case OP_INS: arrayOp = SyncArrayOp.Ins; break;
+                    case OP_DEL: arrayOp = SyncArrayOp.Del; break;
+                }
+                if (arrayOp == SyncArrayOp.Ins) {
+                    int.TryParse(refItem.Replace("=", "").Substring(7), out opIndex);
+                    opIndex--;
+                    if (opIndex < 0) {
+                        Debug.LogWarning($"The '{OP_INS}' array operation in Data Block [{dataKey}], " +
+                            $"Property [{propName}] received invalid index! Using [0] index.");
+                        opIndex = 0;
+                    }
                 }
                 continue;
             }
@@ -754,13 +765,15 @@ public static class patch_DataHandler {
                 switch (arrayOp) {
                     case SyncArrayOp.Mod: OpModData(modArray, refItem, dataKey, propName, doLog); break;
                     case SyncArrayOp.Add: OpAddData(modArray, refItem, dataKey, propName, doLog); break;
+                    case SyncArrayOp.Ins: OpInsData(modArray, ref opIndex, refItem, dataKey, propName, doLog); break;
                     case SyncArrayOp.Del: OpDelData(modArray, refItem, dataKey, propName, doLog); break;
                 }
             } else {
                 switch (arrayOp) {
                     case SyncArrayOp.Mod: Debug.LogWarning($"Non-data [{refItem}] in Data Block [{dataKey}], " +
-                        $"Property [{propName}] doesn't support '--MOD--' operation! Ignoring."); break;
+                        $"Property [{propName}] doesn't support '{OP_MOD}' operation! Ignoring."); break;
                     case SyncArrayOp.Add: OpAddSimple(modArray, refItem, dataKey, propName, doLog); break;
+                    case SyncArrayOp.Ins: OpInsSimple(modArray, ref opIndex, refItem, dataKey, propName, doLog); break;
                     case SyncArrayOp.Del: OpDelSimple(modArray, refItem, dataKey, propName, doLog); break;
                 }
             }
@@ -792,6 +805,14 @@ public static class patch_DataHandler {
         modArray.Add(refItem);
     }
 
+    public static void OpInsData(List<string> modArray, ref int arrIndex, string refItem, string dataKey, string propName, bool doLog) {
+        string[] refData = refItem.Split('=');
+        if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}], Value [{refData[1]}] was inserted " +
+            $"into Data Block [{dataKey}], Property [{propName}] at Index [{arrIndex}]");
+        modArray.Insert(arrIndex, refItem);
+        arrIndex++;
+    }
+
     public static void OpDelData(List<string> modArray, string refItem, string dataKey, string propName, bool doLog) {
         string[] refData = refItem.Split('=');
         bool isFound = false;
@@ -818,6 +839,13 @@ public static class patch_DataHandler {
         if (doLog) Debug.Log($"#Info# Parameter [{refItem}] was added " +
             $"to Data Block [{dataKey}], Property [{propName}]");
         modArray.Add(refItem);
+    }
+
+    public static void OpInsSimple(List<string> modArray, ref int arrIndex, string refItem, string dataKey, string propName, bool doLog) {
+        if (doLog) Debug.Log($"#Info# Parameter [{refItem}] was inserted into " +
+            $"Data Block [{dataKey}], Property [{propName}] at Index [{arrIndex}]");
+        modArray.Insert(arrIndex, refItem);
+        arrIndex++;
     }
 
     public static void OpDelSimple(List<string> modArray, string refItem, string dataKey, string propName, bool doLog) {
@@ -857,10 +885,16 @@ public static class patch_DataHandler {
         else return refObject;
     }
 
+    public const string OP_MOD = "--MOD--";
+    public const string OP_ADD = "--ADD--";
+    public const string OP_INS = "--INS--";
+    public const string OP_DEL = "--DEL--";
+
     public enum SyncArrayOp {
         None,
         Mod,
         Add,
+        Ins,
         Del
     }
 }
