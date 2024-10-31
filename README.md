@@ -12,7 +12,7 @@ Ostranauts Discord Server: https://discord.gg/bluebottlegames (#modding-discussi
 2\. Partial data overwrite of existing entries (from any JSON file, whether it is core or other mod).  
 3\. Reference-based creation of new entries with applied values. No need to copy whole code block.  
 4\. Removal of specific data entries based on their IDs ('strName' parameter) via `mod_info.json`.  
-5\. Precision array modification via `--ADD--`, `--DEL--` and `--MOD--` (data values only) commands.  
+5\. Precision array modification via `--ADD--`, `--INS--`, `--DEL--` and `--MOD--` (data only) commands.  
 6\. Completely new parameters and properties that expand existing different gameplay mechanics.  
 7\. Option to unlock max random range value that allows unrestricted random/loot lists.  
 8\. Other various options and settings to alter gameplay and/or make it easier/harder.  
@@ -138,10 +138,11 @@ you found yourself in need of modifying such arrays: *here be dragons, thus, aba
 Arrays and sub-arrays can be of two types. Data arrays and simple arrays. Data array contain in each entry 
 `"name=value"` and simple arrays arrays don't contain `=` symbol, but just string as whole, i.e. `"BodyEVA05"`.
 
-There are 3 command to perform such modifications:  
+There are 4 commands to perform such modifications:  
 `--MOD--` modifies existing entry based on 'name' (for data arrays only), without losing existing data.   
 `--DEL--` removes existing entry based on 'name' (for data arrays) or on whole string (for simple arrays).  
 `--ADD--` just adds the entry to the existing data as is, doesn't care about array type.  
+`--INS--` inserts the entry at designated index, shifting whatever was at this index forward.
 
 **Note**: make sure that precisely modified arrays start from any command. Otherwise, they will be copied as is
 and you're pretty much asking for a trouble. Same applies to sub-arrays, except first goes number of modifier row
@@ -158,13 +159,16 @@ in the array - loader can't do anything with row number, but without command and
         "IsBingham=",
         "--ADD--",
         "StatDismantleProgressMax=1.0x180"
+        "--INS--4",
+        "StatSpecial=1.0x60"
     ]
     //...code...//
 }
 ```
 In example above existing array `aNormalArray` was modified in the following way: the `StatBasePrice` was 
-changed to `1.0x9000.0`, `IsBingham` was removed from the list disregarding the value and the parameter
-`StatDismantleProgressMax=1.0x180` was added as is to the list.
+changed to `1.0x9000.0`, `IsBingham` was removed from the list disregarding the value, the parameter
+`StatDismantleProgressMax=1.0x180` was added as is to the list and the parameter `StatSpecial=1.0x60` was
+inserted at the place of 4th entry in the array and whatever was there initially shifted forward.
 
 ### Precision Sub-Array Modification Example
 ```json
@@ -172,7 +176,7 @@ changed to `1.0x9000.0`, `IsBingham` was removed from the list disregarding the 
     //...code...//
     "aNestedSubArray": [
         "5|--ADD--|IsClumsy=0.0675x1.0|IsStupid=9000x1.0|--MOD--|IsBrave=0.5675x1.0|--DEL--|IsCraven",
-		"13|--ADD-|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0"
+		"13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
     ]
     //...code...//
 }
@@ -196,7 +200,7 @@ entries you want to add/remove/modify (depending on type of the sub-array). In e
         "--DEL--",
         "IsBeautiful",
         "IsClumsy",
-        "13|--ADD-|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0"
+        "13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
     ]
     //...code...//
 }
@@ -219,7 +223,7 @@ a dedicated command into the sub-array entry itself.
         "--DEL--=",
         "IsBeautiful=",
         "IsClumsy=",
-        "13=|--ADD--=|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0"
+        "13=|--ADD--=|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4=|IsGood=1.0x60"
     ]
     //...code...//
 }
