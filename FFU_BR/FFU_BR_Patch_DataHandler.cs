@@ -795,7 +795,7 @@ public static class patch_DataHandler {
             }
         }
         if (!isReplaced) Debug.LogWarning($"Parameter [{refData[0]}] was not " +
-        $"found in Data Block [{dataKey}], Property [{propName}]!");
+        $"found in Data Block [{dataKey}], Property [{propName}]! Ignoring.");
     }
 
     public static void OpAddData(List<string> modArray, string refItem, string dataKey, string propName, bool doLog) {
@@ -809,7 +809,11 @@ public static class patch_DataHandler {
         string[] refData = refItem.Split('=');
         if (doLog) Debug.Log($"#Info# Parameter [{refData[0]}], Value [{refData[1]}] was inserted " +
             $"into Data Block [{dataKey}], Property [{propName}] at Index [{arrIndex}]");
-        modArray.Insert(arrIndex, refItem);
+        if (arrIndex >= modArray.Count) {
+            Debug.LogWarning($"Index [{arrIndex}] for Parameter [{refData[0]}] in Data " +
+                $"Block [{dataKey}], Property [{propName}] is invalid! Adding instead.");
+            modArray.Add(refItem);
+        } else modArray.Insert(arrIndex, refItem);
         arrIndex++;
     }
 
@@ -831,7 +835,7 @@ public static class patch_DataHandler {
             modArray.RemoveAt(removeIndex);
         } else {
             Debug.LogWarning($"Parameter [{refData[0]}] was not found " +
-            $"in Data Block [{dataKey}], Property [{propName}]!");
+            $"in Data Block [{dataKey}], Property [{propName}]! Ignoring.");
         }
     }
 
@@ -844,7 +848,11 @@ public static class patch_DataHandler {
     public static void OpInsSimple(List<string> modArray, ref int arrIndex, string refItem, string dataKey, string propName, bool doLog) {
         if (doLog) Debug.Log($"#Info# Parameter [{refItem}] was inserted into " +
             $"Data Block [{dataKey}], Property [{propName}] at Index [{arrIndex}]");
-        modArray.Insert(arrIndex, refItem);
+        if (arrIndex >= modArray.Count) {
+            Debug.LogWarning($"Index [{arrIndex}] for Parameter [{refItem}] in Data " +
+                $"Block [{dataKey}], Property [{propName}] is invalid! Adding instead.");
+            modArray.Add(refItem);
+        } else modArray.Insert(arrIndex, refItem);
         arrIndex++;
     }
 
