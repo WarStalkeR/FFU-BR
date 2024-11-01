@@ -127,6 +127,7 @@ namespace FFU_Beyond_Reach {
             ModChanges,
             DeepCopy,
             ModdedDump,
+            ExtendedDump,
             ContentDump,
             SourceDump,
         }

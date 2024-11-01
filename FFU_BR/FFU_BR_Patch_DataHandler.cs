@@ -500,6 +500,7 @@ public static class patch_DataHandler {
         bool logModded = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModChanges;
         bool logRefCopy = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.DeepCopy;
         bool logObjects = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump;
+        bool logExtended = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ExtendedDump;
         bool logContent = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ContentDump;
         bool logSource = FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.SourceDump;
         string rawDump = string.Empty;
@@ -547,7 +548,7 @@ public static class patch_DataHandler {
                     // Reference Deep Copy + Apply Changes
                     if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
                         string deepCopy = JsonMapper.ToJson(dataDict[referenceKey]);
-                        if (logObjects) Debug.Log($"Reference Data Dump (Before): {deepCopy}");
+                        if (logExtended) Debug.Log($"Reference Data Dump (Before): {deepCopy}");
                         bool isDeepCopySuccess = false;
                         deepCopy = Regex.Replace(deepCopy, "(\"strName\":)\"[^\"]*\"", match => {
                             isDeepCopySuccess = true;
@@ -562,7 +563,7 @@ public static class patch_DataHandler {
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
                             try {
                                 SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, extData, logRefCopy);
-                                if (logObjects) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
+                                if (logExtended) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
                             } catch (Exception ex) {
                                 Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
                                 $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
