@@ -16,7 +16,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ostranauts.Ships.Commands {
-    public class patch_HoldStationAutoPilot : HoldStationAutoPilot {
+    public partial class patch_HoldStationAutoPilot : HoldStationAutoPilot {
         [MonoModIgnore] public patch_HoldStationAutoPilot(IAICharacter pilot) : base(pilot) { }
         public CommandCode RunCommand() {
             Ship shipStationKeepingTarget = base.ShipUs.shipStationKeepingTarget;

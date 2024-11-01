@@ -15,7 +15,7 @@ using UnityEngine.UI;
 using TMPro;
 using System;
 
-public class patch_GUIOptions : GUIOptions {
+public partial class patch_GUIOptions : GUIOptions {
     [MonoModReplace] private void Init() {
         cgOptions = base.transform.parent.GetComponent<CanvasGroup>();
         btnQuit = base.transform.Find("pnlMenu/btnQuit/btn").GetComponent<Button>();

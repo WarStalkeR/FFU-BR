@@ -15,8 +15,7 @@ using MonoMod;
 using FFU_Beyond_Reach;
 using System.Linq;
 
-public class patch_Loot : Loot {
-    public string strReference { get; set; }
+public partial class patch_Loot : Loot {
     [MonoModReplace] public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null) {
         List<CondTrigger> lootCTs = new List<CondTrigger>();
         int lootIdx = 0;

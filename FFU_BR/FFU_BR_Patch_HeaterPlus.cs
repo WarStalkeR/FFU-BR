@@ -12,7 +12,7 @@
 using MonoMod;
 using System.Collections.Generic;
 
-public class patch_Heater : Heater {
+public partial class patch_Heater : Heater {
     [MonoModReplace] private void Heat(double fTimePassed) {
         bool isEnabled = false;
         CondOwner heatCO = null;

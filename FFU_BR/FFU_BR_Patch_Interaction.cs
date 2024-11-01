@@ -12,7 +12,7 @@ using FFU_Beyond_Reach;
 using System.Linq;
 using UnityEngine;
 
-public class patch_Interaction : Interaction {
+public partial class patch_Interaction : Interaction {
     private void CalcRate() {
         if (strActionGroup != "Work" || bCTThemModifierCalculated) {
             return;

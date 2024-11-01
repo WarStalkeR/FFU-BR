@@ -15,7 +15,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Ostranauts.UI.MegaToolTip.DataModules {
-    public class patch_NumberModule : NumberModule {
+    public partial class patch_NumberModule : NumberModule {
         public void SetData(CondOwner co) {
             if (co == null || co.mapConds == null) {
                 _IsMarkedForDestroy = true;

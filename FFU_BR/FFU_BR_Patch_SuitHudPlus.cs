@@ -13,7 +13,7 @@ using MonoMod;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class patch_GUIHelmet : GUIHelmet {
+public partial class patch_GUIHelmet : GUIHelmet {
     private double fPwrLast;
     [MonoModReplace] public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut) {
         if (coRoomIn == null || !coRoomIn.HasCond("IsHuman")) {

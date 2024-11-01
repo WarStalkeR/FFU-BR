@@ -19,7 +19,7 @@ using System.Linq;
 using FFU_Beyond_Reach;
 using System;
 
-public class patch_ConsoleToGUI : ConsoleToGUI {
+public partial class patch_ConsoleToGUI : ConsoleToGUI {
     private string logHistoryPath = null;
 	private bool configLoaded = false;
     [MonoModReplace] private void DrawConsole(int window) {
@@ -112,7 +112,7 @@ public class patch_ConsoleToGUI : ConsoleToGUI {
     }
 }
 
-public class patch_ConsoleResolver : ConsoleResolver {
+public partial class patch_ConsoleResolver : ConsoleResolver {
     [MonoModReplace] private static bool KeywordGetCond(ref string strInput, string[] strings) {
         if (CrewSim.objInstance == null) {
             strInput += "\nCrewSim instance not found.";

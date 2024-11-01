@@ -24,7 +24,7 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-public static class patch_DataHandler {
+public static partial class patch_DataHandler {
     public static string strModsPath = string.Empty;
     [MonoModReplace] public static void Init() {
         // Early Access Build Info

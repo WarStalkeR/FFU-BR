@@ -13,7 +13,7 @@ using BepInEx.Configuration;
 using System.IO;
 
 namespace FFU_Beyond_Reach {
-    public class FFU_BR_Defs {
+    public partial class FFU_BR_Defs {
         public static readonly string ModName = "BepInEx: Beyond Reach";
         public static readonly string ModVersion = "0.2.7.0";
 

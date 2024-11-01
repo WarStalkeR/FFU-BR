@@ -12,7 +12,7 @@ using FFU_Beyond_Reach;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class patch_GUIChargenCareer : GUIChargenCareer {
+public partial class patch_GUIChargenCareer : GUIChargenCareer {
     private void AddSkillTrait(JsonCareer jc, string strChosen) {
         bmpDot2.color = Color.white;
         List<string> list = new List<string>(coUser.mapConds.Keys);
