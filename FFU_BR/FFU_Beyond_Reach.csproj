@@ -6,6 +6,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <Configurations>Debug;Release;Patch</Configurations>
   </PropertyGroup>
   <PropertyGroup>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
@@ -15,7 +16,7 @@
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="@echo off&#xD;&#xA;setlocal&#xD;&#xA;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;) else if $(ConfigurationName) == DebugMM (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    &quot;$(SolutionDir)..\MonoMod\MonoMod.exe&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp.FFU_BR.mm.dll&quot; /F&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.pdb&quot; /F&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.dll&quot; &quot;$(SolutionDir)..\..\Game_Data\Managed\Assembly-CSharp-FFU_BR.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\..\Game_Data\Managed\MONOMODDED_Assembly-CSharp.dll&quot; /F&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;)" />
+    <Exec Command="@echo off&#xD;&#xA;setlocal&#xD;&#xA;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;) else if $(ConfigurationName) == Patch (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    &quot;$(SolutionDir)..\MonoMod\MonoMod.exe&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\Assembly-CSharp.FFU_BR.mm.dll&quot; /F&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.pdb&quot; /F&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.dll&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp-FFU_BR.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.dll&quot; /F&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;)" />
   </Target>
   <ItemGroup>
     <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2">
