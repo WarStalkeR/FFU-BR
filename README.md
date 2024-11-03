@@ -65,9 +65,13 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
 
 # New Parameters & Properties
-**StatEmittedTemp** - a `simple condition` parameter that allow to override `StatSolidTemp` without changing 
-it. When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
+**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
+When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
 parameter.  
+**invSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
+inventory owner. Works pretty much same way as other `slot effects`, except parameters `mapMeshTextures`,
+`strSlotImage` and `strSlotImageUnder` are ignored. Thread carefully, as it applies effect to **every** item,
+including whole stacks.
 
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
