@@ -56,7 +56,7 @@ public partial class patch_Container : Container {
                 CondOwnerVisitorAddCond condOwnerVisitorAddCond = new CondOwnerVisitorAddCond();
                 condOwnerVisitorAddCond.strCond = "IsCarried";
                 condOwnerVisitorAddCond.fAmount = 1.0;
-                co.VisitCOs(condOwnerVisitorAddCond, bAllowLocked: true);
+                co.VisitCOs(condOwnerVisitorAddCond, true);
                 break;
             }
             targetCO = targetCO.objCOParent;
