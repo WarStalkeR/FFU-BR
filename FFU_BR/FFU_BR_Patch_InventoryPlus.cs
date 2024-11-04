@@ -40,9 +40,7 @@ public partial class patch_CondOwner : CondOwner {
 public partial class patch_Container : Container {
 	[MonoModIgnore] patch_CondOwner CO => (patch_CondOwner)base.CO;
     [MonoModReplace] public void SetIsInContainer(CondOwner co) {
-        if (CO == this) {
-            Debug.Log("ERROR: Assigning self as own parent.");
-        }
+        if (CO == this) Debug.Log("ERROR: Assigning self as own parent.");
         co.objCOParent = CO;
         if (co.coStackHead == null) {
             co.tf.SetParent(CO.tf);
@@ -113,49 +111,41 @@ public partial class patch_Slot : Slot {
 
 public partial class patch_Container : Container {
     [MonoModReplace] public bool AllowedCO(CondOwner coIn) {
-        if (coIn == null || coIn == CO) {
-            return false;
-        }
-		CondOwner coParent = CO.objCOParent;
+        if (coIn == null || coIn == CO)
+			return false;
+        CondOwner coParent = CO.objCOParent;
 		while (coParent != null) {
 			if (coIn == coParent) return false;
 			coParent = coParent.objCOParent;
 		}
-        if (ctAllowed != null) {
-            return ctAllowed.Triggered(coIn);
-        }
+        if (ctAllowed != null)
+			return ctAllowed.Triggered(coIn);
         return true;
     }
 }
 
 public partial class patch_GUIInventory : GUIInventory {
     public void SpawnInventoryWindow(patch_CondOwner CO, InventoryWindowType type, bool bFlyIn) {
-        if (CO == null) {
-            return;
-        }
+        if (CO == null) return;
         CanvasManager.ShowCanvasGroup(canvasGroup);
-        bool flag = type == InventoryWindowType.Ground || CO.objContainer != null;
+        bool isValid = type == InventoryWindowType.Ground || CO.objContainer != null;
         for (int i = 0; i < activeWindows.Count; i++) {
-            if (!flag) {
-                break;
-            }
-            if (activeWindows[i].CO == CO && type == activeWindows[i].type) {
-                flag = false;
-            }
+            if (!isValid) break;
+            if (activeWindows[i].CO == CO && type == activeWindows[i].type) 
+				isValid = false;
         }
-        if (flag) {
-            GameObject gameObject = Object.Instantiate(inventoryGridPrefab, base.transform);
-            GUIInventoryWindow component = gameObject.GetComponent<GUIInventoryWindow>();
-            activeWindows.Add(component);
-            component.SetData(CO, type);
-            int num = activeWindows.IndexOf(component);
+        if (isValid) {
+            GameObject invGO = Object.Instantiate(inventoryGridPrefab, base.transform);
+            GUIInventoryWindow winCurr = invGO.GetComponent<GUIInventoryWindow>();
+            activeWindows.Add(winCurr);
+            winCurr.SetData(CO, type);
+            int winIndex = activeWindows.IndexOf(winCurr);
             GUIInventoryWindow winPrev = null;
-            if (num > 0) {
-                winPrev = activeWindows[num - 1];
-            }
-            component.transform.localPosition = GetWindowPosition(component, winPrev) * 1.5f * CanvasManager.CanvasRatio;
-            CanvasManager.SetAnchorsToCorners(component.transform);
-            StartCoroutine(FlyIn(component));
+            if (winIndex > 0) winPrev = activeWindows[winIndex - 1];
+            winCurr.transform.localPosition = GetWindowPosition(winCurr, winPrev) 
+				* 1.5f * CanvasManager.CanvasRatio;
+            CanvasManager.SetAnchorsToCorners(winCurr.transform);
+            StartCoroutine(FlyIn(winCurr));
         }
 		List<Slot> sortedSlots = FFU_BR_Defs.StrictInvSorting ? 
 			CO.GetSortedSlots() : CO.GetSlots(true);
@@ -164,12 +154,11 @@ public partial class patch_GUIInventory : GUIInventory {
                 CondOwner coSlotted = slot.aCOs.FirstOrDefault();
                 SpawnSocialMovesWindow(coSlotted);
             } else {
-                if (slot.bHide) {
-                    continue;
-                }
+                if (slot.bHide) continue;
                 CondOwner[] aCOs = slot.aCOs;
                 foreach (CondOwner condOwner in aCOs) {
-                    if (condOwner != null && condOwner.objContainer != null && CTOpenInv.Triggered(condOwner)) {
+                    if (condOwner != null && condOwner.objContainer != null 
+						&& CTOpenInv.Triggered(condOwner)) {
                         SpawnInventoryWindow(condOwner, InventoryWindowType.Container, bFlyIn);
                     }
                 }
@@ -186,9 +175,9 @@ public partial class patch_GUIInventory : GUIInventory {
 
 public partial class patch_CondOwner : CondOwner {
     public List<Slot> GetSortedSlots() {
-        if (compSlots == null) {
-            return _emptySlotsResult ?? (_emptySlotsResult = new List<Slot>());
-        }
+        if (compSlots == null) 
+			return _emptySlotsResult ?? 
+				(_emptySlotsResult = new List<Slot>());
         List<Slot> sortedSlots = new List<Slot>();
         List<Slot> mainSlots = compSlots.aSlots.ToList();
         mainSlots.Sort(SortByDepth);
