@@ -8,7 +8,12 @@
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
 
+using FFU_Beyond_Reach;
 using MonoMod;
+using Ostranauts.Core;
+using Ostranauts.Objectives;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public partial class patch_JsonCondOwner : JsonCondOwner {
@@ -120,6 +125,85 @@ public partial class patch_Container : Container {
             return ctAllowed.Triggered(coIn);
         }
         return true;
+    }
+}
+
+public partial class patch_GUIInventory : GUIInventory {
+    public void SpawnInventoryWindow(patch_CondOwner CO, InventoryWindowType type, bool bFlyIn) {
+        if (CO == null) {
+            return;
+        }
+        CanvasManager.ShowCanvasGroup(canvasGroup);
+        bool flag = type == InventoryWindowType.Ground || CO.objContainer != null;
+        for (int i = 0; i < activeWindows.Count; i++) {
+            if (!flag) {
+                break;
+            }
+            if (activeWindows[i].CO == CO && type == activeWindows[i].type) {
+                flag = false;
+            }
+        }
+        if (flag) {
+            GameObject gameObject = Object.Instantiate(inventoryGridPrefab, base.transform);
+            GUIInventoryWindow component = gameObject.GetComponent<GUIInventoryWindow>();
+            activeWindows.Add(component);
+            component.SetData(CO, type);
+            int num = activeWindows.IndexOf(component);
+            GUIInventoryWindow winPrev = null;
+            if (num > 0) {
+                winPrev = activeWindows[num - 1];
+            }
+            component.transform.localPosition = GetWindowPosition(component, winPrev) * 1.5f * CanvasManager.CanvasRatio;
+            CanvasManager.SetAnchorsToCorners(component.transform);
+            StartCoroutine(FlyIn(component));
+        }
+		List<Slot> sortedSlots = FFU_BR_Defs.StrictInvSorting ? 
+			CO.GetSortedSlots() : CO.GetSlots(true);
+        foreach (Slot slot in sortedSlots) {
+            if (slot.strName == "social") {
+                CondOwner coSlotted = slot.aCOs.FirstOrDefault();
+                SpawnSocialMovesWindow(coSlotted);
+            } else {
+                if (slot.bHide) {
+                    continue;
+                }
+                CondOwner[] aCOs = slot.aCOs;
+                foreach (CondOwner condOwner in aCOs) {
+                    if (condOwner != null && condOwner.objContainer != null && CTOpenInv.Triggered(condOwner)) {
+                        SpawnInventoryWindow(condOwner, InventoryWindowType.Container, bFlyIn);
+                    }
+                }
+            }
+        }
+        if (CrewSim.coPlayer.HasCond("TutorialLockerWaiting") && 
+            instance.IsCOShown(CrewSim.coPlayer) && (CO.HasCond("TutorialLockerTarget") || 
+            (CO.HasCond("IsStorageFurniture") && CrewSim.coPlayer.HasCond("IsENCFirstDockOKLG")))) {
+            CrewSim.coPlayer.ZeroCondAmount("TutorialLockerWaiting");
+            MonoSingleton<ObjectiveTracker>.Instance.CheckObjective(CrewSim.coPlayer.strID);
+        }
+    }
+}
+
+public partial class patch_CondOwner : CondOwner {
+    public List<Slot> GetSortedSlots() {
+        if (compSlots == null) {
+            return _emptySlotsResult ?? (_emptySlotsResult = new List<Slot>());
+        }
+        List<Slot> sortedSlots = new List<Slot>();
+        List<Slot> mainSlots = compSlots.aSlots.ToList();
+        mainSlots.Sort(SortByDepth);
+        foreach (Slot aSlot in mainSlots) {
+			List<Slot> subSlots = aSlot.GetSlots(true, false);
+			if (subSlots != null && subSlots.Count > 0) {
+				subSlots.Sort(SortByDepth);
+				sortedSlots.AddRange(subSlots);
+			}
+        }
+        return sortedSlots;
+        int SortByDepth(Slot s1, Slot s2) {
+            if (s1 == null || s2 == null) return 0;
+            return s1.nDepth.CompareTo(s2.nDepth);
+        }
     }
 }
 
@@ -238,5 +322,84 @@ public bool AllowedCO(CondOwner coIn)
 		return ctAllowed.Triggered(coIn);
 	}
 	return true;
+}
+
+public void SpawnInventoryWindow(CondOwner CO, InventoryWindowType type, bool bFlyIn)
+{
+	if (CO == null)
+	{
+		return;
+	}
+	CanvasManager.ShowCanvasGroup(canvasGroup);
+	bool flag = type == InventoryWindowType.Ground || CO.objContainer != null;
+	for (int i = 0; i < activeWindows.Count; i++)
+	{
+		if (!flag)
+		{
+			break;
+		}
+		if (activeWindows[i].CO == CO && type == activeWindows[i].type)
+		{
+			flag = false;
+		}
+	}
+	if (flag)
+	{
+		GameObject gameObject = Object.Instantiate(inventoryGridPrefab, base.transform);
+		GUIInventoryWindow component = gameObject.GetComponent<GUIInventoryWindow>();
+		activeWindows.Add(component);
+		component.SetData(CO, type);
+		int num = activeWindows.IndexOf(component);
+		GUIInventoryWindow winPrev = null;
+		if (num > 0)
+		{
+			winPrev = activeWindows[num - 1];
+		}
+		component.transform.localPosition = GetWindowPosition(component, winPrev) * 1.5f * CanvasManager.CanvasRatio;
+		CanvasManager.SetAnchorsToCorners(component.transform);
+		StartCoroutine(FlyIn(component));
+	}
+	foreach (Slot slot in CO.GetSlots(bDeep: true))
+	{
+		if (slot.strName == "social")
+		{
+			CondOwner coSlotted = slot.aCOs.FirstOrDefault();
+			SpawnSocialMovesWindow(coSlotted);
+		}
+		else
+		{
+			if (slot.bHide)
+			{
+				continue;
+			}
+			CondOwner[] aCOs = slot.aCOs;
+			foreach (CondOwner condOwner in aCOs)
+			{
+				if (condOwner != null && condOwner.objContainer != null && CTOpenInv.Triggered(condOwner))
+				{
+					SpawnInventoryWindow(condOwner, InventoryWindowType.Container, bFlyIn);
+				}
+			}
+		}
+	}
+	if (CrewSim.coPlayer.HasCond("TutorialLockerWaiting") && instance.IsCOShown(CrewSim.coPlayer) && (CO.HasCond("TutorialLockerTarget") || (CO.HasCond("IsStorageFurniture") && CrewSim.coPlayer.HasCond("IsENCFirstDockOKLG"))))
+	{
+		CrewSim.coPlayer.ZeroCondAmount("TutorialLockerWaiting");
+		MonoSingleton<ObjectiveTracker>.Instance.CheckObjective(CrewSim.coPlayer.strID);
+	}
+}
+
+public List<Slot> GetSlotsDepthFirst(bool bDeep)
+{
+	List<Slot> list = new List<Slot>(aSlots);
+	if (bDeep)
+	{
+		foreach (Slot aSlot in aSlots)
+		{
+			list.AddRange(aSlot.GetSlots(bDeep, bChildFirst: false));
+		}
+	}
+	list.Sort(SortBySlotDepth);
+	return list;
 }
 */

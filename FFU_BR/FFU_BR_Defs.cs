@@ -32,6 +32,7 @@ namespace FFU_Beyond_Reach {
         public static float SuitOxygenNotify = 25.0f;
         public static float SuitPowerNotify = 15.0f;
         public static bool ShowEachO2Battery = true;
+        public static bool StrictInvSorting = true;
         public static bool AltTempEnabled = true;
         public static string AltTempSymbol = "C";
         public static float AltTempMult = 1.0f;
@@ -81,11 +82,14 @@ namespace FFU_Beyond_Reach {
             ShowEachO2Battery = ModDefs.Bind("GameplaySettings", "ShowEachO2Battery", ShowEachO2Battery,
                 "Defines whether to show average percentage across all O2/Batteries or calculate each O2/Battery " +
                 "independently and summarize their percentages. Affects how soon notifications will begin.").Value;
+            StrictInvSorting = ModDefs.Bind("GameplaySettings", "StrictInvSorting", StrictInvSorting,
+                "Enables custom, nDepth-based inventory sorting that enforces strict UI rendering order.").Value;
             ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
             ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
             ModLog.Info($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
             ModLog.Info($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
             ModLog.Info($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}%");
+            ModLog.Info($"GameplaySettings => StrictInvSorting: {StrictInvSorting}%");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
