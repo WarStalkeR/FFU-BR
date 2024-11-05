@@ -179,19 +179,30 @@ public partial class patch_CondOwner : CondOwner {
 			return _emptySlotsResult ?? 
 				(_emptySlotsResult = new List<Slot>());
         List<Slot> sortedSlots = new List<Slot>();
-        List<Slot> mainSlots = compSlots.aSlots.ToList();
-        mainSlots.Sort(SortByDepth);
-        foreach (Slot aSlot in mainSlots) {
-			List<Slot> subSlots = aSlot.GetSlots(true, false);
-			if (subSlots != null && subSlots.Count > 0) {
-				subSlots.Sort(SortByDepth);
-				sortedSlots.AddRange(subSlots);
-			}
-        }
+        sortedSlots = RecursiveSlots(compSlots.aSlots.ToList(),
+			FFU_BR_Defs.ActLogging >= FFU_BR_Defs.ActLogs.Runtime);
         return sortedSlots;
+
+		// Depth Sorting Method
         int SortByDepth(Slot s1, Slot s2) {
             if (s1 == null || s2 == null) return 0;
             return s1.nDepth.CompareTo(s2.nDepth);
+        }
+
+		// Recursive Slot Sorting
+		List<Slot> RecursiveSlots(List<Slot> refSlots, bool dLog, bool dSort = true, int sDepth = 0) {
+			if (refSlots != null && refSlots.Count > 0) {
+				sortedSlots = new List<Slot>();
+				refSlots.Sort(SortByDepth);
+				foreach (Slot refSlot in refSlots) {
+					if (dLog) Debug.Log($"#Info# Sorted Slot " +
+						$"{string.Empty.PadLeft(sDepth, '=')}> {refSlot.strName}");
+					sortedSlots.Add(refSlot);
+					sortedSlots.AddRange(RecursiveSlots(
+						refSlot.GetSlots(false, false), dLog, dSort, sDepth + 1));
+				}
+				return sortedSlots;
+			} else return new List<Slot>();
         }
     }
 }

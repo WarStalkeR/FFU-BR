@@ -19,6 +19,7 @@ namespace FFU_Beyond_Reach {
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;
+        public static ActLogs ActLogging = ActLogs.None;
         public static bool DynamicRandomRange = true;
         public static string[] IgnoredKeys = new string[] {
             "pbaseEyesMissing", "pbaseGlassesMissing", "pbaseHeadMissing", 
@@ -53,7 +54,9 @@ namespace FFU_Beyond_Reach {
 
             // Load Configuration Settings
             SyncLogging = ModDefs.Bind("ConfigSettings", "SyncLogging", SyncLogging,
-                "Defines what changes will be shown in log during sync loading.").Value;
+                "Defines what changes will be shown in the log during sync loading.").Value;
+            ActLogging = ModDefs.Bind("ConfigSettings", "ActLogging", ActLogging,
+                "Defines what activity will be shown in the log during gameplay/runtime.").Value;
             DynamicRandomRange = ModDefs.Bind("ConfigSettings", "DynamicRandomRange", DynamicRandomRange,
                 "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
                 "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
@@ -134,6 +137,11 @@ namespace FFU_Beyond_Reach {
             ExtendedDump,
             ContentDump,
             SourceDump,
+        }
+
+        public enum ActLogs {
+            None,
+            Runtime
         }
     }
 }
