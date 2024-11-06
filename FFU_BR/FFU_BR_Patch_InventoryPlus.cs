@@ -84,9 +84,19 @@ public partial class patch_Container : Container {
     }
 }
 
+public partial class patch_JsonSlot : JsonSlot {
+    public int? sOrder { get; set; }
+}
+
 public partial class patch_Slot : Slot {
+	public int sOrder;
 	[MonoModIgnore] public extern patch_Slot(JsonSlot jslot);
-	[MonoModReplace] public bool CanFit(CondOwner coFit) {
+    [MonoModOriginal] public extern void orig_Slot(JsonSlot jslot);
+    [MonoModConstructor] public void Slot(patch_JsonSlot jslot) {
+		orig_Slot(jslot);
+		sOrder = jslot.sOrder != null ? (int)jslot.sOrder : jslot.nDepth;
+    }
+    [MonoModReplace] public bool CanFit(CondOwner coFit) {
         if (aCOs == null) return false;
         foreach (CondOwner condOwner in aCOs) {
             if (bHoldSlot && condOwner == null && 
@@ -179,30 +189,31 @@ public partial class patch_CondOwner : CondOwner {
 			return _emptySlotsResult ?? 
 				(_emptySlotsResult = new List<Slot>());
         List<Slot> sortedSlots = new List<Slot>();
-        sortedSlots = RecursiveSlots(compSlots.aSlots.ToList(),
+        GetSlotsRecursive(ref sortedSlots, compSlots?.aSlots?.ToList(),
 			FFU_BR_Defs.ActLogging >= FFU_BR_Defs.ActLogs.Runtime);
         return sortedSlots;
 
 		// Depth Sorting Method
         int SortByDepth(Slot s1, Slot s2) {
-            if (s1 == null || s2 == null) return 0;
-            return s1.nDepth.CompareTo(s2.nDepth);
+            if ((s1 as patch_Slot) == null || (s2 as patch_Slot) == null) return 0;
+            return (s1 as patch_Slot).sOrder.CompareTo((s2 as patch_Slot).sOrder);
         }
 
 		// Recursive Slot Sorting
-		List<Slot> RecursiveSlots(List<Slot> refSlots, bool dLog, bool dSort = true, int sDepth = 0) {
+		void GetSlotsRecursive(ref List<Slot> srtSlots, List<Slot> refSlots, 
+			bool dLog, bool dSort = true, int sDepth = 0) {
 			if (refSlots != null && refSlots.Count > 0) {
-				sortedSlots = new List<Slot>();
 				refSlots.Sort(SortByDepth);
 				foreach (Slot refSlot in refSlots) {
 					if (dLog) Debug.Log($"#Info# Sorted Slot " +
 						$"{string.Empty.PadLeft(sDepth, '=')}> {refSlot.strName}");
-					sortedSlots.Add(refSlot);
-					sortedSlots.AddRange(RecursiveSlots(
-						refSlot.GetSlots(false, false), dLog, dSort, sDepth + 1));
+					srtSlots.Add(refSlot);
+					foreach (CondOwner subCO in refSlot.aCOs) {
+                        List<Slot> subSlots = subCO?.compSlots?.aSlots?.ToList();
+						GetSlotsRecursive(ref srtSlots, subSlots, dLog, dSort, sDepth + 1);
+					}
 				}
-				return sortedSlots;
-			} else return new List<Slot>();
+			}
         }
     }
 }
