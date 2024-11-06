@@ -86,7 +86,7 @@ namespace FFU_Beyond_Reach {
                 "Defines whether to show average percentage across all O2/Batteries or calculate each O2/Battery " +
                 "independently and summarize their percentages. Affects how soon notifications will begin.").Value;
             StrictInvSorting = ModDefs.Bind("GameplaySettings", "StrictInvSorting", StrictInvSorting,
-                "Enables custom, order-based inventory sorting that enforces strict UI rendering order.").Value;
+                "Enables custom, order-based inventory windows sorting that enforces strict UI rendering order.").Value;
             ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
             ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
             ModLog.Info($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");

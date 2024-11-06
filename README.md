@@ -49,7 +49,7 @@ suit. When the power level falls below this threshold, the wearer will receive a
 beeps) about power usage. If set to `0`, no notification will be given at any time.  
 **ShowEachO2Battery** - Defines whether to show average percentage across all O2/Batteries or calculate each 
 O2/Battery independently and summarize their percentages. Affects how soon notifications will begin.  
-**StrictInvSorting** - Defines if game will be using custom, order-based inventory sorting that enforces 
+**StrictInvSorting** - Defines if game will be using custom, order-based inventory windows sorting that enforces 
 strict UI rendering order. Relevant if slots have `sOrder` parameter set. Defaults to `nDepth` otherwise.  
 
 ## Quality Settings
