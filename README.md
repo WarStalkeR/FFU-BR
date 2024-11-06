@@ -26,6 +26,8 @@ created after running Ostranauts for the first time with this mod installed).
 ## Configuration Settings
 **SyncLogging** - defines what logging type is used for when overwriting data and/or
 copy-referencing existing items into new items with various parameters overwriting.  
+**ActLogging** - defines what activity will be shown in the log during gameplay/runtime. Applies
+only to very specific action that related to modified game code (such as inventory sorting).  
 **DynamicRandomRange** - By default loot random range is limited to `1.0f`, thus preventing use of 
 loot tables, if total sum of their chances goes beyond `1.0f`. This feature allows to increase max 
 possible random range beyond `1.0f`, to the total sum of all chances in the loot table.  
@@ -47,6 +49,8 @@ suit. When the power level falls below this threshold, the wearer will receive a
 beeps) about power usage. If set to `0`, no notification will be given at any time.  
 **ShowEachO2Battery** - Defines whether to show average percentage across all O2/Batteries or calculate each 
 O2/Battery independently and summarize their percentages. Affects how soon notifications will begin.  
+**StrictInvSorting** - Defines if game will be using custom, order-based inventory sorting that enforces 
+strict UI rendering order. Relevant if slots have `sOrder` parameter set. Defaults to `nDepth` otherwise.  
 
 ## Quality Settings
 **AltTempEnabled** - Allows to show temperature in alternative measure beside Kelvin value (in **top right** 
@@ -67,11 +71,16 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 # New Parameters & Properties
 **StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
 When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
-parameter.  
+parameter.
+
 **invSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
 inventory owner. Works pretty much same way as other `slot effects`, except parameters `mapMeshTextures`,
 `strSlotImage` and `strSlotImageUnder` are ignored. Thread carefully, as it applies effect to **every** item,
 including whole stacks.
+
+**sOrder** - a `slots` parameter that only used, if `StrictInvSorting` gameplay setting is enabled. Requires 
+an integer value, but can be nulled. If nulled, defaults to `nDepth` to avoid potential issues. Slots with 
+lesser numbers are rendered first in open inventory UI. Was implemented to avoid `nDepth` collision/issues.
 
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
