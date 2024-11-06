@@ -65,7 +65,7 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  
 **AllowSuperChars** - Option to allow character to be superior or utterly miserable.  
-**SuperCharMultiplier** - Set to above `1.0` to reach the starts, or below `1.0` to descent into abyss.  
+**SuperCharMultiplier** - Set above `1.0` to reach the stars, or below `1.0` to descent into abyss.  
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
 
 # New Parameters & Properties
