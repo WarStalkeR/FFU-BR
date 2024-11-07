@@ -162,6 +162,15 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
         }
         if (cOwner != null && currData != string.Empty) {
             bool isFound = false;
+			if (currData == "*coParents") {
+				strInput += "\n" + $"Found condowner {cOwner.strNameFriendly} ({cOwner.strName})";
+				CondOwner refParent = cOwner.objCOParent;
+				while (refParent != null) {
+                    strInput += "\n" + $"In condowner {refParent.strNameFriendly} ({refParent.strName})";
+                    refParent = refParent.objCOParent;
+                }
+				return true;
+			}
             foreach (Condition refCond in cOwner.mapConds.Values) {
                 if (currData == "*" || refCond.strName.IndexOf(currData) >= 0) {
                     strInput += "\n" + cOwner.strNameFriendly + "." + refCond.strName + " = " + refCond.fCount;
