@@ -643,14 +643,14 @@ public static partial class patch_DataHandler {
         }
     }
 
-    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string strType, string dataKey, bool extData, bool doLog = false) {
+    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string dataType, string dataKey, bool extData, bool doLog = false) {
         Type currDataType = currDataSet.GetType();
         Type newDataType = newDataSet.GetType();
 
         // Iterate Over Properties
         foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
             // Ignore Forbidden Property
-            if (IsForbidden(strType, currProperty.Name)) continue;
+            if (dataType.IsForbidden(currProperty.Name)) continue;
 
             // New Data Property Validation
             PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
@@ -679,7 +679,7 @@ public static partial class patch_DataHandler {
         BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
         foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
             // Ignore Forbidden Field
-            if (IsForbidden(strType, currField.Name)) continue;
+            if (dataType.IsForbidden(currField.Name)) continue;
 
             // New Data Field Validation
             FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
@@ -903,7 +903,7 @@ public static partial class patch_DataHandler {
         };
     }
 
-    public static bool IsForbidden(string data, string property) {
+    public static bool IsForbidden(this string data, string property) {
         return property switch {
             "strName" => true,
             "strReference" => true,
