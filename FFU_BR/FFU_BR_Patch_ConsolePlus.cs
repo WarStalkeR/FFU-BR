@@ -49,7 +49,8 @@ public partial class patch_ConsoleToGUI : ConsoleToGUI {
         if (Event.current.isKey && GUI.GetNameOfFocusedControl() == "command") {
             if (Event.current.keyCode == KeyCode.Return) {
                 string[] commands = myInput.Split(';');
-                if (!string.IsNullOrEmpty(myInput))
+                if (!string.IsNullOrEmpty(myInput) && 
+					prevInputs.LastOrDefault() != myInput)
                     prevInputs.Add(myInput);
                 if (prevInputs.Count > prevMax)
                     prevInputs.RemoveRange(0, prevInputs.Count - prevMax);
