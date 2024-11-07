@@ -538,11 +538,13 @@ public static partial class patch_DataHandler {
                     // Modify Existing Data
                     if (logObjects) Debug.Log($"Modification Data Dump (Before): {JsonMapper.ToJson(dataDict[dataKey])}");
                     try {
-                        SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, dataKey, extData, logModded);
+                        SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, strType, dataKey, extData, logModded);
                         if (logObjects) Debug.Log($"Modification Data Dump (After): {JsonMapper.ToJson(dataDict[dataKey])}");
                     } catch (Exception ex) {
+                        Exception inner = ex.InnerException;
                         Debug.LogWarning($"Modification sync for Data Block [{dataKey}] " +
-                        $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                        $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ? 
+                        $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 } else if (isMod && !dataDict.ContainsKey(dataKey)) {
                     // Reference Deep Copy + Apply Changes
@@ -562,17 +564,21 @@ public static partial class patch_DataHandler {
                             TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
                             try {
-                                SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, dataKey, extData, logRefCopy);
+                                SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, strType, dataKey, extData, logRefCopy);
                                 if (logExtended) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
                             } catch (Exception ex) {
+                                Exception inner = ex.InnerException;
                                 Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
-                                $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                                $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
+                                $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                             }
                             try {
                                 dataDict.Add(dataKey, deepCopyBlock);
                             } catch (Exception ex) {
+                                Exception inner = ex.InnerException;
                                 Debug.LogWarning($"Reference add of new Data Block [{dataKey}] " +
-                                $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                                $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
+                                $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                             }
                         }
                     } else if (!string.IsNullOrEmpty(referenceKey)) {
@@ -584,14 +590,18 @@ public static partial class patch_DataHandler {
                             try {
                                 Debug.Log($"Addendum Data Dump (Mod): {JsonMapper.ToJson(dataBlock)}");
                             } catch (Exception ex) {
+                                Exception inner = ex.InnerException;
                                 Debug.LogWarning($"Addendum dump (mod) for Data Block " +
-                                $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                                $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
+                                (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                             }
                         try {
                             dataDict.Add(dataKey, dataBlock);
                         } catch (Exception ex) {
+                            Exception inner = ex.InnerException;
                             Debug.LogWarning($"Modded add of new Data Block [{dataKey}] " +
-                            $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                            $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
+                            $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                         }
                     }
                 } else {
@@ -600,14 +610,18 @@ public static partial class patch_DataHandler {
                         try {
                             Debug.Log($"Addendum Data Dump (Core): {JsonMapper.ToJson(dataBlock)}");
                         } catch (Exception ex) {
+                            Exception inner = ex.InnerException;
                             Debug.LogWarning($"Addendum dump (core) for Data Block " +
-                            $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                            $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
+                            (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                         }
                     try {
                         dataDict.Add(dataKey, dataBlock);
                     } catch (Exception ex) {
+                        Exception inner = ex.InnerException;
                         Debug.LogWarning($"Core add of new Data Block [{dataKey}] " +
-                        $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                        $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
+                        $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 }
             }
@@ -629,15 +643,14 @@ public static partial class patch_DataHandler {
         }
     }
 
-    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string dataKey, bool extData, bool doLog = false) {
+    public static void SyncDataSafe<TJson>(TJson currDataSet, TJson newDataSet, ref string rawDataSet, string strType, string dataKey, bool extData, bool doLog = false) {
         Type currDataType = currDataSet.GetType();
         Type newDataType = newDataSet.GetType();
 
         // Iterate Over Properties
         foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
-            // Ignore Identifier Property
-            if (currProperty.Name == "strName" ||
-                currProperty.Name == "strReference") continue;
+            // Ignore Forbidden Property
+            if (IsForbidden(strType, currProperty.Name)) continue;
 
             // New Data Property Validation
             PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
@@ -653,8 +666,10 @@ public static partial class patch_DataHandler {
                         // Overwrite Existing Value
                         currProperty.SetValue(currDataSet, newValue, null);
                     } catch (Exception ex) {
+                        Exception inner = ex.InnerException;
                         Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
-                        $"[{currProperty.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                        $"[{currProperty.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" +
+                        (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 }
             }
@@ -663,9 +678,8 @@ public static partial class patch_DataHandler {
         // Iterate Over Fields
         BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
         foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
-            // Ignore Identifier Field
-            if (currField.Name == "strName" ||
-                currField.Name == "strReference") continue;
+            // Ignore Forbidden Field
+            if (IsForbidden(strType, currField.Name)) continue;
 
             // New Data Field Validation
             FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
@@ -681,8 +695,10 @@ public static partial class patch_DataHandler {
                         // Overwrite Existing Value
                         currField.SetValue(currDataSet, newValue);
                     } catch (Exception ex) {
+                        Exception inner = ex.InnerException;
                         Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
-                        $"[{currField.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}");
+                        $"[{currField.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
+                        (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 }
             }
@@ -884,6 +900,19 @@ public static partial class patch_DataHandler {
                 "TYPE_ITEM", "TYPE_INTERACTION", "TYPE_TEXT", "TYPE_REL", 
                 "TYPE_LIFEEVENT", "TYPE_SHIP", "TYPE_Data" },
             _ => null
+        };
+    }
+
+    public static bool IsForbidden(string data, string property) {
+        return property switch {
+            "strName" => true,
+            "strReference" => true,
+            "Modifier" => data == "condrules",
+            "Preference" => data == "condrules",
+            "ValuesWereChanged" => data == "condtrigs",
+            "RequiresHumans" => data == "condtrigs",
+            "RulesInfo" => data == "condtrigs",
+            _ => false
         };
     }
 
