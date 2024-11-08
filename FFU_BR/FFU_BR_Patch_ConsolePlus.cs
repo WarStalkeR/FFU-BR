@@ -193,8 +193,8 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
                     foreach (var mapSet in cOwner.mapCondRules) {
 						if (mapSet.Value != null) {
 							CondRule refRule = mapSet.Value;
-							strInput += $"\n{mapSet.Key}, {refRule.strName}: " + Array.IndexOf(
-							refRule.aThresholds, refRule.GetCurrentThresh(cOwner));
+							strInput += $"\n{refRule.strName}: " + Array.IndexOf(refRule.aThresholds, 
+							refRule.GetCurrentThresh(cOwner)) + $" ({mapSet.Key})";
 						}
 					}
 				} else strInput += $"\nThe condowner {cOwner.strNameFriendly} " +
