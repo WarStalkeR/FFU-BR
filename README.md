@@ -88,7 +88,7 @@ Use console command `getcond [them] *coParents` on selected object and count num
 its current depth.
 
 ## Improved Console Commands
-`getcond [them] *` - now `getcond` command supports wildcard `*` that list all stats regardless of their name.  
+`getcond [them] *` - now `getcond` command supports wildcard `*` that lists all stats, regardless of their name.  
 `getcond [them]-NUM` - tells `getcond` to fetch data recursively from parent that is `NUM` above targeted object.  
 `getcond [them] *coParents` - lists all `condowners` parent object recursively and how they are nested.  
 `getcond [them] *coRules` - lists all `condrules` (with stat-related information) attached the targeted object.  
