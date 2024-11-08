@@ -201,6 +201,20 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
 					$"({cOwner.strName}) has no attached condrules.";
                 return true;
             }
+            if (currData == "*coTickers") {
+				if (cOwner.aTickers.Count > 0) {
+                    strInput += $"\nFound tickers for {cOwner.strNameFriendly} ({cOwner.strName}):";
+					foreach (var aTicker in cOwner.aTickers) {
+						if (aTicker != null) {
+							strInput += $"\n{aTicker.strName}: " +
+							$"{SmartString(aTicker.fTimeLeft * 3600)}s " +
+							$"({SmartString(aTicker.fPeriod * 3600)}s)";
+						}
+					}
+                } else strInput += $"\nThe condowner {cOwner.strNameFriendly} " +
+                    $"({cOwner.strName}) has no attached tickers.";
+                return true;
+            }
             bool isFirst = true;
             foreach (Condition refCond in cOwner.mapConds.Values) {
                 if (currData == "*" || refCond.strName.IndexOf(currData) >= 0) {
@@ -216,6 +230,16 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
             return isFound;
         }
         return false;
+    }
+
+    public static string SmartString(double number) {
+        int precision = number % 1 == 0 ? 0 : 1;
+        string result;
+        do {
+            result = number.ToString($"N{precision}");
+            precision++;
+        } while (number < 0.1 && result.EndsWith("0") && precision <= 5);
+        return result;
     }
 }
 
