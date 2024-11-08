@@ -128,12 +128,28 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
         } else if (strings.Length == 3) {
             if (strings[1] == "[us]" || strings[1] == "player") {
                 cOwner = CrewSim.GetSelectedCrew();
-            } else if (strings[1] == "[them]") {
+            } else if (strings[1].Contains("[them]")) {
                 if (!(GUIMegaToolTip.Selected != null)) {
                     strInput += "\nNo target selected for [them].";
                     return false;
                 }
                 cOwner = GUIMegaToolTip.Selected;
+				if (strings[1].Contains("-")) {
+					string strNum = strings[1].Split('-')[1];
+                    int.TryParse(strNum, out int pNum);
+					if (pNum > 0) {
+						CondOwner cParent = cOwner;
+						while (cParent != null && pNum > 0) {
+							cParent = cParent.objCOParent;
+							pNum--;
+                        }
+						if (cParent == null) {
+                            strInput += $"\nNo parent exists for [them] at depth {strNum}.";
+                            return false;
+                        }
+						cOwner = cParent;
+					}
+				}
             } else {
                 string cName = strings[1].Replace('_', ' ');
                 if (!DataHandler.mapCOs.TryGetValue(cName, out cOwner)) {
@@ -171,9 +187,14 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
                 }
 				return true;
 			}
+            bool isFirst = true;
             foreach (Condition refCond in cOwner.mapConds.Values) {
                 if (currData == "*" || refCond.strName.IndexOf(currData) >= 0) {
-                    strInput += "\n" + cOwner.strNameFriendly + "." + refCond.strName + " = " + refCond.fCount;
+					if (isFirst) {
+                        strInput += $"\nFound stats for {cOwner.strNameFriendly} ({cOwner.strName}):";
+                        isFirst = false;
+                    }
+                    strInput += $"\n{refCond.strName} = {refCond.fCount}";
                     isFound = true;
                 }
             }
