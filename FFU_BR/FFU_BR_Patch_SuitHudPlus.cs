@@ -24,6 +24,7 @@ public partial class patch_GUIHelmet : GUIHelmet {
             if (!bInit) Init();
             Visible = true;
             List<CondOwner> suitSlots = new List<CondOwner>();
+            bool noPower = true;
             bool noOxygen = true;
             bool isSuitHud = false;
             bool isBasicHud = false;
@@ -32,7 +33,6 @@ public partial class patch_GUIHelmet : GUIHelmet {
                 if (suitSlots.Count > 0) {
                     CondOwner firstSlot = suitSlots[0];
                     isSuitHud = true;
-                    Style = HelmetStyle.Powered;
 					if (isSuitHud) {
 						suitSlots = firstSlot.GetCOs(false);
 						bool foundO2 = false;
@@ -81,7 +81,8 @@ public partial class patch_GUIHelmet : GUIHelmet {
 								}
 							}
 							if (foundPwr) {
-								if (!FFU_BR_Defs.ShowEachO2Battery)
+                                noPower = false;
+                                if (!FFU_BR_Defs.ShowEachO2Battery)
 									percPwr = currPwrTotal / maxPwrTotal * 100.0;
 								txtBatt.text = percPwr.ToString("n2") + "%";
 								if (percPwr != fPwrLast) {
@@ -91,7 +92,9 @@ public partial class patch_GUIHelmet : GUIHelmet {
 							}
 						}
 					}
-                } else Style = HelmetStyle.Unpowered;
+                }
+				if (noPower) Style = HelmetStyle.Unpowered;
+				else Style = HelmetStyle.Powered;
             } else if (coRoomIn.HasCond("IsPSHUD")) {
                 isBasicHud = true;
                 Style = HelmetStyle.Powered;
