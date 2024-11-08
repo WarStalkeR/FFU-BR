@@ -190,11 +190,11 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
             if (currData == "*coRules") {
 				if (cOwner.mapCondRules.Count > 0) {
                     strInput += $"\nFound condrules for {cOwner.strNameFriendly} ({cOwner.strName}):";
-                    foreach (var mapSet in cOwner.mapCondRules) {
-						if (mapSet.Value != null) {
-							CondRule refRule = mapSet.Value;
+                    foreach (var condSet in cOwner.mapCondRules) {
+						if (condSet.Value != null) {
+							CondRule refRule = condSet.Value;
 							strInput += $"\n{refRule.strName}: " + Array.IndexOf(refRule.aThresholds, 
-							refRule.GetCurrentThresh(cOwner)) + $" ({mapSet.Key})";
+							refRule.GetCurrentThresh(cOwner)) + $" ({condSet.Key})";
 						}
 					}
 				} else strInput += $"\nThe condowner {cOwner.strNameFriendly} " +
