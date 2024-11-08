@@ -37,9 +37,11 @@ public partial class patch_CondTrigger : CondTrigger {
         if (IsBlank())
             return true;
         objOwner.ValidateParent();
-        if (maxDepth > 0 && 
+	    // MAX DEPTH TEST BEGIN //
+        if (maxDepth > 0 &&
 			GetDepth(objOwner) > maxDepth)
             return false;
+	    // MAX DEPTH TEST END //
         SocialStats socStats = null;
         if (strIAStatsName != null && DataHandler.dictSocialStats.TryGetValue(strIAStatsName, out socStats))
             socStats.nChecked++;
