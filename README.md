@@ -87,6 +87,10 @@ is nested at depth greater than `maxDepth` parameter, then condition trigger aut
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
 
+## Improved Console Commands
+`getcond [them] *` - now `getcond` command supports wildcard `*` that list all stats regardless of their name.
+`getcond [them] *coParents` - lists all `condowners` parent object recursively and how they are nested.
+
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
 releases from burden of copying entire code blocks just to overwrite a couple of parameters.  
