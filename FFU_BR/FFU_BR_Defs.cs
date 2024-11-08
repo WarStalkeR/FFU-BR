@@ -14,7 +14,7 @@ using System.IO;
 
 namespace FFU_Beyond_Reach {
     public partial class FFU_BR_Defs {
-        public static readonly string ModName = "BepInEx: Beyond Reach";
+        public static readonly string ModName = "Fight For Universe: Beyond Reach";
         public static readonly string ModVersion = "0.3.3.0";
 
         private static ConfigFile ModDefs = null;
@@ -50,6 +50,7 @@ namespace FFU_Beyond_Reach {
             ModDefs = new ConfigFile(Path.Combine(Paths.ConfigPath, "FFU_Beyond_Reach.cfg"), true);
 
             // Logging Start
+            ModLog.Info($"{ModName} v{ModVersion}");
             ModLog.Info($"Loading Mod Configuration...");
 
             // Load Configuration Settings
