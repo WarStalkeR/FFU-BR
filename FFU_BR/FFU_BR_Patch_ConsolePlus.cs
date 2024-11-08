@@ -186,7 +186,21 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
                     refParent = refParent.objCOParent;
                 }
 				return true;
-			}
+            }
+            if (currData == "*coRules") {
+				if (cOwner.mapCondRules.Count > 0) {
+                    strInput += $"\nFound condrules for {cOwner.strNameFriendly} ({cOwner.strName}):";
+                    foreach (var mapSet in cOwner.mapCondRules) {
+						if (mapSet.Value != null) {
+							CondRule refRule = mapSet.Value;
+							strInput += $"\n{mapSet.Key}, {refRule.strName}: " + Array.IndexOf(
+							refRule.aThresholds, refRule.GetCurrentThresh(cOwner));
+						}
+					}
+				} else strInput += $"\nThe condowner {cOwner.strNameFriendly} " +
+					$"({cOwner.strName}) has no attached condrules.";
+                return true;
+            }
             bool isFirst = true;
             foreach (Condition refCond in cOwner.mapConds.Values) {
                 if (currData == "*" || refCond.strName.IndexOf(currData) >= 0) {
