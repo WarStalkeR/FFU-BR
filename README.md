@@ -82,6 +82,11 @@ including whole stacks.
 an integer value, but can be nulled. If nulled, defaults to `nDepth` to avoid potential issues. Slots with 
 lesser numbers are rendered first in open inventory UI. Was implemented to avoid `nDepth` collision/issues.
 
+**maxDepth** - a `condtrigs` parameter that used to check how deeply nested `condowners` object. If object
+is nested at depth greater than `maxDepth` parameter, then condition trigger automatically returns `false`. 
+Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
+its current depth.
+
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
 releases from burden of copying entire code blocks just to overwrite a couple of parameters.  
