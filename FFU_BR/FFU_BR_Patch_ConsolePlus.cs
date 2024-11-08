@@ -179,10 +179,10 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
         if (cOwner != null && currData != string.Empty) {
             bool isFound = false;
 			if (currData == "*coParents") {
-				strInput += "\n" + $"Found condowner {cOwner.strNameFriendly} ({cOwner.strName})";
+				strInput += $"\nFound condowner {cOwner.strNameFriendly} ({cOwner.strName})";
 				CondOwner refParent = cOwner.objCOParent;
 				while (refParent != null) {
-                    strInput += "\n" + $"In condowner {refParent.strNameFriendly} ({refParent.strName})";
+                    strInput += $"\nIn condowner {refParent.strNameFriendly} ({refParent.strName})";
                     refParent = refParent.objCOParent;
                 }
 				return true;
