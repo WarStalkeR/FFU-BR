@@ -30,7 +30,7 @@ namespace FFU_Beyond_Reach {
         public static int MaxLogTextSize = 16382;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
-        public static float SuitOxygenNotify = 25.0f;
+        public static float SuitOxygenNotify = 10.0f;
         public static float SuitPowerNotify = 15.0f;
         public static bool ShowEachO2Battery = true;
         public static bool StrictInvSorting = true;
