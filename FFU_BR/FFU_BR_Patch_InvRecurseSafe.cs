@@ -18,7 +18,7 @@ public partial class patch_Slot : Slot {
                 coFit.mapSlotEffects.ContainsKey(strName)) {
                 return true;
             }
-            CondOwner coParent = condOwner.objCOParent;
+            CondOwner coParent = condOwner;
             while (coParent != null) {
                 if (coFit == coParent) return false;
                 coParent = coParent.objCOParent;
@@ -38,7 +38,7 @@ public partial class patch_Container : Container {
     [MonoModReplace] public bool AllowedCO(CondOwner coIn) {
         if (coIn == null || coIn == CO)
             return false;
-        CondOwner coParent = CO.objCOParent;
+        CondOwner coParent = CO;
         while (coParent != null) {
             if (coIn == coParent) return false;
             coParent = coParent.objCOParent;
