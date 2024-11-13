@@ -29,154 +29,6 @@ public partial class patch_CondTrigger : CondTrigger {
         return orig_Triggered(objOwner, strIAStatsName, logOutcome);
     }
 
-    /*[MonoModReplace] public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true) {
-        if (logReason) logReason = logOutcome;
-        strFailReasonLast = string.Empty;
-        if (objOwner == null)
-            return false;
-        if (IsBlank())
-            return true;
-        objOwner.ValidateParent();
-	    // MAX DEPTH TEST BEGIN //
-        if (maxDepth > 0 &&
-			GetDepth(objOwner) > maxDepth)
-            return false;
-	    // MAX DEPTH TEST END //
-        SocialStats socStats = null;
-        if (strIAStatsName != null && DataHandler.dictSocialStats.TryGetValue(strIAStatsName, out socStats))
-            socStats.nChecked++;
-        if (!bChanceSkip && fChance < 1f) {
-            float num = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat);
-            if (num > fChance) {
-                if (socStats != null)
-                    socStats.nChecked++;
-                if (logReason)
-                    strFailReasonLast = "Chance: " + num + " / " + fChance;
-                return false;
-            }
-        }
-        Condition currCond;
-        if (bAND) {
-            if (strHigherCond != null) {
-                currCond = null;
-                double currCount = 0.0;
-                double newCount = 0.0;
-                objOwner.mapConds.TryGetValue(strHigherCond, out currCond);
-                if (currCond != null) currCount = currCond.fCount;
-                string[] array = aLowerConds;
-                foreach (string key in array) {
-                    currCond = null;
-                    newCount = objOwner.mapConds.TryGetValue(key, out currCond) ? currCond.fCount : 0.0;
-                    if (newCount > currCount) return false;
-                }
-            }
-            string[] reqListA = aReqs;
-            foreach (string reqItem in reqListA) {
-                if (!objOwner.mapConds.TryGetValue(reqItem, out currCond)) {
-                    StatsTrackReqs(strIAStatsName, reqItem, 1f);
-                    if (logReason) {
-                        strFailReasonLast = "Lacking: " + reqItem;
-                    }
-                    return false;
-                }
-                if (currCond == null || currCond.fCount <= 0.0) {
-                    StatsTrackReqs(strIAStatsName, reqItem, 1f);
-                    if (logReason) {
-                        strFailReasonLast = "Lacking: " + reqItem;
-                    }
-                    return false;
-                }
-            }
-            currCond = null;
-            string[] forbListA = aForbids;
-            foreach (string forbItem in forbListA) {
-                if (objOwner.mapConds.TryGetValue(forbItem, out currCond) && currCond.fCount > 0.0) {
-                    StatsTrackForbids(strIAStatsName, forbItem, 1f);
-                    if (logReason)
-                        strFailReasonLast = "Forbidden: " + forbItem;
-                    return false;
-                }
-            }
-            string[] trigListA = aTriggers;
-            foreach (string trigItem in trigListA) {
-                CondTrigger trigger = GetTrigger(trigItem, CTDict.Triggers);
-                if (!trigger.Triggered(objOwner, strIAStatsName, logReason)) {
-                    if (logReason)
-                        strFailReasonLast = trigger.strFailReasonLast;
-                    return false;
-                }
-            }
-            return true;
-        }
-        string[] forbListO = aForbids;
-        foreach (string forbItem in forbListO) {
-            if (objOwner.mapConds.TryGetValue(forbItem, out currCond) && currCond.fCount > 0.0) {
-                StatsTrackForbids(strIAStatsName, forbItem, 1f);
-                if (logReason)
-                    strFailReasonLast = "Forbidden: " + forbItem;
-                return false;
-            }
-        }
-        string[] forbTrigs = aTriggersForbid;
-        foreach (string forbTrig in forbTrigs) {
-            CondTrigger forbCT = GetTrigger(forbTrig, CTDict.Forbids);
-            if (!forbCT.Triggered(objOwner, strIAStatsName, logReason)) {
-                if (logReason)
-                    strFailReasonLast = forbCT.strFailReasonLast;
-                return false;
-            }
-        }
-        if (strHigherCond != null) {
-            currCond = null;
-            double maxCount = 0.0;
-            objOwner.mapConds.TryGetValue(strHigherCond, out currCond);
-            if (currCond != null) {
-                maxCount = currCond.fCount;
-            }
-            string[] lowListO = aLowerConds;
-            foreach (string lowItem in lowListO) {
-                currCond = null;
-                if (objOwner.mapConds.TryGetValue(lowItem, out currCond)
-                    && currCond.fCount <= maxCount) {
-                    return true;
-                }
-            }
-        }
-        string reasonText = "Lacking: (";
-        bool reqFound = false;
-        string[] reqListO = aReqs;
-        foreach (string reqItem in reqListO) {
-            if (logReason)
-                reasonText = reasonText + reqItem + " ";
-            reqFound = true;
-            if (objOwner.mapConds.TryGetValue(reqItem, out currCond) && currCond != null && currCond.fCount > 0.0) {
-                return true;
-            }
-        }
-        if (reqFound && logReason)
-            strFailReasonLast = strFailReasonLast + reasonText + ")";
-        if (logReason)
-            reasonText = "Triggers Lacking: (";
-        reqFound = false;
-        string[] trigListO = aTriggers;
-        foreach (string trigItem in trigListO) {
-            CondTrigger allowCT = GetTrigger(trigItem, CTDict.Triggers);
-            if (allowCT.Triggered(objOwner, strIAStatsName, logReason))
-                return true;
-            if (logReason)
-                reasonText = reasonText + allowCT.strFailReasonLast + " ";
-            reqFound = true;
-        }
-        if (reqFound && logReason)
-            strFailReasonLast = strFailReasonLast + reasonText + ")";
-        if (aReqs.Length + aTriggers.Length == 0)
-            return true;
-        string[] array10 = aReqs;
-        foreach (string strCond in array10)
-            StatsTrackReqs(strIAStatsName, strCond, 1f / aReqs.Length);
-        return false;
-    }*/
-
     public static int GetDepth(CondOwner objCO) {
         int currDepth = 0;
         CondOwner objParent = objCO.objCOParent;
@@ -187,6 +39,157 @@ public partial class patch_CondTrigger : CondTrigger {
         return currDepth;
     }
 }
+
+// Prototype Changes (for TEST BEGIN/TEST END):
+/*
+[MonoModReplace] public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true) {
+    if (logReason) logReason = logOutcome;
+    strFailReasonLast = string.Empty;
+    if (objOwner == null)
+        return false;
+    if (IsBlank())
+        return true;
+    objOwner.ValidateParent();
+    // MAX DEPTH TEST BEGIN //
+    if (maxDepth > 0 &&
+        GetDepth(objOwner) > maxDepth)
+        return false;
+    // MAX DEPTH TEST END //
+    SocialStats socStats = null;
+    if (strIAStatsName != null && DataHandler.dictSocialStats.TryGetValue(strIAStatsName, out socStats))
+        socStats.nChecked++;
+    if (!bChanceSkip && fChance < 1f) {
+        float num = MathUtils.Rand(0f, 1f, MathUtils.RandType.Flat);
+        if (num > fChance) {
+            if (socStats != null)
+                socStats.nChecked++;
+            if (logReason)
+                strFailReasonLast = "Chance: " + num + " / " + fChance;
+            return false;
+        }
+    }
+    Condition currCond;
+    if (bAND) {
+        if (strHigherCond != null) {
+            currCond = null;
+            double currCount = 0.0;
+            double newCount = 0.0;
+            objOwner.mapConds.TryGetValue(strHigherCond, out currCond);
+            if (currCond != null) currCount = currCond.fCount;
+            string[] array = aLowerConds;
+            foreach (string key in array) {
+                currCond = null;
+                newCount = objOwner.mapConds.TryGetValue(key, out currCond) ? currCond.fCount : 0.0;
+                if (newCount > currCount) return false;
+            }
+        }
+        string[] reqListA = aReqs;
+        foreach (string reqItem in reqListA) {
+            if (!objOwner.mapConds.TryGetValue(reqItem, out currCond)) {
+                StatsTrackReqs(strIAStatsName, reqItem, 1f);
+                if (logReason) {
+                    strFailReasonLast = "Lacking: " + reqItem;
+                }
+                return false;
+            }
+            if (currCond == null || currCond.fCount <= 0.0) {
+                StatsTrackReqs(strIAStatsName, reqItem, 1f);
+                if (logReason) {
+                    strFailReasonLast = "Lacking: " + reqItem;
+                }
+                return false;
+            }
+        }
+        currCond = null;
+        string[] forbListA = aForbids;
+        foreach (string forbItem in forbListA) {
+            if (objOwner.mapConds.TryGetValue(forbItem, out currCond) && currCond.fCount > 0.0) {
+                StatsTrackForbids(strIAStatsName, forbItem, 1f);
+                if (logReason)
+                    strFailReasonLast = "Forbidden: " + forbItem;
+                return false;
+            }
+        }
+        string[] trigListA = aTriggers;
+        foreach (string trigItem in trigListA) {
+            CondTrigger trigger = GetTrigger(trigItem, CTDict.Triggers);
+            if (!trigger.Triggered(objOwner, strIAStatsName, logReason)) {
+                if (logReason)
+                    strFailReasonLast = trigger.strFailReasonLast;
+                return false;
+            }
+        }
+        return true;
+    }
+    string[] forbListO = aForbids;
+    foreach (string forbItem in forbListO) {
+        if (objOwner.mapConds.TryGetValue(forbItem, out currCond) && currCond.fCount > 0.0) {
+            StatsTrackForbids(strIAStatsName, forbItem, 1f);
+            if (logReason)
+                strFailReasonLast = "Forbidden: " + forbItem;
+            return false;
+        }
+    }
+    string[] forbTrigs = aTriggersForbid;
+    foreach (string forbTrig in forbTrigs) {
+        CondTrigger forbCT = GetTrigger(forbTrig, CTDict.Forbids);
+        if (!forbCT.Triggered(objOwner, strIAStatsName, logReason)) {
+            if (logReason)
+                strFailReasonLast = forbCT.strFailReasonLast;
+            return false;
+        }
+    }
+    if (strHigherCond != null) {
+        currCond = null;
+        double maxCount = 0.0;
+        objOwner.mapConds.TryGetValue(strHigherCond, out currCond);
+        if (currCond != null) {
+            maxCount = currCond.fCount;
+        }
+        string[] lowListO = aLowerConds;
+        foreach (string lowItem in lowListO) {
+            currCond = null;
+            if (objOwner.mapConds.TryGetValue(lowItem, out currCond)
+                && currCond.fCount <= maxCount) {
+                return true;
+            }
+        }
+    }
+    string reasonText = "Lacking: (";
+    bool reqFound = false;
+    string[] reqListO = aReqs;
+    foreach (string reqItem in reqListO) {
+        if (logReason)
+            reasonText = reasonText + reqItem + " ";
+        reqFound = true;
+        if (objOwner.mapConds.TryGetValue(reqItem, out currCond) && currCond != null && currCond.fCount > 0.0) {
+            return true;
+        }
+    }
+    if (reqFound && logReason)
+        strFailReasonLast = strFailReasonLast + reasonText + ")";
+    if (logReason)
+        reasonText = "Triggers Lacking: (";
+    reqFound = false;
+    string[] trigListO = aTriggers;
+    foreach (string trigItem in trigListO) {
+        CondTrigger allowCT = GetTrigger(trigItem, CTDict.Triggers);
+        if (allowCT.Triggered(objOwner, strIAStatsName, logReason))
+            return true;
+        if (logReason)
+            reasonText = reasonText + allowCT.strFailReasonLast + " ";
+        reqFound = true;
+    }
+    if (reqFound && logReason)
+        strFailReasonLast = strFailReasonLast + reasonText + ")";
+    if (aReqs.Length + aTriggers.Length == 0)
+        return true;
+    string[] array10 = aReqs;
+    foreach (string strCond in array10)
+        StatsTrackReqs(strIAStatsName, strCond, 1f / aReqs.Length);
+    return false;
+}
+*/
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*

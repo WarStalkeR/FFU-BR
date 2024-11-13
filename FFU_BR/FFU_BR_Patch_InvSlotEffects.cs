@@ -17,16 +17,14 @@ public partial class patch_JsonCondOwner : JsonCondOwner {
 
 public partial class patch_CondOwner : CondOwner {
     public JsonSlotEffects invSlotEffect;
-    public extern void orig_SetData(JsonCondOwner jid, bool bLoot, JsonCondOwnerSave jCOSIn);
-    public void SetData(patch_JsonCondOwner jid, bool bLoot, JsonCondOwnerSave jCOSIn) {
-        orig_SetData(jid, bLoot, jCOSIn);
+	public void ParseInvEffects(patch_JsonCondOwner jid) {
         if (jid.invSlotEffect != null) {
             JsonSlotEffects slotEffect = DataHandler.GetSlotEffect(jid.invSlotEffect);
             if (slotEffect != null) {
                 if (Container.GetSpace(this) < 1)
-					Debug.LogWarning($"Can't assign 'invSlotEffect' " +
-						$"for [{strName}] without inventory grid."); 
-				else invSlotEffect = slotEffect;
+                    Debug.LogWarning($"Can't assign 'invSlotEffect' " +
+                        $"for [{strName}] without inventory grid.");
+                else invSlotEffect = slotEffect;
             }
         }
     }
