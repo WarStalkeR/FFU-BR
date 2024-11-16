@@ -24,8 +24,14 @@ using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+public partial class patch_JsonModInfo : JsonModInfo {
+    public Dictionary<string, string[]> removeIds { get; set; }
+    public Dictionary<string, Dictionary<string, string>> changesMap { get; set; }
+}
+
 public static partial class patch_DataHandler {
     public static string strModsPath = string.Empty;
+    public static Dictionary<string, Dictionary<string, string>> dictCOchanges;
     [MonoModReplace] public static void Init() {
         // Early Access Build Info
         try {
@@ -122,6 +128,9 @@ public static partial class patch_DataHandler {
         DataHandler.dictSimple = new Dictionary<string, JsonSimple>();
         DataHandler.dictGUIPropMapUnparsed = new Dictionary<string, JsonGUIPropMap>();
         DataHandler.mapCOs = new Dictionary<string, CondOwner>();
+
+        // Initializing Modded Variables
+        dictCOchanges = new Dictionary<string, Dictionary<string, string>>();
 
         // Initializing Object Reader
         ObjReader.use.scaleFactor = new Vector3(0.0625f, 0.0625f, 0.0625f);
@@ -322,6 +331,17 @@ public static partial class patch_DataHandler {
             numConsoleErrors = ConsoleToGUI.instance.ErrorCount;
             ConsoleToGUI.instance.LogInfo("Begin loading data from these paths:");
             foreach (string dataPath in validDataPaths) ConsoleToGUI.instance.LogInfo(dataPath);
+        }
+
+        // Create CO Changes Map
+        foreach (string modName in validModInfos) {
+            patch_JsonModInfo refModInfo = DataHandler.dictModInfos[modName] as patch_JsonModInfo;
+            if (refModInfo.strName == "Core") continue;
+            if (refModInfo.changesMap != null) {
+                foreach (var changeMap in refModInfo.changesMap) {
+                    dictCOchanges[changeMap.Key] = changeMap.Value;
+                }
+            }
         }
 
         // Sync Load Mods Data

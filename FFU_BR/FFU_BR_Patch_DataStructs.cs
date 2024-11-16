@@ -10,10 +10,6 @@
 
 using System.Collections.Generic;
 
-public partial class patch_JsonModInfo : JsonModInfo {
-    public Dictionary<string, string[]> removeIds { get; set; }
-}
-
 public partial class patch_JsonSimple : JsonSimple {
     public string strReference { get; set; }
 }
