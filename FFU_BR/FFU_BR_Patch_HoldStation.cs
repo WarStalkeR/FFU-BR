@@ -59,26 +59,29 @@ namespace Ostranauts.Ships.Commands {
             num10 -= base.ShipUs.objSS.fW * 0.3f;
             float num11 = 1f / Time.timeScale;
             num3 = MathUtils.Clamp(num10, 0f - num11, num11);
-            if ((double)Mathf.Abs(num4) <= 1E-11 && (double)Mathf.Abs(num5) <= 1E-11 && Mathf.Abs(num3) <= 0.05f && base.ShipUs.objSS.fW == 0f) {
+            float num12 = Mathf.Abs(num4);
+            float num13 = Mathf.Abs(num5);
+            if ((double)num12 <= 1E-11 && (double)num13 <= 1E-11 && Mathf.Abs(num3) <= 0.05f && base.ShipUs.objSS.fW == 0f) {
+                base.ShipUs.Maneuver(0f, 0f, 0f, 0, 1E-10f);
                 return CommandCode.Ongoing;
             }
-            if ((double)Mathf.Abs(num4) > 1E-11) {
+            if ((double)num12 > 1E-11 && num12 > num13) {
                 num = ((!(num4 < 0f)) ? 1f : (-1f));
             } else {
                 base.ShipUs.objSS.vVelX = shipStationKeepingTarget.objSS.vVelX;
             }
-            if ((double)Mathf.Abs(num5) > 1E-11) {
+            if ((double)num13 > 1E-11 && num13 > num12) {
                 num2 = ((!(num5 < 0f)) ? 1f : (-1f));
             } else {
                 base.ShipUs.objSS.vVelY = shipStationKeepingTarget.objSS.vVelY;
             }
-            float num12 = num * num8 + num2 * num9;
-            float num13 = 0f - (num * num9 - num2 * num8);
+            float num14 = num * num8 + num2 * num9;
+            float num15 = 0f - (num * num9 - num2 * num8);
             if (dictionary != null) {
                 _engineMode = ((!dictionary.TryGetValue("nKnobEngineMode", out var value)) ? 1 : int.Parse(value));
                 _throttleSld = ((!dictionary.TryGetValue("slidThrottle", out value)) ? 0.25f : float.Parse(value));
             }
-            base.ShipUs.Maneuver(num12 * _throttleSld, num13 * _throttleSld, num3 * _throttleSld, 0, CrewSim.TimeElapsedScaled(), (Ship.EngineMode)_engineMode);
+            base.ShipUs.Maneuver(num14 * _throttleSld, num15 * _throttleSld, num3 * _throttleSld, 0, CrewSim.TimeElapsedScaled(), (Ship.EngineMode)_engineMode);
             return CommandCode.Ongoing;
         }
     }
