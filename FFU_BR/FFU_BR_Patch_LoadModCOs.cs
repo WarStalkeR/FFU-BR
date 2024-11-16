@@ -267,6 +267,14 @@ public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOS
 	{
 		mapAltItemDefs = new Dictionary<string, string>();
 	}
+	if (jid.mapAltSlotImgs != null)
+	{
+		mapAltSlotImgs = DataHandler.ConvertStringArrayToDict(jid.mapAltSlotImgs);
+	}
+	else
+	{
+		mapAltSlotImgs = new Dictionary<string, string>();
+	}
 	if (bLoot && jCOSIn == null)
 	{
 		List<CondOwner> cOLoot = DataHandler.GetLoot(jid.strLoot).GetCOLoot(this, bSuppressOverride: false);

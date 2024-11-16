@@ -324,6 +324,7 @@ private void Init()
 	{
 		SetRes();
 	});
+	chkScreen.GetComponent<GUIAudioToggle>().requiresInit = false;
 	sldFPS = base.transform.Find("pnlVideo/pnlFPS/sliderFPS/Slider").GetComponent<Slider>();
 	sldFPS.value = PlayerPrefs.GetInt("TargetFPS", 60) / 10;
 	sldFPS.onValueChanged.AddListener(delegate
@@ -350,18 +351,21 @@ private void Init()
 	{
 		ToggleParallax(chkParallax.isOn);
 	});
+	chkParallax.GetComponent<GUIAudioToggle>().requiresInit = false;
 	chkLoS = base.transform.Find("pnlVideo/pnlLoS/chkLoS").GetComponent<Toggle>();
 	chkLoS.isOn = PlayerPrefs.GetInt("LineOfSight", 1) == 1;
 	chkLoS.onValueChanged.AddListener(delegate
 	{
 		ToggleLoS(chkLoS.isOn);
 	});
-	chkA = base.transform.Find("pnlVideo/pnlTurbo/chkA").GetComponent<Toggle>();
-	chkA.isOn = PlayerPrefs.GetInt("TurboA", 1) == 1;
+	chkLoS.GetComponent<GUIAudioToggle>().requiresInit = false;
+	chkA = base.transform.Find("pnlVideo/pnlScreenShake/chkSS").GetComponent<Toggle>();
+	chkA.isOn = PlayerPrefs.GetFloat("ScreenShakeMod", 1f) == 1f;
 	chkA.onValueChanged.AddListener(delegate
 	{
-		TurboA(chkA.isOn);
+		ScreenShake(chkA.isOn);
 	});
+	chkA.GetComponent<GUIAudioToggle>().requiresInit = false;
 	chkB = base.transform.Find("pnlVideo/pnlTurbo/chkB").GetComponent<Toggle>();
 	chkB.isOn = PlayerPrefs.GetInt("TurboB", 1) == 1;
 	chkB.onValueChanged.AddListener(delegate
