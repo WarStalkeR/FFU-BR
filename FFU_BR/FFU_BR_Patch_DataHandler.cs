@@ -32,6 +32,7 @@ public partial class patch_JsonModInfo : JsonModInfo {
 public static partial class patch_DataHandler {
     public static string strModsPath = string.Empty;
     public static Dictionary<string, Dictionary<string, string>> dictCOchanges;
+    public static List<string> listLockedCOs = new List<string>();
     [MonoModReplace] public static void Init() {
         // Early Access Build Info
         try {
@@ -456,6 +457,11 @@ public static partial class patch_DataHandler {
         listPlotBeats.Clear();
         listPlotBeats = null;
         foreach (CondTrigger refTrigger in DataHandler.dictCTs.Values) refTrigger.PostInit();
+
+        // Create Fast List of Locked COs
+        foreach (var dictCO in DataHandler.dictCOs) {
+            if (dictCO.Value.bSlotLocked) patch_DataHandler.listLockedCOs.Add(dictCO.Value.strName);
+        }
 
         // Finalize Mod Load Status
         foreach (string modName in validModInfos) {

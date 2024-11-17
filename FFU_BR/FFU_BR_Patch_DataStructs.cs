@@ -8,8 +8,6 @@
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
 
-using System.Collections.Generic;
-
 public partial class patch_JsonSimple : JsonSimple {
     public string strReference { get; set; }
 }

@@ -8,20 +8,23 @@
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
 
+using FFU_Beyond_Reach;
 using MonoMod;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 using UnityEngine;
 
 public partial class patch_Ship : Ship {
     [MonoModIgnore] public extern patch_Ship(GameObject go);
-    private extern void orig_SpawnItems(List<JsonItem> aItemsPlusCrew, bool bTemplateOnly, Ship.Loaded nLoad, ref Dictionary<string, CondOwner> dictPlaceholders, ref List<CondOwner> aLootSpawners);
-    private void SpawnItems(List<JsonItem> aItemsPlusCrew, bool bTemplateOnly, Ship.Loaded nLoad, ref Dictionary<string, CondOwner> dictPlaceholders, ref List<CondOwner> aLootSpawners) {
-		{
+    private extern void orig_SpawnItems(List<JsonItem> aItemsPlusCrew, bool bTemplateOnly, Loaded nLoad, ref Dictionary<string, CondOwner> dictPlaceholders, ref List<CondOwner> aLootSpawners);
+    private void SpawnItems(List<JsonItem> aItemsPlusCrew, bool bTemplateOnly, Loaded nLoad, ref Dictionary<string, CondOwner> dictPlaceholders, ref List<CondOwner> aLootSpawners) {
+		if (FFU_BR_Defs.ModSyncLoading) {
 			SyncModdedItems(aItemsPlusCrew, bTemplateOnly);
-			RestoreMissingItems(aItemsPlusCrew);
-			if (!bTemplateOnly) RestoreMissingCOs(aItemsPlusCrew);
+            if (nLoad > Loaded.Shallow) {
+                RestoreMissingItems(aItemsPlusCrew);
+                if (!bTemplateOnly) RestoreMissingCOs(aItemsPlusCrew);
+            }
 		}
         orig_SpawnItems(aItemsPlusCrew, bTemplateOnly, nLoad, ref dictPlaceholders, ref aLootSpawners);
     }
@@ -54,31 +57,58 @@ public partial class patch_Ship : Ship {
             }
         }
     }
-	private void RestoreMissingItems(List<JsonItem> aItemList) {
-		List<JsonItem> aMissingItems = new List<JsonItem>();
+    private void RestoreMissingItems(List<JsonItem> aItemList) {
+        List<JsonItem> aMissingItems = new List<JsonItem>();
         foreach (JsonItem aItem in aItemList) {
-			if (patch_DataHandler.dictCOchanges.ContainsKey(aItem.strName) && 
-				DataHandler.dictCOs.TryGetValue(aItem.strName, out JsonCondOwner refCO)) {
-				if (refCO.aSlotsWeHave != null && refCO.aSlotsWeHave.Length > 0 
-					&& refCO.strLoot != null && DataHandler.dictLoot.ContainsKey(refCO.strLoot)) {
-					List<JsonItem> aSlottedItems = aItemList.FindAll(x => x.strSlotParentID == aItem.strID);
-					List<string> aSlotStr = aSlottedItems.Select(x => x.strName).ToList();
-                    //foreach (var _ in aSlotStr) Debug.Log($"#DEBUG_RestoreMissingItems# Found aSlotStr: {_} in {aItem.strName}");
-                    List<string> aOrigStr = DataHandler.dictLoot[refCO.strLoot].GetAllLootNames();
-                    //foreach (var _ in aOrigStr) Debug.Log($"#DEBUG_RestoreMissingItems# Found aOrigStr: {_} in {DataHandler.dictLoot[refCO.strLoot].strName}");
+            // Valid Only For Mapped COs
+            if (patch_DataHandler.dictCOchanges.ContainsKey(aItem.strName) &&
+                DataHandler.dictCOs.TryGetValue(aItem.strName, out JsonCondOwner refCO)) {
+                // Only For COs With Slots And Assigned Loot Table
+                if (refCO.aSlotsWeHave != null && refCO.aSlotsWeHave.Length > 0
+                    && refCO.strLoot != null && DataHandler.dictLoot.ContainsKey(refCO.strLoot)) {
+                    // Find All Existing Locked COs
+                    List<JsonItem> aSlottedItems = aItemList.FindAll(x => x.strSlotParentID == aItem.strID &&
+                        patch_DataHandler.listLockedCOs.Contains(x.strName));
+                    List<string> aSlotStr = aSlottedItems.Select(x => x.strName).ToList();
+
+                    // Find All Missing Locked COs
+                    List<string> aOrigStr = DataHandler.dictLoot[refCO.strLoot].GetAllLootNames()
+                        .Where(x => patch_DataHandler.listLockedCOs.Contains(x)).ToList();
                     List<string> aItemAdd = aOrigStr.Except(aSlotStr).ToList();
-					foreach (var _ in aItemAdd) Debug.LogWarning($"The CO [{aItem.strName}:{aItem.strID}] is missing sub-CO [{_}]");
-				}
-			}
-		}
-	}
+
+                    // Create From Reference With New ID
+                    foreach (string aNewItem in aItemAdd) {
+                        JsonItem refItem = aSlottedItems.First();
+                        JsonItem aMissingItem = new JsonItem();
+                        aMissingItem.strName = aNewItem;
+                        aMissingItem.fX = refItem.fX;
+                        aMissingItem.fY = refItem.fY;
+                        aMissingItem.fRotation = refItem.fRotation;
+                        aMissingItem.strID = Guid.NewGuid().ToString();
+                        aMissingItem.strSlotParentID = refItem.strSlotParentID;
+                        aMissingItem.bForceLoad = refItem.bForceLoad;
+
+                        // Logging And Adding New Entry
+                        Debug.Log($"#Info# Found the missing locked CO [{aNewItem}] " +
+                            $"for the Parent CO [{aItem.strName}:{aItem.strID}] in " +
+                            $"the list! New ID [{aMissingItem.strID}], adding.");
+                        aMissingItems.Add(aMissingItem);
+                    }
+                }
+            }
+        } 
+        // Add Missing Locked COs
+        aItemList.AddRange(aMissingItems);
+    }
     private void RestoreMissingCOs(List<JsonItem> aItemList) {
         foreach (JsonItem aItem in aItemList) {
             if (!DataHandler.mapCOs.ContainsKey(aItem.strID) && !DataHandler.dictCOSaves.ContainsKey(aItem.strID)) {
-                Debug.LogWarning($"CO [{aItem.strName}:{aItem.strID}] is missing save data! Creating from template.");
+                Debug.Log($"#Info# Found the CO [{aItem.strName}:{aItem.strID}] " +
+                    $"with missing save data! Creating data from template.");
                 if (!string.IsNullOrEmpty(aItem.strSlotParentID)) {
                     JsonItem aParent = aItemList.Find(x => x.strID == aItem.strSlotParentID);
-                    if (aParent != null && DataHandler.dictCOs.ContainsKey(aItem.strName) && DataHandler.dictCOs.ContainsKey(aParent.strName)) {
+                    if (aParent != null && DataHandler.dictCOs.ContainsKey(aItem.strName) 
+                        && DataHandler.dictCOs.ContainsKey(aParent.strName)) {
                         JsonCondOwner refCO = DataHandler.dictCOs[aItem.strName];
                         JsonCondOwner prntCO = DataHandler.dictCOs[aParent.strName];
                         if (refCO.strType == "Item") {

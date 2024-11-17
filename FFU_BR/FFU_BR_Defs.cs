@@ -28,6 +28,7 @@ namespace FFU_Beyond_Reach {
             "pbaseHairMissing", "pbaseBeardMissing"
         };
         public static int MaxLogTextSize = 16382;
+        public static bool ModSyncLoading = true;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
         public static float SuitOxygenNotify = 10.0f;
@@ -69,6 +70,9 @@ namespace FFU_Beyond_Reach {
             if (!string.IsNullOrEmpty(refIgnoreString)) IgnoredKeys = refIgnoreString.Split('|');
             MaxLogTextSize = ModDefs.Bind("ConfigSettings", "MaxLogTextSize", MaxLogTextSize,
                 "Defines the max length of the text in the console. May impact performance.").Value;
+            ModSyncLoading = ModDefs.Bind("ConfigSettings", "ModSyncLoading", ModSyncLoading,
+                "Enables smart loading of modified COs and synchronizing of existing CO saved " +
+                "data with updated CO templates, if they are mapped in the mod info file.").Value;
 
             // Load Gameplay Settings
             ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,

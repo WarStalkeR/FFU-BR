@@ -37,6 +37,10 @@ range being limited to `1f`, but it isn't the case, if Dynamic Random Range is e
 **MaxLogTextSize** - Defines the max length of the text in the console. Needed in case if you want 
 to see the whole list of entries from the console commands without missing anything (whether it is
 `getcond` or any other command). May impact performance, if the value is too big.  
+**ModSyncLoading** - Enables smart loading of modified COs and synchronizing of existing CO saved 
+data with updated CO templates, if they are mapped in the mod info file. Frees the user from the
+need of manually updating existing save file and existing ship templates, if Parent CO's got new 
+(or modified existing) built-in locked COs.  
 
 ## Gameplay Settings
 **ModifyUpperLimit** - Enables use of `BonusUpperLimit` to change skill and trait modifier upper limit value.  
