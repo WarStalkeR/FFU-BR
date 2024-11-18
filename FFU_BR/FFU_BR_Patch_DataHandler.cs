@@ -463,6 +463,14 @@ public static partial class patch_DataHandler {
             if (dictCO.Value.bSlotLocked) patch_DataHandler.listLockedCOs.Add(dictCO.Value.strName);
         }
 
+        // Validate Mapped COs In Ship Templates
+        if (FFU_BR_Defs.ModSyncLoading) {
+            foreach (var dictShip in DataHandler.dictShips) {
+                SyncModdedItems(dictShip.Value, true);
+                RestoreLockedItems(dictShip.Value);
+            }
+        }
+
         // Finalize Mod Load Status
         foreach (string modName in validModInfos) {
             JsonModInfo refModInfo = DataHandler.dictModInfos[modName];
