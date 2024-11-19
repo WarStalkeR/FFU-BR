@@ -59,8 +59,7 @@ public static partial class patch_DataHandler {
                                     aSavedCO.strCondID = refCO.strName + aItem.strID;
                                     aSavedCO.strFriendlyName = refCO.strNameFriendly;
                                     aSavedCO.strCODef = refCO.strName;
-                                } else Debug.Log($"#Info# Initially mismatched CO [{aItem.strName}:" +
-                                $"{aItem.strID}] is missing save data! Ignoring it.");
+                                }
                             }
                         }
                     }
@@ -134,8 +133,9 @@ public static partial class patch_DataHandler {
                     JsonItem aParent = aItemList.Find(x => x.strID == aItem.strSlotParentID);
                     JsonCondOwnerSave aParentCO = aSavedCOs.Find(x => x.strID == aItem.strSlotParentID);
                     if (aParent == null || aParentCO == null) continue;
-                    if (DataHandler.dictCOs.ContainsKey(aItem.strName)
-                        && DataHandler.dictCOs.ContainsKey(aParent.strName)) {
+                    if (DataHandler.dictCOs.ContainsKey(aItem.strName) && 
+                        DataHandler.dictCOs.ContainsKey(aParent.strName) &&
+                        patch_DataHandler.dictCOchanges.ContainsKey(aParent.strName)) {
                         Debug.Log($"#Info# Found the CO [{aItem.strName}:{aItem.strID}] " +
                             $"with missing save data! Creating data from template.");
                         JsonCondOwner refCO = DataHandler.dictCOs[aItem.strName];
