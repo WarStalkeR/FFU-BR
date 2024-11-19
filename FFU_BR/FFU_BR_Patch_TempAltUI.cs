@@ -123,5 +123,4 @@ protected override void OnUpdateUI()
 	}
 	LayoutRebuilder.MarkLayoutForRebuild(base.transform.parent as RectTransform);
 }
-
 */
