@@ -65,10 +65,31 @@ public static partial class patch_DataHandler {
                     }
                 }
             }
-            if (!isTemplate && aSavedCOs != null && dictCOchanges.ContainsKey(aItem.strName)
-                && dictCOchanges[aItem.strName].ContainsKey("*sync_conds")) {
-                //...code to sync starting conds with existing conds...//
-                //...ensure that values are ignored, when using Except...//
+        }
+        if (!isTemplate && aSavedCOs != null) {
+            foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+                if (aSavedCO != null && dictCOchanges.ContainsKey(aSavedCO.strCODef)
+                    && dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC)
+                    && DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)
+                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
+                    
+                    // Preparing Sync List
+                    List<string> aSavedConds = aSavedCO.aConds.ToList();
+                    List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
+                    List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).ToList();
+                    List<string> newCondKeys = refCondKeys.Except(objCondKeys).ToList();
+
+                    // Syncing New Conditions
+                    foreach (string newCondKey in newCondKeys) {
+                        string newCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(newCondKey));
+                        Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] is missing " +
+                            $"[{newCond}] condition! Syncing to the CO from the template.");
+                        aSavedConds.Insert(0, newCond);
+                    }
+
+                    // Saving Synced Conditions
+                    if (newCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
+                }
             }
         }
         if (aSavedCOs != null) aShipRef.aCOs = aSavedCOs.ToArray();

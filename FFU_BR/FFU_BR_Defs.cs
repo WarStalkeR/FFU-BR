@@ -134,6 +134,8 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
 
+        public const string CMD_SYNC = "*sync_conds";
+
         public enum SyncLogs {
             None,
             ModChanges,
