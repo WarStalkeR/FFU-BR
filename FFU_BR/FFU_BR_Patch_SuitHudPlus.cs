@@ -121,6 +121,8 @@ public partial class patch_GUIHelmet : GUIHelmet {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+GUIHelmet.UpdateUI
+
 public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 {
 	if (coRoomIn == null || !coRoomIn.HasCond("IsHuman"))

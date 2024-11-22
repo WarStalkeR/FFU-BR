@@ -973,6 +973,11 @@ public static partial class patch_DataHandler {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+DataHandler.Init
+DataHandler.LoadMod
+DataHandler.LoadModJsons
+DataHandler.JsonToData
+
 public static void Init()
 {
 	string empty = string.Empty;

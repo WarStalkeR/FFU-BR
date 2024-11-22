@@ -245,6 +245,9 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+ConsoleToGUI.DrawConsole
+ConsoleResolver.KeywordGetCond
+
 private void DrawConsole(int window)
 {
 	if (HandleInput())

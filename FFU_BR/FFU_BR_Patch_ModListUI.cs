@@ -309,6 +309,8 @@ public partial class patch_GUIOptions : GUIOptions {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+GUIOptions.Init
+
 private void Init()
 {
 	cgOptions = base.transform.parent.GetComponent<CanvasGroup>();

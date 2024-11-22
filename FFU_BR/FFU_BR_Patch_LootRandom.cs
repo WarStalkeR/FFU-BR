@@ -307,6 +307,12 @@ public partial class patch_Loot : Loot {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+Loot.GetCTLoot
+Loot.GetCOLoot
+Loot.GetLootNames
+Loot.ApplyCondLoot
+Loot.GetCondLoot
+
 public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 {
 	List<CondTrigger> list = new List<CondTrigger>();

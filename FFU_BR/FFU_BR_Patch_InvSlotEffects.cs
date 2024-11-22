@@ -79,6 +79,10 @@ public partial class patch_Container : Container {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+Container.SetIsInContainer
+Container.ClearIsInContainer
+Slots.ApplySlotEffects
+
 public void SetIsInContainer(CondOwner co)
 {
 	if (CO == this)

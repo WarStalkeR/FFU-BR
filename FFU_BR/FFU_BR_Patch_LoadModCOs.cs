@@ -18,6 +18,8 @@ public partial class patch_CondOwner : CondOwner {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+CondOwner.SetData
+
 public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOSIn = null)
 {
 	if (jid == null)

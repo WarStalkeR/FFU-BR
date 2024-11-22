@@ -89,6 +89,8 @@ namespace Ostranauts.Ships.Commands {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+HoldStationAutoPilot.RunCommand
+
 public override CommandCode RunCommand()
 {
 	Ship shipStationKeepingTarget = base.ShipUs.shipStationKeepingTarget;

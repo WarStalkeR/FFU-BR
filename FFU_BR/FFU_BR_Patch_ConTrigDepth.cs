@@ -43,7 +43,7 @@ public partial class patch_CondTrigger : CondTrigger {
 // Prototype Changes (for TEST BEGIN/TEST END):
 /*
 [MonoModReplace] public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true) {
-    //...//
+    //...ORIGINAL CODE...//
     objOwner.ValidateParent();
     // MAX DEPTH TEST BEGIN //
     if (maxDepth > 0 &&
@@ -51,12 +51,15 @@ public partial class patch_CondTrigger : CondTrigger {
         return false;
     // MAX DEPTH TEST END //
     SocialStats socStats = null;
-    //...//
+    //...ORIGINAL CODE...//
 }
 */
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+CondTrigger.Clone
+CondTrigger.Triggered
+
 public CondTrigger Clone()
 {
 	CondTrigger condTrigger = new CondTrigger();

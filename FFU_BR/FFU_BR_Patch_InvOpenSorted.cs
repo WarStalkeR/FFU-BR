@@ -116,6 +116,9 @@ public partial class patch_CondOwner : CondOwner {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+GUIInventory.SpawnInventoryWindow
+Slots.GetSlotsDepthFirst
+
 public void SpawnInventoryWindow(CondOwner CO, InventoryWindowType type, bool bFlyIn)
 {
 	if (CO == null)

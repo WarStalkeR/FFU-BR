@@ -51,6 +51,9 @@ public partial class patch_Container : Container {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+Slot.CanFit
+Container.AllowedCO
+
 public bool CanFit(CondOwner coFit)
 {
 	if (aCOs == null)

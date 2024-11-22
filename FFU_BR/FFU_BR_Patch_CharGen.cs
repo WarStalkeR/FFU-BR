@@ -43,6 +43,8 @@ public partial class patch_GUIChargenCareer : GUIChargenCareer {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+GUIChargenCareer.AddSkillTrait
+
 private void AddSkillTrait(JsonCareer jc, string strChosen)
 {
 	bmpDot2.color = Color.white;

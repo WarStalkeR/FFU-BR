@@ -23,6 +23,8 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
+ConsoleResolver.ResolveString
+
 public static bool ResolveString(ref string strInput)
 {
 	strInput.Trim();
