@@ -100,6 +100,48 @@ its current depth.
 `syncinveffects` - synchronizes inventory effects for all COs in inventory with effects. Mostly usable in cases,
 when mod adds inventory effects to existing inventories, which are necessary for various condition triggers.  
 
+## Objects Mapping and Removal
+Modification or removal of some items, might require lots of manual patching for existing ship templates and 
+potentially starting new game (or at least pruning existing entities). In order to avoid it, features that allow 
+objects mapping and removal were implemented. Configurable via `mod_info.json` file only.
+
+**Existing Entries Removal**: Works similar to exclusion paths, except removes items based on type and identifier.
+By adding `"removeIds": {"cooverlays": ["OutfitEVA03", "OutfitEVA03Off", "OutfitEVA03Dmg"]}` will allow to remove
+specified identifiers from `cooverlays` and free them for full implementation as complete condition owners for
+example. This routine runs before JSON objects are processed, thus prevents identifiers pollution.
+
+**Missing Locked Sub-COs**: Just adding any CO to the `mod_info.json` as `"changesMap": {"OutfitEVA01": {}}` or 
+as `"changesMap": {"OutfitEVA01": null}` will make feature add any missing built-in locked sub-COs (only inventory 
+defined that way) for every `OutfitEVA01` in the save game and in ship template (ship templates updated on start, 
+saved COs only during loading process, whilst keeping original files intact - everything is done in the memory).
+
+**Sub-COs Replacement Mapping**: By using code like this `"changesMap": {"OutfitEVA01": {"PocketClipPoint01": 
+"PocketEVAClipPoint02", "PocketEVABatt01": "PocketEVABatt02"}}` feature will replace existing `PocketClipPoint01`
+with `PocketEVAClipPoint02` and `PocketEVABatt01` with `PocketEVABatt02` for every `OutfitEVA01` in the save game 
+and in ship template, without affecting inventory contents and their states.
+
+**Existing COs Conditions Sync**: By using code `"changesMap": {"OutfitEVA01": {"*sync_conds": null}}` or 
+`"changesMap": {"OutfitEVA01": {"*sync_conds": ""}}` will add missing conditions from the template to the existing
+saved `OutfitEVA01` CO. If your intention is to add only specific conditions to existing saved COs from the template, 
+then syntax `"*sync_conds": "IsCondA|StatNewParam"` should be used - this will make feature add only conditions
+`IsCondA` and `StatNewParam` from the template to the CO in save game and template. Using `"*sync_conds": 
+"!IsCondA|StatNewParam"` with `!` at start will work in inverse: all new condition except `IsCondA` and `StatNewParam`
+will be added from the template to the CO in save game and template.
+
+**Existing COs Conditions Update**: By using code `"changesMap": {"OutfitEVA01": {"*sync_stats": null}}` or 
+`"changesMap": {"OutfitEVA01": {"*sync_stats": ""}}` will fetch all existing condition values from CO templates and
+overwrite them in saved COs. Do note that such approach is extremely dangerous, as some conditions are dynamic and
+changing them in such way might break game logic (or game itself). Instead, use precise approach `"*sync_stats": 
+"StatBasePrice|StatDamageMax"` to update only conditions you know that are static. As with command above, using `!`
+at start will make it work in inverse, but this approach is dangerous as well.
+
+**Precision Mapped Entries Removal**: Since all parameters in `changesMap` are additive, option to remove various
+entries and sub-entries was implemented. To remove specific sub-entry, use code `"changesMap": {"OutfitEVA01": 
+{"EntryName": "~"}}` and to remove entire entry use code `"changesMap": {"OutfitEVA01": {"~": "~"}}`. In addition,
+if you're using `{"~": "~", "SomeCO" : "NewCO"}` it pretty much wipes previous mapped changes for that CO, whist 
+filling with your mapped data only (of course - depending on mod order and what loads after your mod). If the
+`SyncLogging` is set to `ModdedDump` or above, the compiled `changesMap` will be shown in the logs.
+
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
 releases from burden of copying entire code blocks just to overwrite a couple of parameters.  
@@ -108,10 +150,10 @@ releases from burden of copying entire code blocks just to overwrite a couple of
 
 ```json
 {
-	"strName": "ItmRackUnder01",
-	"strContainerCT": "TIsFitContainerSolidCargoBay",
-	"nContainerHeight": 6,
-	"nContainerWidth": 6
+    "strName": "ItmRackUnder01",
+    "strContainerCT": "TIsFitContainerSolidCargoBay",
+    "nContainerHeight": 6,
+    "nContainerWidth": 6
 }
 ```
 As in example above, you no longer need to copy entire `ItmRackUnder01` code block, just to alter a few 
@@ -121,17 +163,17 @@ entry you want to change.
 ## Reference-based Creation Example
 ```json
 {
-	"strName": "OutfitEVA05",
-	"strReference": "OutfitEVA01",
-	"strNameFriendly": "Bingham-12 Civilian EVA Suit",
-	"strItemDef": "OutfitEVA05",
-	"strPortraitImg": "CrewSuit05",
-	"mapSlotEffects": [
-		"shirt_out", "BodyEVA05",
-		"heldL", "HeldItmDefaultSoftL",
-		"heldR", "HeldItmDefaultSoftR"
-	],
-	"jsonPI": "EVASuit05"
+    "strName": "OutfitEVA05",
+    "strReference": "OutfitEVA01",
+    "strNameFriendly": "Bingham-12 Civilian EVA Suit",
+    "strItemDef": "OutfitEVA05",
+    "strPortraitImg": "CrewSuit05",
+    "mapSlotEffects": [
+        "shirt_out", "BodyEVA05",
+        "heldL", "HeldItmDefaultSoftL",
+        "heldR", "HeldItmDefaultSoftR"
+    ],
+    "jsonPI": "EVASuit05"
 }
 ```
 In this example as well, you no longer need to copy entire block just to create one. When creating new entry,
@@ -142,24 +184,51 @@ existing copied parameters of the new entry.
 ## Removal of Existing Entries Example
 ```json
 [
-	{
-		//...vaious mod parameters...//
-		"removeIds": {
-			"cooverlays": [
-				"OutfitHelmet05",
-				"OutfitHelmet05Dmg",
-				"OutfitEVA05",
-				"OutfitEVA05Off",
-				"OutfitEVA05Dmg"
-			]
-		}
-	}
+    {
+        //...vaious mod parameters...//
+        "removeIds": {
+            "cooverlays": [
+                "OutfitHelmet05",
+                "OutfitHelmet05Dmg",
+                "OutfitEVA05",
+                "OutfitEVA05Off",
+                "OutfitEVA05Dmg"
+            ]
+        }
+    }
 ]
 ```
 Prior to processing/loading data, mod loader will remove every item listed in `removeIds` from the `mod_info.json`. 
 It allows removal of existing core and mod items, given correct loading order is used. It identifies entry type
 based on folder name, where data is stored: `cooverlays`, `conditions`, `loot` & etc. In example above I removed
 all `cooverlays` for Bingham-12C EVA Suit/Helmet, to give space to proper `condowners` in the mod.  
+
+
+## Objects Mapping Example
+```json
+[
+    {
+        //...vaious mod parameters...//
+        "changesMap": {
+            "ModifiedItem01": {
+                "PocketClipPoint01": "PocketEVAClipPoint01", // Change existing saved CO into another.
+                "*sync_conds": null // Fetch all new conditions from CO template into saved CO.
+            },
+            "ModifiedItem02": {
+                "PocketClipPoint03": "~", // Remove PocketClipPoint03 from ModifiedItem02 map.
+                "*sync_conds": "!StatTest|StatExample" // Fetch all new conditions, except these two.
+            },
+            "ModifiedItem03": {
+                "~": "~", // Remove all previous mapped changes and start from clean slate.
+                "PocketClipPoint05": "PocketEVAClipPoint07", // Change existing saved CO into another.
+                "*sync_stats": "NewArmorValueA|NewArmorValueB" // Fetch only these two values from template.
+            }
+        }
+    }
+]
+```
+This example is pretty much self explanatory with in-line comments. Please read 'Objects Mapping and Removal' 
+paragraph for more information, as it explains all the potential and functionality of the feature.
 
 ## Precision Array Modifications
 Since Ostranauts is extremely data-drive game, lots of various parameters and flags are stored in various arrays 
@@ -207,7 +276,7 @@ inserted at the place of 4th entry in the array and whatever was there initially
     //...code...//
     "aNestedSubArray": [
         "5|--ADD--|IsClumsy=0.0675x1.0|IsStupid=9000x1.0|--MOD--|IsBrave=0.5675x1.0|--DEL--|IsCraven",
-		"13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
+        "13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
     ]
     //...code...//
 }

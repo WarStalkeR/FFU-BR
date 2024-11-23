@@ -340,18 +340,26 @@ public static partial class patch_DataHandler {
             if (refModInfo.strName == "Core") continue;
             if (refModInfo.changesMap != null) {
                 foreach (var changeMap in refModInfo.changesMap) {
+                    if (!dictCOchanges.ContainsKey(changeMap.Key))
+                        dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
                     if (changeMap.Value != null) {
-                        if (!dictCOchanges.ContainsKey(changeMap.Key))
-                            dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
                         foreach (var subMap in changeMap.Value) {
-                            if (subMap.Value != FFU_BR_Defs.OPT_DEL)
-                                dictCOchanges[changeMap.Key][subMap.Key] = subMap.Value;
-                            else dictCOchanges[changeMap.Key].Remove(subMap.Key);
+                            if (subMap.Key != FFU_BR_Defs.OPT_DEL) {
+                                if (subMap.Value != FFU_BR_Defs.OPT_DEL)
+                                    dictCOchanges[changeMap.Key][subMap.Key] = subMap.Value;
+                                else dictCOchanges[changeMap.Key].Remove(subMap.Key);
+                            } else {
+                                dictCOchanges.Remove(changeMap.Key);
+                                if (changeMap.Value.Count > 1)
+                                    dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
+                                else break;
+                            }
                         }
                     }
                 }
             }
         }
+        if (FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump) Debug.Log($"Modification Map Dump: {JsonMapper.ToJson(dictCOchanges)}");
 
         // Sync Load Mods Data
         foreach (string modPath in validModPaths) DataHandler.aModPaths.Insert(0, modPath);

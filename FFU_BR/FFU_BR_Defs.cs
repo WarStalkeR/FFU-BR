@@ -16,7 +16,7 @@ using System.IO;
 namespace FFU_Beyond_Reach {
     public partial class FFU_BR_Defs {
         public static readonly string ModName = "Fight For Universe: Beyond Reach";
-        public static readonly string ModVersion = "0.3.4.0";
+        public static readonly string ModVersion = "0.4.0.0";
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;
@@ -139,7 +139,7 @@ namespace FFU_Beyond_Reach {
         public const string CMD_INVERSE = "!";
         public const string CMD_SYNC_CONDS = "*sync_conds";
         public const string CMD_SYNC_STATS = "*sync_stats";
-        public const string OPT_DEL = "*delete";
+        public const string OPT_DEL = "~";
 
         public enum SyncLogs {
             None,
