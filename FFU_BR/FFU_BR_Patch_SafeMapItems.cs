@@ -69,26 +69,66 @@ public static partial class patch_DataHandler {
         if (!isTemplate && aSavedCOs != null) {
             foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
                 if (aSavedCO != null && dictCOchanges.ContainsKey(aSavedCO.strCODef)
-                    && dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC)
-                    && DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)
-                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
-                    
-                    // Preparing Sync List
-                    List<string> aSavedConds = aSavedCO.aConds.ToList();
-                    List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
-                    List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).ToList();
-                    List<string> newCondKeys = refCondKeys.Except(objCondKeys).ToList();
+                    && DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
-                    // Syncing New Conditions
-                    foreach (string newCondKey in newCondKeys) {
-                        string newCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(newCondKey));
-                        Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] is missing " +
-                            $"[{newCond}] condition! Syncing to the CO from the template.");
-                        aSavedConds.Insert(0, newCond);
+                    // Conditions Syncing
+                    if (dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC_CONDS)
+                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
+                        // Parse Sync Commands
+                        string sCmdList = dictCOchanges[aSavedCO.strCODef][FFU_BR_Defs.CMD_SYNC_CONDS];
+                        bool doAll = string.IsNullOrEmpty(sCmdList);
+                        bool isInverse = !doAll ? sCmdList.StartsWith(FFU_BR_Defs.CMD_INVERSE) : false;
+                        List<string> syncKeys = !doAll ? isInverse ? sCmdList.Substring(1).Split(FFU_BR_Defs.CMD_DIV)
+                            .ToList() : sCmdList.Split(FFU_BR_Defs.CMD_DIV).ToList() : new List<string>();
+
+                        // Make Conditions List
+                        List<string> aSavedConds = aSavedCO.aConds.ToList();
+                        List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
+                        List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll 
+                            || (!isInverse && syncKeys.Contains(x)) || (isInverse && !syncKeys.Contains(x))).ToList();
+                        List<string> newCondKeys = refCondKeys.Except(objCondKeys).ToList();
+
+                        // Syncing New Conditions
+                        foreach (string newCondKey in newCondKeys) {
+                            string newCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(newCondKey + "="));
+                            Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] is missing " +
+                                $"[{newCond}] condition! Syncing to the CO from the template.");
+                            aSavedConds.Insert(0, newCond);
+                        }
+
+                        // Saving Synced Conditions
+                        if (newCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
                     }
 
-                    // Saving Synced Conditions
-                    if (newCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
+                    // Stats Syncing
+                    if (dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC_STATS)
+                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
+                        // Parse Sync Commands
+                        string sCmdList = dictCOchanges[aSavedCO.strCODef][FFU_BR_Defs.CMD_SYNC_STATS];
+                        bool doAll = string.IsNullOrEmpty(sCmdList);
+                        bool isInverse = !doAll ? sCmdList.StartsWith(FFU_BR_Defs.CMD_INVERSE) : false;
+                        List<string> syncKeys = !doAll ? isInverse ? sCmdList.Substring(1).Split(FFU_BR_Defs.CMD_DIV)
+                            .ToList() : sCmdList.Split(FFU_BR_Defs.CMD_DIV).ToList() : new List<string>();
+
+                        // Make Conditions List
+                        List<string> aSavedConds = aSavedCO.aConds.ToList();
+                        List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
+                        List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll
+                            || (!isInverse && syncKeys.Contains(x)) || (isInverse && !syncKeys.Contains(x))).ToList();
+                        List<string> extCondKeys = refCondKeys.Intersect(objCondKeys).ToList();
+
+                        // Syncing Condition Values
+                        foreach (string extCondKey in extCondKeys) {
+                            string extCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(extCondKey + "="));
+                            string currCond = aSavedConds.Find(x => x.StartsWith(extCondKey + "="));
+                            Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] condition " +
+                                $"[{extCondKey}] received new value from the template CO.");
+                            aSavedConds[aSavedConds.IndexOf(currCond)] = extCond;
+                        }
+
+                        // Saving Synced Conditions
+                        if (extCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
+                    }
                 }
             }
         }

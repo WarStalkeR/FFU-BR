@@ -10,6 +10,7 @@
 
 using BepInEx;
 using BepInEx.Configuration;
+using System.Collections.Generic;
 using System.IO;
 
 namespace FFU_Beyond_Reach {
@@ -134,7 +135,11 @@ namespace FFU_Beyond_Reach {
             ModLog.Info($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
 
-        public const string CMD_SYNC = "*sync_conds";
+        public const char CMD_DIV = '|';
+        public const string CMD_INVERSE = "!";
+        public const string CMD_SYNC_CONDS = "*sync_conds";
+        public const string CMD_SYNC_STATS = "*sync_stats";
+        public const string OPT_DEL = "*delete";
 
         public enum SyncLogs {
             None,

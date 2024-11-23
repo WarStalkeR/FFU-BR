@@ -340,7 +340,15 @@ public static partial class patch_DataHandler {
             if (refModInfo.strName == "Core") continue;
             if (refModInfo.changesMap != null) {
                 foreach (var changeMap in refModInfo.changesMap) {
-                    dictCOchanges[changeMap.Key] = changeMap.Value;
+                    if (changeMap.Value != null) {
+                        if (!dictCOchanges.ContainsKey(changeMap.Key))
+                            dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
+                        foreach (var subMap in changeMap.Value) {
+                            if (subMap.Value != FFU_BR_Defs.OPT_DEL)
+                                dictCOchanges[changeMap.Key][subMap.Key] = subMap.Value;
+                            else dictCOchanges[changeMap.Key].Remove(subMap.Key);
+                        }
+                    }
                 }
             }
         }
