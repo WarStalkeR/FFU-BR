@@ -27,6 +27,7 @@ public partial class patch_Ship : Ship {
                 patch_DataHandler.SyncConditions(json);
                 patch_DataHandler.UpdateConditions(json);
                 patch_DataHandler.SyncSlotEffects(json);
+                patch_DataHandler.SyncInvEffects(json);
             }
         }
         orig_InitShip(bTemplateOnly, nLoad, strRegIDNew);
@@ -382,6 +383,59 @@ public static partial class patch_DataHandler {
 
         // Valid Ship Data Only
         foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+            if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) &&
+                dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_EFFECT_INV) &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV] != null &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV].Count > 0 &&
+                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+
+                // Prepare Base Variables
+                List<string> addConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV]
+                    .Where(x => x.Contains(FFU_BR_Defs.SYM_EQU)).ToList();
+                List<string> remConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV]
+                    .Where(x => x.StartsWith(FFU_BR_Defs.SYM_INV)).Select(x => x.Substring(1)).ToList();
+                List<JsonCondOwnerSave> targetCOs = aSavedCOs.FindAll(x => aItemList
+                    .Any(i => i.strParentID == aSavedCO.strID && i.strID == x.strID));
+
+                // Syncing Inventory Effects
+                foreach (JsonCondOwnerSave targetCO in targetCOs) {
+                    List<string> aTargetConds = targetCO.aConds != null ?
+                        targetCO.aConds.ToList() : new List<string>();
+                    foreach (string addCond in addConds) {
+                        string addCondEntry = addCond.Split(FFU_BR_Defs.SYM_DIV[0])[0];
+                        string addCondKey = addCondEntry.Split(FFU_BR_Defs.SYM_EQU[0])[0];
+                        List<string> validCOs = addCond.Split(FFU_BR_Defs.SYM_DIV[0]).Skip(1).ToList();
+
+                        // Add Only If No Condition
+                        if (!aTargetConds.Any(x => x.StartsWith(addCondKey + "=")) &&
+                            (validCOs.Count == 0 || validCOs.Contains(targetCO.strCODef))) {
+                            Debug.Log($"#Info# Saved CO [{targetCO.strCODef}:{targetCO.strID}] " +
+                                $"got condition [{addCondEntry}] due to the Parent CO " +
+                                $"[{aSavedCO.strCODef}:{aSavedCO.strID}] inventory effects.");
+                            aTargetConds.Insert(0, addCondEntry);
+                            continue;
+                        }
+                    }
+                    foreach (string remCond in remConds) {
+                        string remCondEntry = remCond.Split(FFU_BR_Defs.SYM_DIV[0])[0];
+                        string remCondsKey = remCondEntry.Split(FFU_BR_Defs.SYM_EQU[0])[0];
+                        List<string> validCOs = remCond.Split(FFU_BR_Defs.SYM_DIV[0]).Skip(1).ToList();
+
+                        // Remove Only If Condition
+                        if (aTargetConds.Any(x => x.StartsWith(remCondsKey + "=")) &&
+                            (validCOs.Count == 0 || validCOs.Contains(targetCO.strCODef))) {
+                            Debug.Log($"#Info# Saved CO [{targetCO.strCODef}:{targetCO.strID}] " +
+                                $"lost condition [{remCondEntry}] due to the Parent CO " +
+                                $"[{aSavedCO.strCODef}:{aSavedCO.strID}] inventory effects.");
+                            aTargetConds.Remove(aTargetConds.Find(x => x.StartsWith(remCondsKey + "=")));
+                            continue;
+                        }
+                    }
+
+                    // Saving Synced Conditions
+                    if (addConds.Count > 0 || remConds.Count > 0) targetCO.aConds = aTargetConds.ToArray();
+                }
+            }
         }
     }
 }
