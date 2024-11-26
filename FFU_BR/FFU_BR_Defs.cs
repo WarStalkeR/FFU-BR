@@ -10,7 +10,6 @@
 
 using BepInEx;
 using BepInEx.Configuration;
-using System.Collections.Generic;
 using System.IO;
 
 namespace FFU_Beyond_Reach {
@@ -52,8 +51,8 @@ namespace FFU_Beyond_Reach {
             ModDefs = new ConfigFile(Path.Combine(Paths.ConfigPath, "FFU_Beyond_Reach.cfg"), true);
 
             // Logging Start
-            ModLog.Info($"{ModName} v{ModVersion}");
-            ModLog.Info($"Loading Mod Configuration...");
+            UnityEngine.Debug.Log($"{ModName} v{ModVersion}");
+            UnityEngine.Debug.Log($"Loading Mod Configuration...");
 
             // Load Configuration Settings
             SyncLogging = ModDefs.Bind("ConfigSettings", "SyncLogging", SyncLogging,
@@ -93,12 +92,12 @@ namespace FFU_Beyond_Reach {
                 "independently and summarize their percentages. Affects how soon notifications will begin.").Value;
             StrictInvSorting = ModDefs.Bind("GameplaySettings", "StrictInvSorting", StrictInvSorting,
                 "Enables custom, order-based inventory windows sorting that enforces strict UI rendering order.").Value;
-            ModLog.Info($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
-            ModLog.Info($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
-            ModLog.Info($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
-            ModLog.Info($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
-            ModLog.Info($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}%");
-            ModLog.Info($"GameplaySettings => StrictInvSorting: {StrictInvSorting}%");
+            UnityEngine.Debug.Log($"GameplaySettings => ModifyUpperLimit: {ModifyUpperLimit}");
+            UnityEngine.Debug.Log($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
+            UnityEngine.Debug.Log($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
+            UnityEngine.Debug.Log($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
+            UnityEngine.Debug.Log($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}%");
+            UnityEngine.Debug.Log($"GameplaySettings => StrictInvSorting: {StrictInvSorting}%");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
@@ -111,11 +110,11 @@ namespace FFU_Beyond_Reach {
                 "Alternative temperature value shift for conversion from Kelvin.").Value;
             TowBraceAllowsKeep = ModDefs.Bind("QualitySettings", "TowBraceAllowsKeep", TowBraceAllowsKeep,
                 "Allows to use station keeping command, while tow braced to another vessel.").Value;
-            ModLog.Info($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
-            ModLog.Info($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
-            ModLog.Info($"QualitySettings => AltTempMult: {AltTempMult}");
-            ModLog.Info($"QualitySettings => AltTempShift: {AltTempShift}");
-            ModLog.Info($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
+            UnityEngine.Debug.Log($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
+            UnityEngine.Debug.Log($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
+            UnityEngine.Debug.Log($"QualitySettings => AltTempMult: {AltTempMult}");
+            UnityEngine.Debug.Log($"QualitySettings => AltTempShift: {AltTempShift}");
+            UnityEngine.Debug.Log($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
 
             // Load Superiority Settings
             NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
@@ -124,22 +123,31 @@ namespace FFU_Beyond_Reach {
                 "Allows existence of super characters with extreme performance bonuses.").Value;
             SuperCharMultiplier = ModDefs.Bind("SuperSettings", "SuperCharMultiplier", SuperCharMultiplier,
                 "Defines the bonus multiplier for super characters performance.").Value;
-            ModLog.Info($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
-            ModLog.Info($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
-            ModLog.Info($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
+            UnityEngine.Debug.Log($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
+            UnityEngine.Debug.Log($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
+            UnityEngine.Debug.Log($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
 
             // Load List of Super Chars
             string refCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
                 "Lower-case list of super characters that will receive boost on name basis.").Value;
             if (!string.IsNullOrEmpty(refCharString)) SuperCharacters = refCharString.Split('|');
-            ModLog.Info($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
+            UnityEngine.Debug.Log($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
 
-        public const char CMD_DIV = '|';
-        public const string CMD_INVERSE = "!";
-        public const string CMD_SYNC_CONDS = "*sync_conds";
-        public const string CMD_SYNC_STATS = "*sync_stats";
+        public const string SYM_DIV = "|";
+        public const string SYM_EQU = "=";
+        public const string SYM_IGN = "*";
+        public const string SYM_INV = "!";
+        public const string CMD_SWITCH_SLT = "Switch_Slotted";
+        public const string CMD_REC_MISSING = "Recover_Missing";
+        public const string CMD_CONDS_SYN = "Sync_Conditions";
+        public const string CMD_CONDS_UPD = "Update_Conditions";
+        public const string CMD_EFFECT_SLT = "Sync_Slot_Effects";
+        public const string CMD_EFFECT_INV = "Sync_Inv_Effects";
+        public const string FLAG_INVERSE = "*IsInverse*";
         public const string OPT_DEL = "~";
+        public const string OPT_MOD = "*";
+        public const string OPT_REM = "-";
 
         public enum SyncLogs {
             None,

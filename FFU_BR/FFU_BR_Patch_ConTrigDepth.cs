@@ -9,8 +9,6 @@
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
 
-using MonoMod;
-
 public partial class patch_CondTrigger : CondTrigger {
     public int maxDepth { get; set; }
 

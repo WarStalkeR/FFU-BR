@@ -20,33 +20,54 @@ public partial class patch_Ship : Ship {
     public extern void orig_InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null);
     public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null) {
         if (FFU_BR_Defs.ModSyncLoading && json != null) {
-            patch_DataHandler.SyncModdedItems(json, bTemplateOnly);
-            patch_DataHandler.RestoreLockedItems(json);
-            if (!bTemplateOnly) patch_DataHandler.RestoreLockedCOs(json);
+            patch_DataHandler.SwitchSlottedItems(json, bTemplateOnly);
+            patch_DataHandler.RecoverMissingItems(json);
+            if (!bTemplateOnly) {
+                patch_DataHandler.RecoverMissingCOs(json);
+                patch_DataHandler.SyncConditions(json);
+                patch_DataHandler.UpdateConditions(json);
+                patch_DataHandler.SyncSlotEffects(json);
+            }
         }
         orig_InitShip(bTemplateOnly, nLoad, strRegIDNew);
     }
 }
 
 public static partial class patch_DataHandler {
-    public static void SyncModdedItems(JsonShip aShipRef, bool isTemplate) {
+    public static void SwitchSlottedItems(JsonShip aShipRef, bool isTemplate) {
         if (aShipRef == null) return;
         List<JsonItem> aItemList = aShipRef.aItems != null ? aShipRef.aItems.ToList() : null;
         List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
         if (aItemList == null) return;
+
+        // Valid Ship Data Only
         foreach (JsonItem aItem in aItemList) {
             if (!string.IsNullOrEmpty(aItem.strSlotParentID)) {
-                // Get Parent From ID
+                
+                // Proceed With Parent Only
                 JsonItem aParent = aItemList.Find(x => x.strID == aItem.strSlotParentID);
-                if (aParent != null && dictCOchanges.ContainsKey(aParent.strName)) {
-                    if (dictCOchanges[aParent.strName].ContainsKey(aItem.strName)) {
-                        // Validate Mapped CO
-                        string refTarget = dictCOchanges[aParent.strName][aItem.strName];
+                if (aParent != null && dictChangesMap.ContainsKey(aParent.strName) &&
+                    dictChangesMap[aParent.strName].ContainsKey(FFU_BR_Defs.CMD_SWITCH_SLT) && 
+                    dictChangesMap[aParent.strName][FFU_BR_Defs.CMD_SWITCH_SLT] != null) {
+
+                    // Create Items Map For Parent
+                    Dictionary<string,string> mapSwitchSlots = 
+                        dictChangesMap[aParent.strName][FFU_BR_Defs.CMD_SWITCH_SLT]
+                        .Where(x => x.Split(FFU_BR_Defs.SYM_EQU[0]).Length == 2)
+                        .Select(x => x.Split(FFU_BR_Defs.SYM_EQU[0]))
+                        .ToDictionary(x => x[0], x => x[1]);
+
+                    // Verify Item Mapping
+                    if (mapSwitchSlots.ContainsKey(aItem.strName)) {
+                        string refTarget = mapSwitchSlots[aItem.strName];
                         if (string.IsNullOrEmpty(refTarget)) continue;
+
+                        // Valid Mapped CO Only
                         Debug.Log($"#Info# Found the mismatched CO [{aItem.strName}:{aItem.strID}] " +
                             $"for the Parent CO [{aParent.strName}:{aParent.strID}] for remapping! " +
                             $"Syncing to the CO [{refTarget}] from the template.");
                         if (DataHandler.dictCOs.TryGetValue(refTarget, out JsonCondOwner refCO)) {
+                            
                             // Sync Existing Item
                             aItem.strName = refCO.strName;
                             if (!isTemplate && aSavedCOs != null &&
@@ -66,108 +87,55 @@ public static partial class patch_DataHandler {
                 }
             }
         }
-        if (!isTemplate && aSavedCOs != null) {
-            foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
-                if (aSavedCO != null && dictCOchanges.ContainsKey(aSavedCO.strCODef)
-                    && DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
-                    // Conditions Syncing
-                    if (dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC_CONDS)
-                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
-                        // Parse Sync Commands
-                        string sCmdList = dictCOchanges[aSavedCO.strCODef][FFU_BR_Defs.CMD_SYNC_CONDS];
-                        bool doAll = string.IsNullOrEmpty(sCmdList);
-                        bool isInverse = !doAll ? sCmdList.StartsWith(FFU_BR_Defs.CMD_INVERSE) : false;
-                        List<string> syncKeys = !doAll ? isInverse ? sCmdList.Substring(1).Split(FFU_BR_Defs.CMD_DIV)
-                            .ToList() : sCmdList.Split(FFU_BR_Defs.CMD_DIV).ToList() : new List<string>();
-
-                        // Make Conditions List
-                        List<string> aSavedConds = aSavedCO.aConds.ToList();
-                        List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
-                        List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll 
-                            || (!isInverse && syncKeys.Contains(x)) || (isInverse && !syncKeys.Contains(x))).ToList();
-                        List<string> newCondKeys = refCondKeys.Except(objCondKeys).ToList();
-
-                        // Syncing New Conditions
-                        foreach (string newCondKey in newCondKeys) {
-                            string newCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(newCondKey + "="));
-                            Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] is missing " +
-                                $"[{newCond}] condition! Syncing to the CO from the template.");
-                            aSavedConds.Insert(0, newCond);
-                        }
-
-                        // Saving Synced Conditions
-                        if (newCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
-                    }
-
-                    // Stats Syncing
-                    if (dictCOchanges[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_SYNC_STATS)
-                    && refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length > 0) {
-                        // Parse Sync Commands
-                        string sCmdList = dictCOchanges[aSavedCO.strCODef][FFU_BR_Defs.CMD_SYNC_STATS];
-                        bool doAll = string.IsNullOrEmpty(sCmdList);
-                        bool isInverse = !doAll ? sCmdList.StartsWith(FFU_BR_Defs.CMD_INVERSE) : false;
-                        List<string> syncKeys = !doAll ? isInverse ? sCmdList.Substring(1).Split(FFU_BR_Defs.CMD_DIV)
-                            .ToList() : sCmdList.Split(FFU_BR_Defs.CMD_DIV).ToList() : new List<string>();
-
-                        // Make Conditions List
-                        List<string> aSavedConds = aSavedCO.aConds.ToList();
-                        List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
-                        List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll
-                            || (!isInverse && syncKeys.Contains(x)) || (isInverse && !syncKeys.Contains(x))).ToList();
-                        List<string> extCondKeys = refCondKeys.Intersect(objCondKeys).ToList();
-
-                        // Syncing Condition Values
-                        foreach (string extCondKey in extCondKeys) {
-                            string extCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(extCondKey + "="));
-                            string currCond = aSavedConds.Find(x => x.StartsWith(extCondKey + "="));
-                            Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] condition " +
-                                $"[{extCondKey}] received new value from the template CO.");
-                            aSavedConds[aSavedConds.IndexOf(currCond)] = extCond;
-                        }
-
-                        // Saving Synced Conditions
-                        if (extCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
-                    }
-                }
-            }
-        }
+        // Update Saved Items & Saved COs
         if (aSavedCOs != null) aShipRef.aCOs = aSavedCOs.ToArray();
         aShipRef.aItems = aItemList.ToArray();
     }
-    public static void RestoreLockedItems(JsonShip aShipRef) {
+
+    public static void RecoverMissingItems(JsonShip aShipRef) {
         if (aShipRef == null) return;
         List<JsonItem> aItemList = aShipRef.aItems != null ? aShipRef.aItems.ToList() : null;
         List<JsonItem> aMissingItems = new List<JsonItem>();
         if (aItemList == null) return;
+
+        // Valid Ship Data Only
         foreach (JsonItem aItem in aItemList) {
-            // Valid Only For Mapped COs
-            if (patch_DataHandler.dictCOchanges.ContainsKey(aItem.strName) &&
+            if (dictChangesMap.ContainsKey(aItem.strName) &&
+                dictChangesMap[aItem.strName].ContainsKey(FFU_BR_Defs.CMD_REC_MISSING) &&
+                dictChangesMap[aItem.strName][FFU_BR_Defs.CMD_REC_MISSING] != null &&
                 DataHandler.dictCOs.TryGetValue(aItem.strName, out JsonCondOwner refCO)) {
+                
+                // Prepare Base Commands
+                List<string> targetKeys = dictChangesMap[aItem.strName][FFU_BR_Defs.CMD_REC_MISSING].ToList();
+                bool isInverse = targetKeys.Remove(FFU_BR_Defs.FLAG_INVERSE);
+                bool doAll = targetKeys.Count == 0;
+
                 // Only For COs With Slots And Assigned Loot Table
                 if (refCO.aSlotsWeHave != null && refCO.aSlotsWeHave.Length > 0
                     && refCO.strLoot != null && DataHandler.dictLoot.ContainsKey(refCO.strLoot)) {
+                    
                     // Find All Existing Locked COs
-                    List<JsonItem> aSlottedItems = aItemList.FindAll(x => x.strSlotParentID == aItem.strID &&
-                        patch_DataHandler.listLockedCOs.Contains(x.strName));
-                    List<string> aSlotStr = aSlottedItems.Select(x => x.strName).ToList();
+                    List<string> aSlotStr = aItemList.FindAll(x => x.strSlotParentID == aItem.strID
+                        && listLockedCOs.Contains(x.strName) || targetKeys.Contains(x.strName))
+                        .Select(x => x.strName).ToList();
 
                     // Find All Missing Locked COs
                     List<string> aOrigStr = DataHandler.dictLoot[refCO.strLoot].GetAllLootNames()
-                        .Where(x => patch_DataHandler.listLockedCOs.Contains(x)).ToList();
+                        .Where(x => (doAll && listLockedCOs.Contains(x)) || (!isInverse && targetKeys.Contains(x))
+                        || (isInverse && !targetKeys.Contains(x) && listLockedCOs.Contains(x))).ToList();
                     List<string> aItemAdd = aOrigStr.Except(aSlotStr).ToList();
 
                     // Create From Reference With New ID
                     foreach (string aNewItem in aItemAdd) {
-                        JsonItem refItem = aSlottedItems.First();
                         JsonItem aMissingItem = new JsonItem();
                         aMissingItem.strName = aNewItem;
-                        aMissingItem.fX = refItem.fX;
-                        aMissingItem.fY = refItem.fY;
-                        aMissingItem.fRotation = refItem.fRotation;
+                        aMissingItem.fX = aItem.fX;
+                        aMissingItem.fY = aItem.fY;
+                        aMissingItem.fRotation = 0.0f;
                         aMissingItem.strID = Guid.NewGuid().ToString();
-                        aMissingItem.strSlotParentID = refItem.strSlotParentID;
-                        aMissingItem.bForceLoad = refItem.bForceLoad;
+                        aMissingItem.strSlotParentID = aItem.strID;
+                        aMissingItem.bForceLoad = aItem.bForceLoad;
 
                         // Logging And Adding New Entry
                         Debug.Log($"#Info# Found the missing locked CO [{aNewItem}] " +
@@ -178,31 +146,40 @@ public static partial class patch_DataHandler {
                 }
             }
         }
+
         // Add Missing Locked COs
         aItemList.AddRange(aMissingItems);
         aShipRef.aItems = aItemList.ToArray();
     }
-    public static void RestoreLockedCOs(JsonShip aShipRef) {
+
+    public static void RecoverMissingCOs(JsonShip aShipRef) {
         if (aShipRef == null) return;
         List<JsonItem> aItemList = aShipRef.aItems != null ? aShipRef.aItems.ToList() : null;
         List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
         if (aItemList == null || aSavedCOs == null) return;
+
+        // Valid Ship Data Only
         foreach (JsonItem aItem in aItemList) {
-            if (patch_DataHandler.listLockedCOs.Contains(aItem.strName) && 
-                aSavedCOs.Find(x => x.strID == aItem.strID) == null) {
+            if (aSavedCOs.Find(x => x.strID == aItem.strID) == null) {
                 if (!string.IsNullOrEmpty(aItem.strSlotParentID)) {
                     JsonItem aParent = aItemList.Find(x => x.strID == aItem.strSlotParentID);
                     JsonCondOwnerSave aParentCO = aSavedCOs.Find(x => x.strID == aItem.strSlotParentID);
                     if (aParent == null || aParentCO == null) continue;
+
+                    // Proceed If Parent Has CO
                     if (DataHandler.dictCOs.ContainsKey(aItem.strName) && 
                         DataHandler.dictCOs.ContainsKey(aParent.strName) &&
-                        patch_DataHandler.dictCOchanges.ContainsKey(aParent.strName)) {
+                        dictChangesMap.ContainsKey(aParent.strName) &&
+                        dictChangesMap[aParent.strName].ContainsKey(FFU_BR_Defs.CMD_REC_MISSING)) {
+
+                        // Prepare Base Variables
                         Debug.Log($"#Info# Found the CO [{aItem.strName}:{aItem.strID}] " +
                             $"with missing save data! Creating data from template.");
                         JsonCondOwner refCO = DataHandler.dictCOs[aItem.strName];
                         JsonCondOwner prntCO = DataHandler.dictCOs[aParent.strName];
+
+                        // Create From Template If Item Type
                         if (refCO.strType == "Item") {
-                            // Creating Save CO From Template
                             JsonCondOwnerSave coSaveData = new JsonCondOwnerSave();
 
                             // Getting Identifiers From Item
@@ -235,8 +212,177 @@ public static partial class patch_DataHandler {
                 } else Debug.LogWarning($"Warning! The [{aItem.strName}] isn't slotted and not supported! Ignoring.");
             }
         }
+
         // Add Missing Locked CO Save Data
         aShipRef.aCOs = aSavedCOs.ToArray();
+    }
+
+    public static void SyncConditions(JsonShip aShipRef) {
+        if (aShipRef == null) return;
+        List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
+        if (aSavedCOs == null) return;
+
+        // Valid Ship Data Only
+        foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+            if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) && 
+                dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_CONDS_SYN) &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_SYN] != null &&
+                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+
+                // Prepare Base Variables
+                List<string> targetKeys = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_SYN].ToList();
+                bool isInverse = targetKeys.Remove(FFU_BR_Defs.FLAG_INVERSE);
+                bool doAll = targetKeys.Count == 0;
+
+                // Conditions Syncing
+                if (refCO.aStartingConds != null && aSavedCO.aConds != null && 
+                    refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length >= 0) {
+
+                    // Make Conditions List
+                    List<string> aSavedConds = aSavedCO.aConds.ToList();
+                    List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
+                    List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll
+                        || (!isInverse && targetKeys.Contains(x)) || (isInverse && !targetKeys.Contains(x))).ToList();
+                    List<string> newCondKeys = refCondKeys.Except(objCondKeys).ToList();
+
+                    // Syncing New Conditions
+                    foreach (string newCondKey in newCondKeys) {
+                        string newCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(newCondKey + "="));
+                        Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] is missing " +
+                            $"[{newCond}] condition! Syncing to the CO from the template.");
+                        aSavedConds.Insert(0, newCond);
+                    }
+
+                    // Saving Synced Conditions
+                    if (newCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
+                }
+            }
+        }
+
+        // Update Saved COs
+        aShipRef.aCOs = aSavedCOs.ToArray();
+    }
+
+    public static void UpdateConditions(JsonShip aShipRef) {
+        if (aShipRef == null) return;
+        List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
+        if (aSavedCOs == null) return;
+
+        // Valid Ship Data Only
+        foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+            if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) && 
+                dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_CONDS_UPD) &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_UPD] != null &&
+                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+
+                // Prepare Base Variables
+                List<string> targetKeys = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_UPD].ToList();
+                bool isInverse = targetKeys.Remove(FFU_BR_Defs.FLAG_INVERSE);
+                bool doAll = targetKeys.Count == 0;
+
+                // Conditions Updating
+                if (refCO.aStartingConds != null && aSavedCO.aConds != null &&
+                    refCO.aStartingConds.Length > 0 && aSavedCO.aConds.Length >= 0) {
+
+                    // Make Conditions List
+                    List<string> aSavedConds = aSavedCO.aConds.ToList();
+                    List<string> objCondKeys = aSavedCO.aConds.Select(x => x.Split('=')[0]).ToList();
+                    List<string> refCondKeys = refCO.aStartingConds.Select(x => x.Split('=')[0]).Where(x => doAll
+                        || (!isInverse && targetKeys.Contains(x)) || (isInverse && !targetKeys.Contains(x))).ToList();
+                    List<string> extCondKeys = refCondKeys.Intersect(objCondKeys).ToList();
+
+                    // Syncing Condition Values
+                    foreach (string extCondKey in extCondKeys) {
+                        string extCond = refCO.aStartingConds.ToList().Find(x => x.StartsWith(extCondKey + "="));
+                        string currCond = aSavedConds.Find(x => x.StartsWith(extCondKey + "="));
+                        Debug.Log($"#Info# Saved CO [{aSavedCO.strCODef}:{aSavedCO.strID}] condition " +
+                            $"[{extCondKey}] received new value from the template CO.");
+                        aSavedConds[aSavedConds.IndexOf(currCond)] = extCond;
+                    }
+
+                    // Saving Synced Conditions
+                    if (extCondKeys.Count > 0) aSavedCO.aConds = aSavedConds.ToArray();
+                }
+            }
+        }
+
+        // Update Saved COs
+        aShipRef.aCOs = aSavedCOs.ToArray();
+    }
+
+    public static void SyncSlotEffects(JsonShip aShipRef) {
+        if (aShipRef == null) return;
+        List<JsonItem> aItemList = aShipRef.aItems != null ? aShipRef.aItems.ToList() : null;
+        List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
+        if (aItemList == null || aSavedCOs == null) return;
+
+        // Valid Ship Data Only
+        foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+            if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) &&
+                dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_EFFECT_SLT) &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT] != null &&
+                dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT].Count > 0 &&
+                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+
+                // Prepare Base Variables
+                List<string> addConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT]
+                    .Where(x => x.Contains(FFU_BR_Defs.SYM_EQU)).ToList();
+                List<string> remConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT]
+                    .Where(x => x.StartsWith(FFU_BR_Defs.SYM_INV)).Select(x => x.Substring(1)).ToList();
+                List<JsonCondOwnerSave> targetCOs = aSavedCOs.FindAll(x => aItemList
+                    .Any(i => i.strSlotParentID == aSavedCO.strID && i.strID == x.strID));
+
+                // Syncing Slot Effects
+                foreach (JsonCondOwnerSave targetCO in targetCOs) {
+                    List<string> aTargetConds = targetCO.aConds != null ?
+                        targetCO.aConds.ToList() : new List<string>();
+                    foreach (string addCond in addConds) {
+                        string addCondEntry = addCond.Split(FFU_BR_Defs.SYM_DIV[0])[0];
+                        string addCondKey = addCondEntry.Split(FFU_BR_Defs.SYM_EQU[0])[0];
+                        List<string> validCOs = addCond.Split(FFU_BR_Defs.SYM_DIV[0]).Skip(1).ToList();
+
+                        // Add Only If No Condition
+                        if (!aTargetConds.Any(x => x.StartsWith(addCondKey + "=")) && 
+                            (validCOs.Count == 0 || validCOs.Contains(targetCO.strCODef))) {
+                            Debug.Log($"#Info# Saved CO [{targetCO.strCODef}:{targetCO.strID}] " +
+                                $"got condition [{addCondEntry}] due to the Parent CO " +
+                                $"[{aSavedCO.strCODef}:{aSavedCO.strID}] slot effects.");
+                            aTargetConds.Insert(0, addCondEntry);
+                            continue;
+                        }
+                    }
+                    foreach (string remCond in remConds) {
+                        string remCondEntry = remCond.Split(FFU_BR_Defs.SYM_DIV[0])[0];
+                        string remCondsKey = remCondEntry.Split(FFU_BR_Defs.SYM_EQU[0])[0];
+                        List<string> validCOs = remCond.Split(FFU_BR_Defs.SYM_DIV[0]).Skip(1).ToList();
+
+                        // Remove Only If Condition
+                        if (aTargetConds.Any(x => x.StartsWith(remCondsKey + "=")) &&
+                            (validCOs.Count == 0 || validCOs.Contains(targetCO.strCODef))) {
+                            Debug.Log($"#Info# Saved CO [{targetCO.strCODef}:{targetCO.strID}] " +
+                                $"lost condition [{remCondEntry}] due to the Parent CO " +
+                                $"[{aSavedCO.strCODef}:{aSavedCO.strID}] slot effects.");
+                            aTargetConds.Remove(aTargetConds.Find(x => x.StartsWith(remCondsKey + "=")));
+                            continue;
+                        }
+                    }
+
+                    // Saving Synced Conditions
+                    if (addConds.Count > 0 || remConds.Count > 0) targetCO.aConds = aTargetConds.ToArray();
+                }
+            }
+        }
+    }
+
+    public static void SyncInvEffects(JsonShip aShipRef) {
+        if (aShipRef == null) return;
+        List<JsonItem> aItemList = aShipRef.aItems != null ? aShipRef.aItems.ToList() : null;
+        List<JsonCondOwnerSave> aSavedCOs = aShipRef.aCOs != null ? aShipRef.aCOs.ToList() : null;
+        if (aItemList == null || aSavedCOs == null) return;
+
+        // Valid Ship Data Only
+        foreach (JsonCondOwnerSave aSavedCO in aSavedCOs) {
+        }
     }
 }
 

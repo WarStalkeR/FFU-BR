@@ -26,12 +26,12 @@ using System.Text.RegularExpressions;
 
 public partial class patch_JsonModInfo : JsonModInfo {
     public Dictionary<string, string[]> removeIds { get; set; }
-    public Dictionary<string, Dictionary<string, string>> changesMap { get; set; }
+    public Dictionary<string, Dictionary<string, string[]>> changesMap { get; set; }
 }
 
 public static partial class patch_DataHandler {
     public static string strModsPath = string.Empty;
-    public static Dictionary<string, Dictionary<string, string>> dictCOchanges;
+    public static Dictionary<string, Dictionary<string, List<string>>> dictChangesMap;
     public static List<string> listLockedCOs = new List<string>();
     [MonoModReplace] public static void Init() {
         // Early Access Build Info
@@ -131,7 +131,7 @@ public static partial class patch_DataHandler {
         DataHandler.mapCOs = new Dictionary<string, CondOwner>();
 
         // Initializing Modded Variables
-        dictCOchanges = new Dictionary<string, Dictionary<string, string>>();
+        dictChangesMap = new Dictionary<string, Dictionary<string, List<string>>>();
 
         // Initializing Object Reader
         ObjReader.use.scaleFactor = new Vector3(0.0625f, 0.0625f, 0.0625f);
@@ -340,18 +340,48 @@ public static partial class patch_DataHandler {
             if (refModInfo.strName == "Core") continue;
             if (refModInfo.changesMap != null) {
                 foreach (var changeMap in refModInfo.changesMap) {
-                    if (!dictCOchanges.ContainsKey(changeMap.Key))
-                        dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
+                    if (!dictChangesMap.ContainsKey(changeMap.Key))
+                        dictChangesMap[changeMap.Key] = new Dictionary<string, List<string>>();
                     if (changeMap.Value != null) {
                         foreach (var subMap in changeMap.Value) {
-                            if (subMap.Key != FFU_BR_Defs.OPT_DEL) {
-                                if (subMap.Value != FFU_BR_Defs.OPT_DEL)
-                                    dictCOchanges[changeMap.Key][subMap.Key] = subMap.Value;
-                                else dictCOchanges[changeMap.Key].Remove(subMap.Key);
+                            bool IsInverse = subMap.Key.StartsWith(FFU_BR_Defs.SYM_INV);
+                            string subMapKey = IsInverse? subMap.Key.Substring(1) : subMap.Key;
+                            if (subMapKey != FFU_BR_Defs.OPT_DEL) {
+                                if (!dictChangesMap[changeMap.Key].ContainsKey(subMapKey))
+                                    dictChangesMap[changeMap.Key][subMapKey] = new List<string>();
+                                if (IsInverse && !dictChangesMap[changeMap.Key][subMapKey].Contains(FFU_BR_Defs.FLAG_INVERSE))
+                                    dictChangesMap[changeMap.Key][subMapKey].Add(FFU_BR_Defs.FLAG_INVERSE);
+                                if (subMap.Value != null && subMap.Value.Length > 0) {
+                                    if (subMap.Value[0] != FFU_BR_Defs.OPT_DEL) {
+                                        foreach (var subMapEntry in subMap.Value) {
+                                            if (subMapEntry.StartsWith(FFU_BR_Defs.OPT_REM)) {
+                                                string cleanEntry = subMapEntry.Substring(1);
+                                                string targetEntry = dictChangesMap[changeMap.Key][subMapKey]
+                                                    .Find(x => x.StartsWith(cleanEntry));
+                                                if (!string.IsNullOrEmpty(targetEntry)) {
+                                                    dictChangesMap[changeMap.Key][subMapKey].Remove(targetEntry);
+                                                    continue;
+                                                }
+                                            } else if (subMapEntry.StartsWith(FFU_BR_Defs.OPT_MOD)) {
+                                                string cleanEntry = subMapEntry.Substring(1);
+                                                string lookupKey = cleanEntry.Contains(FFU_BR_Defs.SYM_DIV) ? cleanEntry.Split(FFU_BR_Defs.SYM_DIV[0])[0] :
+                                                    cleanEntry.Contains(FFU_BR_Defs.SYM_EQU) ? cleanEntry.Split(FFU_BR_Defs.SYM_EQU[0])[0] : cleanEntry;
+                                                string targetEntry = dictChangesMap[changeMap.Key][subMapKey]
+                                                    .Find(x => x.StartsWith(lookupKey));
+                                                if (!string.IsNullOrEmpty(targetEntry)) {
+                                                    int targetIdx = dictChangesMap[changeMap.Key][subMapKey].IndexOf(targetEntry);
+                                                    dictChangesMap[changeMap.Key][subMapKey][targetIdx] = cleanEntry;
+                                                    continue;
+                                                }
+                                            } else dictChangesMap[changeMap.Key][subMapKey].Add(subMapEntry);
+                                        }
+                                    }
+                                    else dictChangesMap[changeMap.Key].Remove(subMapKey);
+                                }
                             } else {
-                                dictCOchanges.Remove(changeMap.Key);
+                                dictChangesMap.Remove(changeMap.Key);
                                 if (changeMap.Value.Count > 1)
-                                    dictCOchanges[changeMap.Key] = new Dictionary<string, string>();
+                                    dictChangesMap[changeMap.Key] = new Dictionary<string, List<string>>();
                                 else break;
                             }
                         }
@@ -359,7 +389,7 @@ public static partial class patch_DataHandler {
                 }
             }
         }
-        if (FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump) Debug.Log($"Modification Map Dump: {JsonMapper.ToJson(dictCOchanges)}");
+        if (FFU_BR_Defs.SyncLogging >= FFU_BR_Defs.SyncLogs.ModdedDump) Debug.Log($"Dynamic Changes Map (Dump): {JsonMapper.ToJson(dictChangesMap)}");
 
         // Sync Load Mods Data
         foreach (string modPath in validModPaths) DataHandler.aModPaths.Insert(0, modPath);
@@ -482,8 +512,8 @@ public static partial class patch_DataHandler {
         // Validate Mapped COs In Ship Templates
         if (FFU_BR_Defs.ModSyncLoading) {
             foreach (var dictShip in DataHandler.dictShips) {
-                SyncModdedItems(dictShip.Value, true);
-                RestoreLockedItems(dictShip.Value);
+                SwitchSlottedItems(dictShip.Value, true);
+                RecoverMissingItems(dictShip.Value);
             }
         }
 
@@ -586,10 +616,10 @@ public static partial class patch_DataHandler {
                 rawDump = rawDump + dataKey + "\n";
                 if (isMod && dataDict.ContainsKey(dataKey)) {
                     // Modify Existing Data
-                    if (logObjects) Debug.Log($"Modification Data Dump (Before): {JsonMapper.ToJson(dataDict[dataKey])}");
+                    if (logObjects) Debug.Log($"Modification Data (Dump/Before): {JsonMapper.ToJson(dataDict[dataKey])}");
                     try {
                         SyncDataSafe(dataDict[dataKey], dataBlock, ref rawBlock, strType, dataKey, extData, logModded);
-                        if (logObjects) Debug.Log($"Modification Data Dump (After): {JsonMapper.ToJson(dataDict[dataKey])}");
+                        if (logObjects) Debug.Log($"Modification Data (Dump/After): {JsonMapper.ToJson(dataDict[dataKey])}");
                     } catch (Exception ex) {
                         Exception inner = ex.InnerException;
                         Debug.LogWarning($"Modification sync for Data Block [{dataKey}] " +
@@ -600,7 +630,7 @@ public static partial class patch_DataHandler {
                     // Reference Deep Copy + Apply Changes
                     if (referenceKey != null && dataDict.ContainsKey(referenceKey)) {
                         string deepCopy = JsonMapper.ToJson(dataDict[referenceKey]);
-                        if (logExtended) Debug.Log($"Reference Data Dump (Before): {deepCopy}");
+                        if (logExtended) Debug.Log($"Reference Data (Dump/Before): {deepCopy}");
                         bool isDeepCopySuccess = false;
                         deepCopy = Regex.Replace(deepCopy, "(\"strName\":)\"[^\"]*\"", match => {
                             isDeepCopySuccess = true;
@@ -615,7 +645,7 @@ public static partial class patch_DataHandler {
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
                             try {
                                 SyncDataSafe(deepCopyBlock, dataBlock, ref rawBlock, strType, dataKey, extData, logRefCopy);
-                                if (logExtended) Debug.Log($"Reference Data Dump (After): {JsonMapper.ToJson(deepCopyBlock)}");
+                                if (logExtended) Debug.Log($"Reference Data (Dump/After): {JsonMapper.ToJson(deepCopyBlock)}");
                             } catch (Exception ex) {
                                 Exception inner = ex.InnerException;
                                 Debug.LogWarning($"Reference sync for Data Block [{dataKey}] " +
@@ -638,10 +668,10 @@ public static partial class patch_DataHandler {
                         // Add New Mod Data Entry
                         if (logContent)
                             try {
-                                Debug.Log($"Addendum Data Dump (Mod): {JsonMapper.ToJson(dataBlock)}");
+                                Debug.Log($"Addendum Data (Dump/Mod): {JsonMapper.ToJson(dataBlock)}");
                             } catch (Exception ex) {
                                 Exception inner = ex.InnerException;
-                                Debug.LogWarning($"Addendum dump (mod) for Data Block " +
+                                Debug.LogWarning($"Addendum Data (Dump/Mod) for Data Block " +
                                 $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
                                 (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                             }
@@ -649,7 +679,7 @@ public static partial class patch_DataHandler {
                             dataDict.Add(dataKey, dataBlock);
                         } catch (Exception ex) {
                             Exception inner = ex.InnerException;
-                            Debug.LogWarning($"Modded add of new Data Block [{dataKey}] " +
+                            Debug.LogWarning($"Modded Add of new Data Block [{dataKey}] " +
                             $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
                             $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                         }
@@ -658,10 +688,10 @@ public static partial class patch_DataHandler {
                     // Add New Core Data Entry
                     if (logSource)
                         try {
-                            Debug.Log($"Addendum Data Dump (Core): {JsonMapper.ToJson(dataBlock)}");
+                            Debug.Log($"Addendum Data (Dump/Core): {JsonMapper.ToJson(dataBlock)}");
                         } catch (Exception ex) {
                             Exception inner = ex.InnerException;
-                            Debug.LogWarning($"Addendum dump (core) for Data Block " +
+                            Debug.LogWarning($"Addendum Data (Dump/Core) for Data Block " +
                             $"[{dataKey}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
                             (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                         }
@@ -669,7 +699,7 @@ public static partial class patch_DataHandler {
                         dataDict.Add(dataKey, dataBlock);
                     } catch (Exception ex) {
                         Exception inner = ex.InnerException;
-                        Debug.LogWarning($"Core add of new Data Block [{dataKey}] " +
+                        Debug.LogWarning($"Core Add of new Data Block [{dataKey}] " +
                         $"has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + (inner != null ?
                         $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
