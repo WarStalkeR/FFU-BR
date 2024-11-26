@@ -13,11 +13,12 @@ Ostranauts Discord Server: https://discord.gg/bluebottlegames (#modding-discussi
 3\. Reference-based creation of new entries with applied values. No need to copy whole code block.  
 4\. Removal of specific data entries based on their IDs ('strName' parameter) via `mod_info.json`.  
 5\. Precision array modification via `--ADD--`, `--INS--`, `--DEL--` and `--MOD--` (data only) commands.  
-6\. Completely new parameters and properties that expand existing different gameplay mechanics.  
-7\. Option to unlock max random range value that allows unrestricted random/loot lists.  
-8\. Other various options and settings to alter gameplay and/or make it easier/harder.  
+6\. Dynamic changes mapping and dynamic data modification (for existing templates and saved games).  
+7\. Completely new parameters and properties that expand existing different gameplay mechanics.  
+8\. Option to unlock max random range value that allows unrestricted random/loot lists.  
+9\. Other various options and settings to alter gameplay and/or make it easier/harder.  
 
-**Note:** coding API examples can be viewed below, in relevant paragraph.  
+**Note:** in-depth explanation and API examples can be viewed below, in relevant paragraph.  
 
 # Configuration Options
 Settings file can be found at `\Ostranauts\BepInEx\config\FFU_Beyond_Reach.cfg` (it is
@@ -97,54 +98,96 @@ its current depth.
 `getcond [them] *coParents` - lists all `condowners` parent object recursively and how they are nested.  
 `getcond [them] *coRules` - lists all `condrules` (with stat-related information) attached the targeted object.  
 `getcond [them] *coTickers` - lists all `tickers` (plus related timer information) attached the targeted object.  
-`syncinveffects` - synchronizes inventory effects for all COs in inventory with effects. Mostly usable in cases,
-when mod adds inventory effects to existing inventories, which are necessary for various condition triggers.  
+`syncinveffects` - synchronizes inventory effects for all COs in inventory with effects (in current instance).  
 
-## Objects Mapping and Removal
+## Existing Entities Removal
+Whilst modding API already implements exclusion based on folder paths, it removes whole files with data and not 
+individual items. Existing entities removal allows to remove specific items based on their type and their exact 
+identifier. For example, by adding the JSON block `"removeIds": {"cooverlays": ["OutfitEVA03", "OutfitEVA03Off", 
+"OutfitEVA03Dmg"]}` into `mod_info.json` will make Data Handler remove specified identifiers from `cooverlays` 
+and free them for full implementation as complete condition owners for example. This routine runs before JSON 
+objects are processed, thus prevents identifiers pollution.
+
+## Elastic Mod Data Handling
+Extension to the original modding API that allows precise modification of individual parameters in specific items
+without need to overwrite JSON data block. To be precise, it allows:  
+*\* Partial Data Overwrite* - frees from need to copy entire data block just to modify single parameter.  
+*\* Reference-based Creation* - allows to copy entire original data block with only specific parameters modified.  
+*\* Precision Array Modification* - set of commands to precisely modify original content of arrays with damage.
+
+## Dynamic Changes Mapping
 Modification or removal of some items, might require lots of manual patching for existing ship templates and 
 potentially starting new game (or at least pruning existing entities). In order to avoid it, features that allow 
 objects mapping and removal were implemented. Configurable via `mod_info.json` file only.
 
-**Existing Entries Removal**: Works similar to exclusion paths, except removes items based on type and identifier.
-By adding `"removeIds": {"cooverlays": ["OutfitEVA03", "OutfitEVA03Off", "OutfitEVA03Dmg"]}` will allow to remove
-specified identifiers from `cooverlays` and free them for full implementation as complete condition owners for
-example. This routine runs before JSON objects are processed, thus prevents identifiers pollution.
+**Slotted Items Mapping**: `Switch_Slotted` command that allows to remap existing slotted sub-items into other
+items in the list. By using code such as this `"changesMap": {"OutfitEVA01": {"Switch_Slotted" : ["PocketClipPoint01=
+PocketEVAClipPoint01"]}`, on game or template load, all slotted `PocketClipPoint01` will be converted into the
+`PocketEVAClipPoint01` for all `OutfitEVA01` items. The `Switch_Slotted` can contain multiple entries.
 
-**Missing Locked Sub-COs**: Just adding any CO to the `mod_info.json` as `"changesMap": {"OutfitEVA01": {}}` or 
-as `"changesMap": {"OutfitEVA01": null}` will make feature add any missing built-in locked sub-COs (only inventory 
-defined that way) for every `OutfitEVA01` in the save game and in ship template (ship templates updated on start, 
-saved COs only during loading process, whilst keeping original files intact - everything is done in the memory).
+**Recover Missing Sub-Items**: `Recover_Missing` command allows to recover missing sub-items based on the assigned
+loot table of the item itself. By using code `"changesMap": {"OutfitEVA01": {"Recover_Missing" : []}` game 
+will attempt to recover all `bSlotLocked` sub-items for the item itself, if they are list in the assigned loot
+table of the item. Specifying name of sub-items in the list will make game re-add items, even if they aren't
+`bSlotLocked` as long as they are in the assigned loot table. In addition, this command also supports inverted mode
+`!Recover_Missing: []` - it will attempt to recover all `bSlotLocked` sub-items based on the loot table, if they
+aren't listed in the command.
 
-**Sub-COs Replacement Mapping**: By using code like this `"changesMap": {"OutfitEVA01": {"PocketClipPoint01": 
-"PocketEVAClipPoint02", "PocketEVABatt01": "PocketEVABatt02"}}` feature will replace existing `PocketClipPoint01`
-with `PocketEVAClipPoint02` and `PocketEVABatt01` with `PocketEVABatt02` for every `OutfitEVA01` in the save game 
-and in ship template, without affecting inventory contents and their states.
+**Saved COs Conditions Sync**: `Sync_Conditions` command allows to add missing conditions to already existing COs
+if they are present in their template counterparts. By using code `"changesMap": {"OutfitEVA01": {"Sync_Conditions": 
+[]}}` game will add missing conditions from the template to the existing saved `OutfitEVA01` CO. If you intend only
+to add specific missing conditions that exist in template, listing them as `["IsNewCond", "StatNewCond"]` will make
+game add only them, if they aren't present in saved CO. This command also supports inverted `"!Sync_Conditions": 
+[]` mode, in which only non-listed conditions are added to the saved CO from the template.
 
-**Existing COs Conditions Sync**: By using code `"changesMap": {"OutfitEVA01": {"*sync_conds": null}}` or 
-`"changesMap": {"OutfitEVA01": {"*sync_conds": ""}}` will add missing conditions from the template to the existing
-saved `OutfitEVA01` CO. If your intention is to add only specific conditions to existing saved COs from the template, 
-then syntax `"*sync_conds": "IsCondA|StatNewParam"` should be used - this will make feature add only conditions
-`IsCondA` and `StatNewParam` from the template to the CO in save game and template. Using `"*sync_conds": 
-"!IsCondA|StatNewParam"` with `!` at start will work in inverse: all new condition except `IsCondA` and `StatNewParam`
-will be added from the template to the CO in save game and template.
+**Saved COs Conditions Update**: `Update_Conditions` command allows to update existing condition in the saved CO
+with the values from the template CO. By using code `"changesMap": {"OutfitEVA01": {"Update_Conditions": []}}` game
+will fetch all existing condition values from CO templates and overwrite them in the saved COs.  Do note that such 
+approach is extremely dangerous, as some conditions are dynamic and changing them in such way might break game logic 
+(or game itself). Use precise approach `"Update_Conditions": ["StatBasePrice", "StatDamageMax"]` to update only 
+conditions you know that are static. This command also supports `"!Update_Conditions": []` inverted mode that will
+update all existing conditions values, except ones that are listed in the command.
 
-**Existing COs Conditions Update**: By using code `"changesMap": {"OutfitEVA01": {"*sync_stats": null}}` or 
-`"changesMap": {"OutfitEVA01": {"*sync_stats": ""}}` will fetch all existing condition values from CO templates and
-overwrite them in saved COs. Do note that such approach is extremely dangerous, as some conditions are dynamic and
-changing them in such way might break game logic (or game itself). Instead, use precise approach `"*sync_stats": 
-"StatBasePrice|StatDamageMax"` to update only conditions you know that are static. As with command above, using `!`
-at start will make it work in inverse, but this approach is dangerous as well.
+**Sync Slotted Conditions**: `Sync_Slot_Effects`
 
-**Precision Mapped Entries Removal**: Since all parameters in `changesMap` are additive, option to remove various
+**Sync Inventory Conditions**: `Sync_Inv_Effects`
+
+**Custom Dynamic Changes Syntax**: Since all parameters in `changesMap` are additive, option to remove various
 entries and sub-entries was implemented. To remove specific sub-entry, use code `"changesMap": {"OutfitEVA01": 
-{"EntryName": "~"}}` and to remove entire entry use code `"changesMap": {"OutfitEVA01": {"~": "~"}}`. In addition,
-if you're using `{"~": "~", "SomeCO" : "NewCO"}` it pretty much wipes previous mapped changes for that CO, whist 
-filling with your mapped data only (of course - depending on mod order and what loads after your mod). If the
-`SyncLogging` is set to `ModdedDump` or above, the compiled `changesMap` will be shown in the logs.
+{"CommandName": ["~"]}}` and to remove entire entry use code `"changesMap": {"OutfitEVA01": {"~": []}}`. In addition, 
+if you're using `{"~": [], "Command" : []}` it pretty much wipes previous mapped changes for that CO, whist filling 
+with your mapped data only (of course - depending on mod order and what loads after your mod). Individual command
+entries can be modified as well. Using `"Switch_Slotted" : ["*Pocket01=NewPocket02"]` will modify existing entry to 
+have `NewPocket02` instead whatever there was before. Using `"Switch_Slotted" : ["!Pocket01"]` will remove it
+instead (if not added by some other mods loaded after it).
+
+If the `SyncLogging` is set to `ModdedDump` or above, the compiled `changesMap` will be shown in the logs.
 
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
 releases from burden of copying entire code blocks just to overwrite a couple of parameters.  
+
+## Removal of Existing Entries Example
+```json
+[
+    {
+        //...vaious mod parameters...//
+        "removeIds": {
+            "cooverlays": [
+                "OutfitHelmet05",
+                "OutfitHelmet05Dmg",
+                "OutfitEVA05",
+                "OutfitEVA05Off",
+                "OutfitEVA05Dmg"
+            ]
+        }
+    }
+]
+```
+Prior to processing/loading data, mod loader will remove every item listed in `removeIds` from the `mod_info.json`. 
+It allows removal of existing core and mod items, given correct loading order is used. It identifies entry type
+based on folder name, where data is stored: `cooverlays`, `conditions`, `loot` & etc. In example above I removed
+all `cooverlays` for Bingham-12C EVA Suit/Helmet, to give space to proper `condowners` in the mod.  
 
 ## Partial Data Overwrite Example
 
@@ -180,29 +223,6 @@ In this example as well, you no longer need to copy entire block just to create 
 it is enough to choose valid `strReference` (`strName` of some other entry) and loader will create exact same 
 copy of the entry, but with new `strName` of your choice. Any additional parameters will be used to overwrite
 existing copied parameters of the new entry.  
-
-## Removal of Existing Entries Example
-```json
-[
-    {
-        //...vaious mod parameters...//
-        "removeIds": {
-            "cooverlays": [
-                "OutfitHelmet05",
-                "OutfitHelmet05Dmg",
-                "OutfitEVA05",
-                "OutfitEVA05Off",
-                "OutfitEVA05Dmg"
-            ]
-        }
-    }
-]
-```
-Prior to processing/loading data, mod loader will remove every item listed in `removeIds` from the `mod_info.json`. 
-It allows removal of existing core and mod items, given correct loading order is used. It identifies entry type
-based on folder name, where data is stored: `cooverlays`, `conditions`, `loot` & etc. In example above I removed
-all `cooverlays` for Bingham-12C EVA Suit/Helmet, to give space to proper `condowners` in the mod.  
-
 
 ## Objects Mapping Example
 ```json
