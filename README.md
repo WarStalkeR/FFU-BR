@@ -98,7 +98,6 @@ its current depth.
 `getcond [them] *coParents` - lists all `condowners` parent object recursively and how they are nested.  
 `getcond [them] *coRules` - lists all `condrules` (with stat-related information) attached the targeted object.  
 `getcond [them] *coTickers` - lists all `tickers` (plus related timer information) attached the targeted object.  
-`syncinveffects` - synchronizes inventory effects for all COs in inventory with effects (in current instance).  
 
 ## Elastic Mod Data Handling
 Extension to the original modding API that allows precise modification of individual parameters in specific items
