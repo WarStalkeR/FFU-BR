@@ -210,7 +210,7 @@ public static partial class patch_DataHandler {
                             aSavedCOs.Add(coSaveData);
                         } else Debug.LogWarning($"Warning! The [{aItem.strName}] isn't item CO and not supported! Ignoring.");
                     } else Debug.LogWarning($"Warning! Template CO [{aItem.strName}] for parent or item doesn't exist! Ignoring.");
-                } else Debug.LogWarning($"Warning! The [{aItem.strName}] isn't slotted and not supported! Ignoring.");
+                }
             }
         }
 
