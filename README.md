@@ -100,6 +100,13 @@ its current depth.
 `getcond [them] *coTickers` - lists all `tickers` (plus related timer information) attached the targeted object.  
 `syncinveffects` - synchronizes inventory effects for all COs in inventory with effects (in current instance).  
 
+## Elastic Mod Data Handling
+Extension to the original modding API that allows precise modification of individual parameters in specific items
+without need to overwrite JSON data block. To be precise, it allows:  
+*\* Simplified Data Overwrite* - frees from need to copy entire data block just to modify single parameter.  
+*\* Reference-based Creation* - allows to copy entire original data block with only specific parameters modified.  
+*\* Precision Array Modification* - set of commands to precisely modify original contents of array in a safe manner.
+
 ## Existing Entities Removal
 Whilst modding API already implements exclusion based on folder paths, it removes whole files with data and not 
 individual items. Existing entities removal allows to remove specific items based on their type and their exact 
@@ -107,13 +114,6 @@ identifier. For example, by adding the JSON block `"removeIds": {"cooverlays": [
 "OutfitEVA03Dmg"]}` into `mod_info.json` will make Data Handler remove specified identifiers from `cooverlays` 
 and free them for full implementation as complete condition owners for example. This routine runs before JSON 
 objects are processed, thus prevents identifiers pollution.
-
-## Elastic Mod Data Handling
-Extension to the original modding API that allows precise modification of individual parameters in specific items
-without need to overwrite JSON data block. To be precise, it allows:  
-*\* Partial Data Overwrite* - frees from need to copy entire data block just to modify single parameter.  
-*\* Reference-based Creation* - allows to copy entire original data block with only specific parameters modified.  
-*\* Precision Array Modification* - set of commands to precisely modify original content of arrays with damage.
 
 ## Dynamic Changes Mapping
 Modification or removal of some items, might require lots of manual patching for existing ship templates and 
@@ -182,32 +182,68 @@ modified in the order of loaded mods, thus you need pay utmost attention to it.
 If the `SyncLogging` is set to `ModdedDump` or above, the final/compiled `changesMap` will be shown in the logs.
 
 # Modding API Examples
-In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
-releases from burden of copying entire code blocks just to overwrite a couple of parameters.  
+A various JSON examples that demonstrate usage of extended modding API features in different ways.
 
 ## Removal of Existing Entries Example
 ```json
-[
-    {
-        //...vaious mod parameters...//
-        "removeIds": {
-            "cooverlays": [
-                "OutfitHelmet05",
-                "OutfitHelmet05Dmg",
-                "OutfitEVA05",
-                "OutfitEVA05Off",
-                "OutfitEVA05Dmg"
-            ]
+{
+    "strName": "Your Mod Name",
+    //...vaious mod parameters...//
+    "removeIds": {
+        "cooverlays": [
+            "OutfitHelmet05",
+            "OutfitHelmet05Dmg",
+            "OutfitEVA05",
+            "OutfitEVA05Off",
+            "OutfitEVA05Dmg"
+        ]
+    }
+}
+```
+In this example all `cooverlays` for Bingham-12C EVA Suit and Helmet will be completely removed from the game, in 
+order to give space to proper `condowners` in the mod.  
+
+## Dynamic Changes Map Example 
+```json
+{
+    "strName": "Your Mod Name",
+    //...vaious mod parameters...//
+    "changesMap": {
+        "OutfitEVA01": {
+            "Switch_Slotted": ["PocketClipPoint01=PocketEVAClipPoint01"],
+            "Recover_Missing": [],
+            "Sync_Conditions": ["StatArmorCut", "StatArmorBlunt"],
+            "!Update_Conditions": ["StatMass"],
+            "Sync_Slot_Effects": ["IsModified=1.0x1|PocketEVABatt01"],
+            "Sync_Inv_Effects": ["!IsUnsableItem"]
+        },
+        "OutfitEVA03": {
+            "Switch_Slotted": ["~"],
+            "Recover_Missing": ["PocketEVAO201"],
+            "!Sync_Conditions": ["TestCondition"],
+            "Sync_Slot_Effects": ["-IsSpecial"]
+        },
+        "OutfitEVA05": {
+            "~": []
         }
     }
-]
+}
 ```
-Prior to processing/loading data, mod loader will remove every item listed in `removeIds` from the `mod_info.json`. 
-It allows removal of existing core and mod items, given correct loading order is used. It identifies entry type
-based on folder name, where data is stored: `cooverlays`, `conditions`, `loot` & etc. In example above I removed
-all `cooverlays` for Bingham-12C EVA Suit/Helmet, to give space to proper `condowners` in the mod.  
+In this example in saved game or template, all `OutfitEVA01` slotted `PocketClipPoint01` COs with be replaced with
+`PocketEVAClipPoint01` COs. All missing **locked** COs will be restored and re-attached to `OutfitEVA01`. If the CO
+`OutfitEVA01` is missing `StatArmorCut` or/and `StatArmorBlunt` conditions, they will be added to it. In addition,
+all condition values except `StatMass` will be fetched from original template and added to the `OutfitEVA01` CO.
+Anything that is slotted in the `OutfitEVA01` slots will receive `IsModified` condition. And everything that is
+stored in the inventory attached to `OutfitEVA01` will lose `IsUnsableItem` condition.
 
-## Partial Data Overwrite Example
+For the `OutfitEVA03` CO, the command `Switch_Slotted` will be removed. The `Recover_Missing` command will only
+restore slotted `PocketEVAO201`, if it is present in the attached loot table. The `Sync_Conditions` command will
+add all missing conditions (except `TestCondition`) from the template to `OutfitEVA03` CO. And the `Sync_Slot_Effects`
+command no longer will add `IsSpecial` to items that are slotted in the `OutfitEVA03` CO.
+
+The `OutfitEVA05` will be completely removed from the `changesMap`, regardless of what it had previously.
+
+## Simplified Data Overwrite Example
 
 ```json
 {
@@ -242,32 +278,6 @@ it is enough to choose valid `strReference` (`strName` of some other entry) and 
 copy of the entry, but with new `strName` of your choice. Any additional parameters will be used to overwrite
 existing copied parameters of the new entry.  
 
-## Objects Mapping Example
-```json
-[
-    {
-        //...vaious mod parameters...//
-        "changesMap": {
-            "ModifiedItem01": {
-                "PocketClipPoint01": "PocketEVAClipPoint01", // Change existing saved CO into another.
-                "*sync_conds": null // Fetch all new conditions from CO template into saved CO.
-            },
-            "ModifiedItem02": {
-                "PocketClipPoint03": "~", // Remove PocketClipPoint03 from ModifiedItem02 map.
-                "*sync_conds": "!StatTest|StatExample" // Fetch all new conditions, except these two.
-            },
-            "ModifiedItem03": {
-                "~": "~", // Remove all previous mapped changes and start from clean slate.
-                "PocketClipPoint05": "PocketEVAClipPoint07", // Change existing saved CO into another.
-                "*sync_stats": "NewArmorValueA|NewArmorValueB" // Fetch only these two values from template.
-            }
-        }
-    }
-]
-```
-This example is pretty much self explanatory with in-line comments. Please read 'Objects Mapping and Removal' 
-paragraph for more information, as it explains all the potential and functionality of the feature.
-
 ## Precision Array Modifications
 Since Ostranauts is extremely data-drive game, lots of various parameters and flags are stored in various arrays 
 and sub-arrays. Modified modding/loading API supports precise modifications of such arrays and sub-arrays. If
@@ -289,7 +299,6 @@ in the array - loader can't do anything with row number, but without command and
 ### Precision Array Modification Example
 ```json
 {
-    //...code...//
     "aNormalArray": [
         "--MOD--",
         "StatBasePrice=1.0x9000.0",
@@ -300,7 +309,6 @@ in the array - loader can't do anything with row number, but without command and
         "--INS--4",
         "StatSpecial=1.0x60"
     ]
-    //...code...//
 }
 ```
 In example above existing array `aNormalArray` was modified in the following way: the `StatBasePrice` was 
@@ -311,12 +319,10 @@ inserted at the place of 4th entry in the array and whatever was there initially
 ### Precision Sub-Array Modification Example
 ```json
 {
-    //...code...//
     "aNestedSubArray": [
         "5|--ADD--|IsClumsy=0.0675x1.0|IsStupid=9000x1.0|--MOD--|IsBrave=0.5675x1.0|--DEL--|IsCraven",
         "13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
     ]
-    //...code...//
 }
 ```
 Sub-array is essentially array within array, but with different separator (`|` in that case). First you write 
@@ -327,7 +333,6 @@ entries you want to add/remove/modify (depending on type of the sub-array). In e
 ### Mixed Array Modification Example
 ```json
 {
-    //...code...//
     "aVeryMixedArray": [
         "5|--ADD--|IsClumsy=0.0675x1.0|IsStupid=9000x1.0|--MOD--|IsBrave=0.5675x1.0|--DEL--|IsCraven",
         "--ADD--",
@@ -340,7 +345,6 @@ entries you want to add/remove/modify (depending on type of the sub-array). In e
         "IsClumsy",
         "13|--ADD--|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4|IsGood=1.0x60"
     ]
-    //...code...//
 }
 ```
 In example above, array is modified both, as array and as sub-array. Be extremely careful when using 
@@ -350,7 +354,6 @@ a dedicated command into the sub-array entry itself.
 ### Loot Table Array Edge Cases
 ```json
 {
-    //...code...//
     "aLootArrayCase": [
         "5=|--ADD--=|IsClumsy=0.0675x1.0|IsStupid=9000x1.0|--MOD--=|IsBrave=0.5675x1.0|--DEL--=|IsCraven=",
         "--ADD--=",
@@ -363,7 +366,6 @@ a dedicated command into the sub-array entry itself.
         "IsClumsy=",
         "13=|--ADD--=|IsMagic=9000x1.0|IsFriendship=9000x1.0|IsHeresy=9000x1.0|--INS--4=|IsGood=1.0x60"
     ]
-    //...code...//
 }
 ```
 Loot table arrays located in `loot` folder are edge cases for arrays, because `Loot` class has its own parser,
