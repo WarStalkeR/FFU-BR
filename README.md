@@ -120,6 +120,7 @@ Modification or removal of some items, might require lots of manual patching for
 potentially starting new game (or at least pruning existing entities). In order to avoid it, features that allow 
 objects mapping and removal were implemented. Configurable via `mod_info.json` file only.
 
+### Dynamic Changes Map Commands
 **Slotted Items Mapping**: `Switch_Slotted` command that allows to remap existing slotted sub-items into other
 items in the list. By using code such as this `"changesMap": {"OutfitEVA01": {"Switch_Slotted" : ["PocketClipPoint01=
 PocketEVAClipPoint01"]}`, on game or template load, all slotted `PocketClipPoint01` will be converted into the
@@ -148,20 +149,37 @@ approach is extremely dangerous, as some conditions are dynamic and changing the
 conditions you know that are static. This command also supports `"!Update_Conditions": []` inverted mode that will
 update all existing conditions values, except ones that are listed in the command.
 
-**Sync Slotted Conditions**: `Sync_Slot_Effects`
+**Sync Slotted Conditions**: `Sync_Slot_Effects` command allows to enforce specific conditions to the items that are
+slotted in targeted COs. By using `"changesMap": {"OutfitEVA01": {"Sync_Slot_Effects": ["IsSlotted=1.0x1"]}}` all COs
+that are slotted into `OutfitEVA01` will receive `IsSlotted` condition. If you intention is to apply effect only to
+specific sub-items, you need to use `"Sync_Slot_Effects": ["IsSlotted=1.0x1|ItemName1|ItemName2"]` and it will apply 
+the condition only specific items types, if they are slotted. In addition, this feature supports inverted mode via `!`
+symbol in entries. Code `"Sync_Slot_Effects": ["!IsSlotted"]` will remove specified condition from slotted sub-items
+and `"Sync_Slot_Effects": ["!IsSlotted|ItemName3"]` will remove it only from specific item types. It should be only 
+used, when you're certain that these conditions are assigned and/or removed to/from the slotted sub-items naturally, 
+when you slot them into target item, since it ignores all the trigger validations and checks.
 
-**Sync Inventory Conditions**: `Sync_Inv_Effects`
+**Sync Inventory Conditions**: `Sync_Inv_Effects` command allows to enforce specific conditions to the items that are
+stored in targeted COs. By using `"changesMap": {"OutfitEVA01": {"Sync_Inv_Effects": ["IsStored=1.0x1"]}}` all COs
+that are stored in the `OutfitEVA01` will receive `IsStored` condition. If you intention is to apply effect only to
+specific items in the inventory, you need to use `"Sync_Inv_Effects": ["IsStored=1.0x1|ItemName1|ItemName2"]` and it 
+will apply the condition only specific items types. In addition, this feature supports inverted mode via `!` symbol 
+in entries. Code `"Sync_Inv_Effects": ["!IsStored"]` will remove specified condition from all the stored items
+and `"Sync_Inv_Effects": ["!IsStored|ItemName3"]` will remove it only from specific item types. It should be only 
+used, when you're certain that these conditions are assigned and/or removed to/from the stored items naturally, 
+when you put them into item's attached inventory, since it ignores all the trigger validations and checks.
 
-**Custom Dynamic Changes Syntax**: Since all parameters in `changesMap` are additive, option to remove various
-entries and sub-entries was implemented. To remove specific sub-entry, use code `"changesMap": {"OutfitEVA01": 
-{"CommandName": ["~"]}}` and to remove entire entry use code `"changesMap": {"OutfitEVA01": {"~": []}}`. In addition, 
-if you're using `{"~": [], "Command" : []}` it pretty much wipes previous mapped changes for that CO, whist filling 
-with your mapped data only (of course - depending on mod order and what loads after your mod). Individual command
-entries can be modified as well. Using `"Switch_Slotted" : ["*Pocket01=NewPocket02"]` will modify existing entry to 
-have `NewPocket02` instead whatever there was before. Using `"Switch_Slotted" : ["!Pocket01"]` will remove it
-instead (if not added by some other mods loaded after it).
+### Dynamic Changes Map Syntax
+Since all parameters in `changesMap` are additive, option to remove various entries and sub-entries was implemented. 
+To remove specific sub-entry, use code `"changesMap": {"OutfitEVA01": {"CommandName": ["~"]}}` and to remove entire 
+entry use code `"changesMap": {"OutfitEVA01": {"~": []}}`. In addition, if you're using `{"~": [], "Command" : []}` 
+it pretty much wipes previous mapped changes for that CO, whist filling with your mapped data only (of course - 
+depending on mod order and what loads after your mod). Individual command entries can be modified as well. Using 
+`"Switch_Slotted" : ["*Pocket01=NewPocket02"]` will modify existing entry to have `NewPocket02` instead whatever 
+there was before. Using `"Switch_Slotted" : ["-Pocket01"]` will remove it instead. Do note that the `changesMap` is
+modified in the order of loaded mods, thus you need pay utmost attention to it.
 
-If the `SyncLogging` is set to `ModdedDump` or above, the compiled `changesMap` will be shown in the logs.
+If the `SyncLogging` is set to `ModdedDump` or above, the final/compiled `changesMap` will be shown in the logs.
 
 # Modding API Examples
 In addition to implementation of synchronized loading, this mod improves quality of modding itself and 
