@@ -10,7 +10,9 @@
 
 using BepInEx;
 using BepInEx.Configuration;
+using System;
 using System.IO;
+using System.Linq;
 
 namespace FFU_Beyond_Reach {
     public partial class FFU_BR_Defs {
@@ -40,6 +42,8 @@ namespace FFU_Beyond_Reach {
         public static float AltTempMult = 1.0f;
         public static float AltTempShift = -273.15f;
         public static bool TowBraceAllowsKeep = true;
+        public static bool OrgInventoryMode = true;
+        public static float[] OrgInventoryTweaks = new float[] { -60, -65, -30, -50, 16 };
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
@@ -110,11 +114,21 @@ namespace FFU_Beyond_Reach {
                 "Alternative temperature value shift for conversion from Kelvin.").Value;
             TowBraceAllowsKeep = ModDefs.Bind("QualitySettings", "TowBraceAllowsKeep", TowBraceAllowsKeep,
                 "Allows to use station keeping command, while tow braced to another vessel.").Value;
+            OrgInventoryMode = ModDefs.Bind("QualitySettings", "OrgInventoryMode", OrgInventoryMode,
+                "Changes inventory layout and makes smart use of available space.").Value;
+            string refTweakString = ModDefs.Bind("QualitySettings", "OrgInventoryTweaks", 
+                string.Join("|", Array.ConvertAll(OrgInventoryTweaks, n => n.ToString())),
+                "Organized inventory offsets for tweaking: Base, Top, Bottom, Padding, Grid.").Value;
+            if (!string.IsNullOrEmpty(refTweakString)) OrgInventoryTweaks = Array.ConvertAll(
+                refTweakString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
             UnityEngine.Debug.Log($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempMult: {AltTempMult}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempShift: {AltTempShift}");
             UnityEngine.Debug.Log($"QualitySettings => TowBraceAllowsKeep: {TowBraceAllowsKeep}");
+            UnityEngine.Debug.Log($"QualitySettings => OrgInventoryMode: {OrgInventoryMode}");
+            UnityEngine.Debug.Log($"QualitySettings => OrgInventoryTweaks: " + string.Join(", ", 
+                Array.ConvertAll(OrgInventoryTweaks, x => x.ToString())));
 
             // Load Superiority Settings
             NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
@@ -123,14 +137,12 @@ namespace FFU_Beyond_Reach {
                 "Allows existence of super characters with extreme performance bonuses.").Value;
             SuperCharMultiplier = ModDefs.Bind("SuperSettings", "SuperCharMultiplier", SuperCharMultiplier,
                 "Defines the bonus multiplier for super characters performance.").Value;
-            UnityEngine.Debug.Log($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
-            UnityEngine.Debug.Log($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
-            UnityEngine.Debug.Log($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
-
-            // Load List of Super Chars
             string refCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
                 "Lower-case list of super characters that will receive boost on name basis.").Value;
             if (!string.IsNullOrEmpty(refCharString)) SuperCharacters = refCharString.Split('|');
+            UnityEngine.Debug.Log($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
+            UnityEngine.Debug.Log($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
+            UnityEngine.Debug.Log($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
             UnityEngine.Debug.Log($"SuperSettings => SuperCharacters: {string.Join(", ", SuperCharacters)}");
         }
 
