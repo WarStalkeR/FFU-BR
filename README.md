@@ -66,6 +66,15 @@ info window), similar to how gas shows mass and pressure. Uses formula: `AltTemp
 **TowBraceAllowsKeep** - Defines if it is allowed to use station keeping command, while tow braced to 
 another vessel. As you remember, even when tow braced to another ship, you can only control ship manually, 
 but 'Station Keeping' command is getting turned off. This option resolves this issue.  
+**OrgInventoryMode** - Enables inventory UI tweaking mode that allows to adjust inventory window offsets,
+where they open, what range between them and what is the size of padding between sub-windows.  
+**OrgInventoryTweaks** - Defines various offsets that adjust inventory UI. Allows float values. Required
+values: Base, Top, Bottom, Padding, Grid. **Base** - horizontal offset between inventory equipment window
+and leftmost side of the screen. **Top** - horizontal offset from topmost inventory window to top of the 
+screen. **Bottom** - horizontal cutout offset, below which inventory window will be shown in next column,
+required to balance the 'top' offset. **Padding** - padding between inventory window columns. **Grid** -
+inventory windows column auto-adjustment width for each additional horizontal inventory grid tile, only
+relevant when inventory width is above 4 grid tiles.
 
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  
