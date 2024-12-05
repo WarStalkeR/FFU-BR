@@ -42,7 +42,7 @@ namespace FFU_Beyond_Reach {
         public static float AltTempShift = -273.15f;
         public static bool TowBraceAllowsKeep = true;
         public static bool OrgInventoryMode = true;
-        public static float[] OrgInventoryTweaks = new float[] { -60, -65, -30, -50, 16 };
+        public static float[] OrgInventoryTweaks = new float[] { -60f, -65f, -55f, -50f, 16f, 0.67f };
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
@@ -117,8 +117,8 @@ namespace FFU_Beyond_Reach {
                 "Changes inventory layout and makes smart use of available space.").Value;
             string refTweakString = ModDefs.Bind("QualitySettings", "OrgInventoryTweaks", 
                 string.Join("|", Array.ConvertAll(OrgInventoryTweaks, n => n.ToString())),
-                "Organized inventory offsets for tweaking: Base, Top, Bottom, Padding, Grid.").Value;
-            if (!string.IsNullOrEmpty(refTweakString)) OrgInventoryTweaks = Array.ConvertAll(
+                "Inventory offsets for tweaking: Base, Top, Bottom, Padding, Grid, Safety.").Value;
+            if (refTweakString.Split('|').Length == 6) OrgInventoryTweaks = Array.ConvertAll(
                 refTweakString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
             UnityEngine.Debug.Log($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempSymbol: {AltTempEnabled}");

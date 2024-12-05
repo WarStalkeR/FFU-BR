@@ -17,7 +17,7 @@ public partial class patch_GUIInventory : GUIInventory {
     private float colMaxWidth = 0;
     private extern Vector2 orig_GetWindowPosition(GUIInventoryWindow winCurrent, GUIInventoryWindow winPrev);
     private Vector2 GetWindowPosition(GUIInventoryWindow winCurrent, GUIInventoryWindow winPrev) {
-        if (!FFU_BR_Defs.OrgInventoryMode || FFU_BR_Defs.OrgInventoryTweaks.Length != 5) return orig_GetWindowPosition(winCurrent, winPrev);
+        if (!FFU_BR_Defs.OrgInventoryMode || FFU_BR_Defs.OrgInventoryTweaks.Length != 6) return orig_GetWindowPosition(winCurrent, winPrev);
         RectTransform tPaperDoll = base.transform.Find("PaperDoll").GetComponent<RectTransform>();
         if (activeWindows.IndexOf(winCurrent) == 0) {
             RectTransform tBackground = base.transform.Find("Background").GetComponent<RectTransform>();
@@ -40,11 +40,15 @@ public partial class patch_GUIInventory : GUIInventory {
             xOffset = winPrev.transform.localPosition.x * wScale;
             yOffset = winPrev.transform.localPosition.y - winPrev.gridImageRect.rect.height - winPrev.tabImage.rectTransform.rect.height * 1.7f;
             yOffset *= wScale;
-            float wHeight = winCurrent.gridImageRect.rect.height + winCurrent.tabImage.rectTransform.rect.height * 1.7f;
+            float wHeight = (winCurrent.gridImageRect.rect.height + winCurrent.tabImage.rectTransform.rect.height * 1.7f) * FFU_BR_Defs.OrgInventoryTweaks[5];
             float prevMaxWidth = winPrev.tabImage.rectTransform.rect.width + 
                 Mathf.Max(winPrev.gridLayout.gridMaxX - 4, 0) * FFU_BR_Defs.OrgInventoryTweaks[4];
             if (prevMaxWidth > colMaxWidth) colMaxWidth = prevMaxWidth;
-            if (yOffset - wHeight < yOffsetRef - yOffsetRef * 2f - 4f - FFU_BR_Defs.OrgInventoryTweaks[2]) {
+            float yOffsetExpected = yOffset - wHeight;
+            float yOffsetLimit = -yOffsetRef - 4f - FFU_BR_Defs.OrgInventoryTweaks[2];
+            if (FFU_BR_Defs.ActLogging >= FFU_BR_Defs.ActLogs.Runtime) Debug.Log($"#Info# Inventory Window: {winCurrent.CO.strCODef}, yOffset: " +
+                $"{yOffset}, wHeight: {wHeight}, yOffsetRef: {yOffsetRef}, yOffsetExpected: {yOffsetExpected}, yOffsetLimit: {yOffsetLimit}");
+            if (yOffsetExpected < yOffsetLimit) {
                 yOffset = yOffsetRef;
                 xOffset += colMaxWidth + 42f + FFU_BR_Defs.OrgInventoryTweaks[3];
                 colMaxWidth = 0f;

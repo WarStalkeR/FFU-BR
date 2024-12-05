@@ -74,7 +74,12 @@ and leftmost side of the screen. **Top** - horizontal offset from topmost invent
 screen. **Bottom** - horizontal cutout offset, below which inventory window will be shown in next column,
 required to balance the 'top' offset. **Padding** - padding between inventory window columns. **Grid** -
 inventory windows column auto-adjustment width for each additional horizontal inventory grid tile, only
-relevant when inventory width is above 4 grid tiles.
+relevant when inventory width is above 4 grid tiles. **Safety** - is safety multiplier for inventory
+window height. If its too big inventory window might overflow to the next column, despite having enough
+space in the current. If its too small, inventory window might overflow below intended height limit in the
+same column. If you see that inventory windows overflow one way or another, enable `ActLogging` and try
+various `Safety` and `Bottom` values. If there are less than 6 values, parameter is ignored and default 
+values loaded instead.
 
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  
