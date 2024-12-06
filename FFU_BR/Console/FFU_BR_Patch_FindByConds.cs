@@ -28,7 +28,7 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
             } else if (aCondsToFind.Length == 0) {
                 foreach (JsonCondOwner aCO in DataHandler.dictCOs.Values) {
                     string[] aCondsList = aCO.aStartingConds.Select(x => x.Split('=')[0]).ToArray();
-                    if (!aCondsToAvoid.All(x => aCondsList.Contains(x))) {
+                    if (!aCondsToAvoid.Any(x => aCondsList.Contains(x))) {
                         strInput += $"\n> {aCO.strNameFriendly} ({aCO.strName})";
                         objCount++;
                     }
@@ -37,7 +37,7 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
                 foreach (JsonCondOwner aCO in DataHandler.dictCOs.Values) {
                     string[] aCondsList = aCO.aStartingConds.Select(x => x.Split('=')[0]).ToArray();
                     if (aCondsToFind.All(x => aCondsList.Contains(x)) && 
-                        !aCondsToAvoid.All(x => aCondsList.Contains(x))) {
+                        !aCondsToAvoid.Any(x => aCondsList.Contains(x))) {
                         strInput += $"\n> {aCO.strNameFriendly} ({aCO.strName})";
                         objCount++;
                     }
