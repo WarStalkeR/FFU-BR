@@ -29,6 +29,9 @@ public class patch_CrewSim : CrewSim {
             if (bRaiseUI) {
                 break;
             }
+            if (CanvasManager.IsCanvasQuitShowing()) {
+                break;
+            }
             if (list[i].IsHumanOrRobot) {
                 tooltip.SetTooltipCrew(list[i], GUITooltip.TooltipWindow.Crew);
                 flag = true;

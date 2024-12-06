@@ -77,6 +77,7 @@ public CondTrigger Clone()
 	condTrigger.strFailReasonLast = strFailReasonLast;
 	condTrigger.strHigherCond = strHigherCond;
 	condTrigger.aLowerConds = aLowerConds;
+	condTrigger.nFilterMultiple = nFilterMultiple;
 	condTrigger._isBlank = _isBlank;
 	condTrigger._valuesWereChanged = false;
 	return condTrigger;
