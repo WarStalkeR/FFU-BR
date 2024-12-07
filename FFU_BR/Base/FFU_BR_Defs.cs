@@ -43,6 +43,7 @@ namespace FFU_Beyond_Reach {
         public static bool TowBraceAllowsKeep = true;
         public static bool OrgInventoryMode = true;
         public static float[] OrgInventoryTweaks = new float[] { -60f, -65f, -55f, -50f, 16f, 0.67f };
+        public static bool BetterQuickMove = true;
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
