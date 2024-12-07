@@ -79,7 +79,10 @@ window height. If its too big inventory window might overflow to the next column
 space in the current. If its too small, inventory window might overflow below intended height limit in the
 same column. If you see that inventory windows overflow one way or another, enable `ActLogging` and try
 various `Safety` and `Bottom` values. If there are less than 6 values, parameter is ignored and default 
-values loaded instead.
+values loaded instead.  
+**BetterInvTransfer** - Changes behavior of **shift-click** item transferring in inventory. Items will be 
+auto-transferred to the last inventory window, where player has placed the item manually. Last inventory 
+window is forgotten, when inventory is closed - thus the exploit of long-distance transferring is avoided.  
 
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  

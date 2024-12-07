@@ -22,7 +22,7 @@ public partial class patch_GUIInventory : GUIInventory {
 public partial class patch_GUIInventoryItem : GUIInventoryItem {
     public extern void orig_OnShiftPointerDown();
     public void OnShiftPointerDown() {
-        if (!FFU_BR_Defs.BetterQuickMove ||
+        if (!FFU_BR_Defs.BetterInvTransfer ||
             patch_GUIInventory.instance.targetWindow == null ||
             patch_GUIInventory.instance.targetWindow.CO == null ||
             windowData == patch_GUIInventory.instance.targetWindow) {

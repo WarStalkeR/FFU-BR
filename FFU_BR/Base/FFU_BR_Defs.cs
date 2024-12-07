@@ -43,7 +43,7 @@ namespace FFU_Beyond_Reach {
         public static bool TowBraceAllowsKeep = true;
         public static bool OrgInventoryMode = true;
         public static float[] OrgInventoryTweaks = new float[] { -60f, -65f, -55f, -50f, 16f, 0.67f };
-        public static bool BetterQuickMove = true;
+        public static bool BetterInvTransfer = true;
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
@@ -121,6 +121,10 @@ namespace FFU_Beyond_Reach {
                 "Inventory offsets for tweaking: Base, Top, Bottom, Padding, Grid, Safety.").Value;
             if (refTweakString.Split('|').Length == 6) OrgInventoryTweaks = Array.ConvertAll(
                 refTweakString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
+            BetterInvTransfer = ModDefs.Bind("QualitySettings", "BetterInvTransfer", BetterInvTransfer,
+                "Changes behavior of shift-click item transferring in inventory. Items will be " +
+                "auto-transferred to the last inventory window, where player has placed the item " +
+                "manually. Last inventory window is forgotten, when inventory is closed.").Value;
             UnityEngine.Debug.Log($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempMult: {AltTempMult}");
