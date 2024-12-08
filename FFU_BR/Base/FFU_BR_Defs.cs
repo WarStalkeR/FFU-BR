@@ -45,6 +45,8 @@ namespace FFU_Beyond_Reach {
         public static bool OrgInventoryMode = true;
         public static float[] OrgInventoryTweaks = new float[] { -60f, -65f, -55f, -50f, 16f, 0.67f };
         public static bool BetterInvTransfer = true;
+        public static bool QuickBarPinning = true;
+        public static float[] QuickBarTweaks = new float[] { -520f, 340f, 1f };
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
         public static float SuperCharMultiplier = 10f;
@@ -104,8 +106,8 @@ namespace FFU_Beyond_Reach {
             UnityEngine.Debug.Log($"GameplaySettings => BonusUpperLimit: {BonusUpperLimit}");
             UnityEngine.Debug.Log($"GameplaySettings => SuitOxygenNotify: {SuitOxygenNotify}%");
             UnityEngine.Debug.Log($"GameplaySettings => SuitPowerNotify: {SuitPowerNotify}%");
-            UnityEngine.Debug.Log($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}%");
-            UnityEngine.Debug.Log($"GameplaySettings => StrictInvSorting: {StrictInvSorting}%");
+            UnityEngine.Debug.Log($"GameplaySettings => ShowEachO2Battery: {ShowEachO2Battery}");
+            UnityEngine.Debug.Log($"GameplaySettings => StrictInvSorting: {StrictInvSorting}");
 
             // Load Quality Settings
             AltTempEnabled = ModDefs.Bind("QualitySettings", "AltTempEnabled", AltTempEnabled,
@@ -120,15 +122,22 @@ namespace FFU_Beyond_Reach {
                 "Allows to use station keeping command, while tow braced to another vessel.").Value;
             OrgInventoryMode = ModDefs.Bind("QualitySettings", "OrgInventoryMode", OrgInventoryMode,
                 "Changes inventory layout and makes smart use of available space.").Value;
-            string refTweakString = ModDefs.Bind("QualitySettings", "OrgInventoryTweaks", 
+            string refOrgInvString = ModDefs.Bind("QualitySettings", "OrgInventoryTweaks", 
                 string.Join("|", Array.ConvertAll(OrgInventoryTweaks, n => n.ToString())),
                 "Inventory offsets for tweaking: Base, Top, Bottom, Padding, Grid, Safety.").Value;
-            if (refTweakString.Split('|').Length == 6) OrgInventoryTweaks = Array.ConvertAll(
-                refTweakString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
+            if (refOrgInvString.Split('|').Length == 6) OrgInventoryTweaks = Array.ConvertAll(
+                refOrgInvString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
             BetterInvTransfer = ModDefs.Bind("QualitySettings", "BetterInvTransfer", BetterInvTransfer,
                 "Changes behavior of shift-click item transferring in inventory. Items will be " +
                 "auto-transferred to the last inventory window, where player has placed the item " +
                 "manually. Last inventory window is forgotten, when inventory is closed.").Value;
+            QuickBarPinning = ModDefs.Bind("QualitySettings", "QuickBarPinning", !QuickBarPinning,
+                "Allows to permanently lock the interactions quick bar, where you desire.").Value;
+            string refQckBarString = ModDefs.Bind("QualitySettings", "QuickBarTweaks",
+                string.Join("|", Array.ConvertAll(QuickBarTweaks, n => n.ToString())),
+                "Quick Bar offsets for tweaking: Horizontal, Vertical, Expanded.").Value;
+            if (refQckBarString.Split('|').Length == 3) QuickBarTweaks = Array.ConvertAll(
+                refQckBarString.Split('|'), x => float.TryParse(x, out float v) ? v : 0f);
             UnityEngine.Debug.Log($"QualitySettings => AltTempEnabled: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempSymbol: {AltTempEnabled}");
             UnityEngine.Debug.Log($"QualitySettings => AltTempMult: {AltTempMult}");
@@ -137,6 +146,10 @@ namespace FFU_Beyond_Reach {
             UnityEngine.Debug.Log($"QualitySettings => OrgInventoryMode: {OrgInventoryMode}");
             UnityEngine.Debug.Log($"QualitySettings => OrgInventoryTweaks: " + string.Join(", ", 
                 Array.ConvertAll(OrgInventoryTweaks, x => x.ToString())));
+            UnityEngine.Debug.Log($"QualitySettings => BetterInvTransfer: {BetterInvTransfer}");
+            UnityEngine.Debug.Log($"QualitySettings => QuickBarPinning: {QuickBarPinning}");
+            UnityEngine.Debug.Log($"QualitySettings => QuickBarTweaks: " + string.Join(", ",
+                Array.ConvertAll(QuickBarTweaks, x => x.ToString())));
 
             // Load Superiority Settings
             NoSkillTraitCost = ModDefs.Bind("SuperSettings", "NoSkillTraitCost", NoSkillTraitCost,
@@ -145,9 +158,9 @@ namespace FFU_Beyond_Reach {
                 "Allows existence of super characters with extreme performance bonuses.").Value;
             SuperCharMultiplier = ModDefs.Bind("SuperSettings", "SuperCharMultiplier", SuperCharMultiplier,
                 "Defines the bonus multiplier for super characters performance.").Value;
-            string refCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
+            string refSupCharString = ModDefs.Bind("SuperSettings", "SuperCharacters", string.Join("|", SuperCharacters),
                 "Lower-case list of super characters that will receive boost on name basis.").Value;
-            if (!string.IsNullOrEmpty(refCharString)) SuperCharacters = refCharString.Split('|');
+            if (!string.IsNullOrEmpty(refSupCharString)) SuperCharacters = refSupCharString.Split('|');
             UnityEngine.Debug.Log($"SuperSettings => NoSkillTraitCost: {NoSkillTraitCost}");
             UnityEngine.Debug.Log($"SuperSettings => AllowSuperChars: {AllowSuperChars}");
             UnityEngine.Debug.Log($"SuperSettings => SuperCharMultiplier: {SuperCharMultiplier}");
