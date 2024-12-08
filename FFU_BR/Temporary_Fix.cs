@@ -11,14 +11,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MonoMod;
+using FFU_Beyond_Reach;
 using Ostranauts.UI.MegaToolTip;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Vectrosity;
 
 public class patch_CrewSim : CrewSim {
-    [MonoModReplace] private void MouseHandler() {
+    private extern void orig_MouseHandler();
+    private void MouseHandler() {
+        if (FFU_BR_Defs.EnableCodeFixes) new_MouseHandler();
+        else orig_MouseHandler();
+    }
+    private void new_MouseHandler() {
         List<CondOwner> list = FindCOsAtMousePosition(null, bInteractive: false, bAllowLocked: true);
         bool flag = false;
         CondOwner selected = GUIMegaToolTip.Selected;
@@ -290,7 +295,7 @@ public class patch_CrewSim : CrewSim {
                                 SetBracketTarget(null, bUpdateOnly: false);
                             }
                             HideInputSelector();
-                            if (GUIModal.Instance != null) GUIModal.Instance.Hide();
+                            if (GUIModal.Instance != null) GUIModal.Instance.Hide(); // FIX
                         } else if (gameObject != null) {
                             CondOwner component5 = gameObject.GetComponent<CondOwner>();
                             if (component5.strCODef.IndexOf("Closed") >= 0 || component5.strCODef.IndexOf("Open") >= 0) {

@@ -30,6 +30,7 @@ namespace FFU_Beyond_Reach {
         };
         public static int MaxLogTextSize = 16382;
         public static bool ModSyncLoading = true;
+        public static bool EnableCodeFixes = true;
         public static bool ModifyUpperLimit = false;
         public static float BonusUpperLimit = 1000f;
         public static float SuitOxygenNotify = 10.0f;
@@ -77,6 +78,9 @@ namespace FFU_Beyond_Reach {
             ModSyncLoading = ModDefs.Bind("ConfigSettings", "ModSyncLoading", ModSyncLoading,
                 "Enables smart loading of modified COs and synchronizing of existing CO saved " +
                 "data with updated CO templates, if they are mapped in the mod info file.").Value;
+            EnableCodeFixes = ModDefs.Bind("ConfigSettings", "EnableCodeFixes", EnableCodeFixes,
+                "Enables various vanilla code fixes. Added for cross-version compatibility. If causes " +
+                "any issues, please disable. Option might have no effect in future versions.").Value;
 
             // Load Gameplay Settings
             ModifyUpperLimit = ModDefs.Bind("GameplaySettings", "ModifyUpperLimit", ModifyUpperLimit,
