@@ -69,9 +69,9 @@ but 'Station Keeping' command is getting turned off. This option resolves this i
 **OrgInventoryMode** - Enables inventory UI tweaking mode that allows to adjust inventory window offsets,
 where they open, what range between them and what is the size of padding between sub-windows.  
 **OrgInventoryTweaks** - Defines various offsets that adjust inventory UI. Allows float values. Required
-values: Base, Top, Bottom, Padding, Grid. **Base** - horizontal offset between inventory equipment window
-and leftmost side of the screen. **Top** - horizontal offset from topmost inventory window to top of the 
-screen. **Bottom** - horizontal cutout offset, below which inventory window will be shown in next column,
+values: Base, Top, Bottom, Padding, Grid, Safety. **Base** - horizontal offset between inventory equipment 
+window and leftmost side of the screen. **Top** - horizontal offset from topmost inventory window to top of 
+the screen. **Bottom** - horizontal cutout offset, below which inventory window will be shown in next column,
 required to balance the 'top' offset. **Padding** - padding between inventory window columns. **Grid** -
 inventory windows column auto-adjustment width for each additional horizontal inventory grid tile, only
 relevant when inventory width is above 4 grid tiles. **Safety** - is safety multiplier for inventory
@@ -83,6 +83,12 @@ values loaded instead.
 **BetterInvTransfer** - Changes behavior of **shift-click** item transferring in inventory. Items will be 
 auto-transferred to the last inventory window, where player has placed the item manually. Last inventory 
 window is forgotten, when inventory is closed - thus the exploit of long-distance transferring is avoided.  
+**QuickBarPinning** - Allows to permanently lock the interactions quick bar, where you desire on the screen.  
+**QuickBarTweaks** - Defines various offsets that adjust interactions quick bar position and mode. Required
+values: Horizontal, Vertical, Expanded. **Horizontal** - defines horizontal position offset for the 
+interactions quick bar. **Vertical** - defines vertical position offset for the interactions quick bar. 
+**Expanded** - defines if interactions quick bar is always expanded or not (only `1` is treated as `true`,
+any other number is treated as `false`).
 
 ## Superiority Settings
 **NoSkillTraitCost** - Option to allow learn/unlearn any trait or skill for free.  
