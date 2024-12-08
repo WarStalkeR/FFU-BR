@@ -16,6 +16,7 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
         array[0] = array[0].ToLower();
         switch (array[0]) {
             case "findcondcos": return KeywordFindCondCOs(ref strInput);
+            case "repairship": return KeywordRepairShip(ref strInput);
             default: return orig_ResolveString(ref strInput);
         }
     }
