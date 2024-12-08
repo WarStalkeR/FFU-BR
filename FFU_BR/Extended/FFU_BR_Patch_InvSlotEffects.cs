@@ -85,10 +85,6 @@ public partial class patch_Container : Container {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 CondOwner.SetData
-Container.SetIsInContainer
-Container.ClearIsInContainer
-Slots.ApplySlotEffects
-
 public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOSIn = null)
 {
 	if (jid == null)
@@ -632,6 +628,7 @@ public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOS
 	SetUpBehaviours();
 }
 
+Container.SetIsInContainer
 public void SetIsInContainer(CondOwner co)
 {
 	if (CO == this)
@@ -665,6 +662,7 @@ public void SetIsInContainer(CondOwner co)
 	}
 }
 
+Container.ClearIsInContainer
 public void ClearIsInContainer(CondOwner co)
 {
 	co.ZeroCondAmount("IsInContainer");
@@ -675,6 +673,7 @@ public void ClearIsInContainer(CondOwner co)
 	co.objCOParent = null;
 }
 
+Slots.ApplySlotEffects
 private void ApplySlotEffects(Slot slot, CondOwner co, JsonSlotEffects jse, bool bRemove = false)
 {
 	if (co == null || slot == null || jse == null)

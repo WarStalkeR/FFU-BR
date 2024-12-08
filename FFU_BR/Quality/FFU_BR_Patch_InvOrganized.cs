@@ -61,7 +61,6 @@ public partial class patch_GUIInventory : GUIInventory {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 GUIInventory.GetWindowPosition
-
 private Vector2 GetWindowPosition(GUIInventoryWindow winCurrent, GUIInventoryWindow winPrev)
 {
 	RectTransform component = base.transform.Find("PaperDoll").GetComponent<RectTransform>();

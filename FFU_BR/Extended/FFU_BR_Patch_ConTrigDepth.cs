@@ -56,8 +56,6 @@ public partial class patch_CondTrigger : CondTrigger {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 CondTrigger.Clone
-CondTrigger.Triggered
-
 public CondTrigger Clone()
 {
 	CondTrigger condTrigger = new CondTrigger();
@@ -83,6 +81,7 @@ public CondTrigger Clone()
 	return condTrigger;
 }
 
+CondTrigger.Triggered
 public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true)
 {
 	if (logReason)

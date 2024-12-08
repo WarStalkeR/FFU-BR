@@ -9,8 +9,6 @@
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
 
-using Ostranauts.UI.MegaToolTip;
-using System.Collections.Generic;
 using MonoMod;
 using UnityEngine;
 using System.IO;
@@ -118,7 +116,6 @@ public partial class patch_ConsoleToGUI : ConsoleToGUI {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 ConsoleToGUI.DrawConsole
-
 private void DrawConsole(int window)
 {
 	if (HandleInput())

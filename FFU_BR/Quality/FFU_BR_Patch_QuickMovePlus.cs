@@ -74,8 +74,6 @@ public partial class patch_GUIInventoryItem : GUIInventoryItem {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 GUIInventoryItem.OnShiftPointerDown
-GUIInventoryItem.MoveInventories
-
 public void OnShiftPointerDown()
 {
 	CondOwner inventoryCrew = GetInventoryCrew();
@@ -129,6 +127,7 @@ public void OnShiftPointerDown()
 	}
 }
 
+GUIInventoryItem.MoveInventories
 public bool MoveInventories(GUIInventoryWindow destination, Vector2 position, bool canPlaceSelf)
 {
 	if (CO == null || destination == null)

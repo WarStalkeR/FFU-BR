@@ -34,8 +34,6 @@ public class patch_GUIQuickBar : GUIQuickBar {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 GUIQuickBar.Start
-GUIQuickBar.ExpandCollapse
-
 private void Start()
 {
 	TooltipPreviewButton.OnPreviewButtonClicked.AddListener(delegate(CondOwner selectedCO)
@@ -63,6 +61,7 @@ private void Start()
 	Setup();
 }
 
+GUIQuickBar.ExpandCollapse
 private void ExpandCollapse(bool refreshSizeOnly = false)
 {
 	if (!refreshSizeOnly)

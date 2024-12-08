@@ -1020,10 +1020,6 @@ public static partial class patch_DataHandler {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 DataHandler.Init
-DataHandler.LoadMod
-DataHandler.LoadModJsons
-DataHandler.JsonToData
-
 public static void Init()
 {
 	string empty = string.Empty;
@@ -1277,6 +1273,7 @@ public static void Init()
 	bLoaded = true;
 }
 
+DataHandler.LoadMod
 private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, JsonModInfo jmi)
 {
 	if (!Directory.Exists(strFolderPath + "data/"))
@@ -1430,6 +1427,7 @@ private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, Json
 	}
 }
 
+DataHandler.LoadModJsons
 private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string, TJson> dict, string[] aIgnorePatterns)
 {
 	if (!Directory.Exists(strFolderPath))
@@ -1464,6 +1462,7 @@ private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string,
 	}
 }
 
+DataHandler.JsonToData
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
 {
 	Debug.Log("#Info# Loading json: " + strFile);

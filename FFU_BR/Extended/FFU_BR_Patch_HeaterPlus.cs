@@ -96,7 +96,6 @@ public partial class patch_Heater : Heater {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 Heater.Heat
-
 private void Heat(double fTimePassed)
 {
 	bool flag = false;

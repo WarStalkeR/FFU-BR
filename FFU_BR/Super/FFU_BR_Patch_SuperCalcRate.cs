@@ -48,7 +48,6 @@ public partial class patch_Interaction : Interaction {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 Interaction.CalcRate
-
 private void CalcRate()
 {
 	if (strActionGroup != "Work" || bCTThemModifierCalculated)

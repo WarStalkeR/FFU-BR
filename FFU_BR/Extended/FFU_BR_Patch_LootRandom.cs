@@ -308,11 +308,6 @@ public partial class patch_Loot : Loot {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 Loot.GetCTLoot
-Loot.GetCOLoot
-Loot.GetLootNames
-Loot.ApplyCondLoot
-Loot.GetCondLoot
-
 public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 {
 	List<CondTrigger> list = new List<CondTrigger>();
@@ -381,6 +376,7 @@ public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 	return list;
 }
 
+Loot.GetCOLoot
 public List<CondOwner> GetCOLoot(CondOwner objUs, bool bSuppressOverride, string strRandID = null)
 {
 	List<CondOwner> list = new List<CondOwner>();
@@ -476,6 +472,7 @@ public List<CondOwner> GetCOLoot(CondOwner objUs, bool bSuppressOverride, string
 	return list;
 }
 
+Loot.GetLootNames
 public List<string> GetLootNames(string strRandID = null, bool bOnlyCOs = false, string type = null)
 {
 	List<string> list = new List<string>();
@@ -558,6 +555,7 @@ public List<string> GetLootNames(string strRandID = null, bool bOnlyCOs = false,
 	return list;
 }
 
+Loot.ApplyCondLoot
 public void ApplyCondLoot(CondOwner coUs, float fCoeff, string strRandID = null, float fCondRuleTrack = 0f)
 {
 	if (coUs == null || strType != "condition")
@@ -601,6 +599,7 @@ public void ApplyCondLoot(CondOwner coUs, float fCoeff, string strRandID = null,
 	}
 }
 
+Loot.GetCondLoot
 public Dictionary<string, double> GetCondLoot(float fCoeff, Dictionary<string, double> dictOut, string strRandID = null)
 {
 	if (dictOut == null)

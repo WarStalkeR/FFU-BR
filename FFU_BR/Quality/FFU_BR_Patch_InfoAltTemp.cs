@@ -71,8 +71,6 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
 /*
 NumberModule.SetData
-NumberModule.OnUpdateUI
-
 public override void SetData(CondOwner co)
 {
 	if (co == null || co.mapConds == null)
@@ -108,6 +106,7 @@ public override void SetData(CondOwner co)
 	}
 }
 
+NumberModule.OnUpdateUI
 protected override void OnUpdateUI()
 {
 	if (_numbList.Count == 0)
