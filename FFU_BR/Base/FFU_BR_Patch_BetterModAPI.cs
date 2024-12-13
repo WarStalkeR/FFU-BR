@@ -1127,11 +1127,13 @@ public static void Init()
 	{
 		Debug.LogWarning("WARNING: settings.json not found. Resorting to default values.");
 		dictSettings["UserSettings"] = new JsonUserSettings();
+		dictSettings["UserSettings"].Init();
 	}
 	if (!dictSettings.ContainsKey("UserSettings") || dictSettings["UserSettings"] == null)
 	{
 		Debug.LogError("ERROR: Malformed settings.json. Resorting to default values.");
 		dictSettings["UserSettings"] = new JsonUserSettings();
+		dictSettings["UserSettings"].Init();
 	}
 	dictSettings["DefaultUserSettings"].CopyTo(GetUserSettings());
 	dictSettings.Remove("DefaultUserSettings");

@@ -977,7 +977,7 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		{
 			foreach (Ship item5 in aDocked)
 			{
-				if (item5 != null && !list5.Contains(item5))
+				if (item5 != null && !item5.bDestroyed && !list5.Contains(item5))
 				{
 					list5.Insert(0, item5);
 				}

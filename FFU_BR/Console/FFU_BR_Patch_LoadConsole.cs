@@ -77,6 +77,14 @@ public static bool ResolveString(ref string strInput)
 		return KeywordShipVis(ref strInput, array);
 	case "lookup":
 		return KeywordLookup(ref strInput, array);
+	case "plot":
+		return KeywordPlot(ref strInput, array);
+	case "summon":
+		return KeywordSummon(ref strInput, array);
+	case "rel":
+		return KeywordRelationship(ref strInput, array);
+	case "skywalk":
+		return KeywordSkywalk(ref strInput, array);
 	case "detatch":
 		return KeywordDetach(ref strInput, array);
 	case "attatch":
