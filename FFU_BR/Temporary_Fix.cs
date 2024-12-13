@@ -356,47 +356,49 @@ public class patch_CrewSim : CrewSim {
                     ctSelectFilter = condTrigger3;
                 }
             } else if (GetMouseButtonUp(1)) {
-                if (ZoneMenuOpen) {
-                    return;
-                }
-                if (objInstance.coConnectMode != null) {
-                    if (coConnectLastCrew != null) {
-                        SetBracketTarget(coConnectLastCrew.strID, bUpdateOnly: false, noAuto: true);
-                        coConnectLastCrew = null;
-                        coConnectMode = null;
-                    } else {
-                        SetBracketTarget(null, bUpdateOnly: false);
+                if (!bJustClickedInput) {
+                    if (ZoneMenuOpen) {
+                        return;
                     }
-                    HideInputSelector();
-                    GUIModal.Instance.Hide();
-                } else if ((contextMenuPool.IsRaised && !bRaisedMenuThisFrame) || (double)RightMouseButtonDownTimer > 0.3) {
-                    RightMouseButtonDownTimer = 0f;
-                    LowerContextMenu();
-                } else if (!bRaiseUI && !inventoryGUI.ClickedInventory(Input.mousePosition)) {
-                    RightMouseButtonDownTimer = 0f;
-                    if (CanvasManager.IsOverUIElement(goCrewBar)) {
-                        if (CanvasManager.IsOverUIElement(goCrewBarPortraitButton)) {
-                            OnRightClick.Invoke(new List<CondOwner> { GetSelectedCrew() });
-                        }
-                    } else {
-                        if (bShipEdit || bDebugShow) {
-                            ctSelectFilter = null;
+                    if (objInstance.coConnectMode != null) {
+                        if (coConnectLastCrew != null) {
+                            SetBracketTarget(coConnectLastCrew.strID, bUpdateOnly: false, noAuto: true);
+                            coConnectLastCrew = null;
+                            coConnectMode = null;
                         } else {
-                            ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelectedMTT");
+                            SetBracketTarget(null, bUpdateOnly: false);
                         }
-                        List<CondOwner> mouseOverCO4 = GetMouseOverCO(new string[2] { "Default", "LoS" }, ctSelectFilter);
-                        Room room2 = null;
-                        if (shipCurrentLoaded != null) {
-                            room2 = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
+                        HideInputSelector();
+                        GUIModal.Instance.Hide();
+                    } else if ((contextMenuPool.IsRaised && !bRaisedMenuThisFrame) || (double)RightMouseButtonDownTimer > 0.3) {
+                        RightMouseButtonDownTimer = 0f;
+                        LowerContextMenu();
+                    } else if (!bRaiseUI && !inventoryGUI.ClickedInventory(Input.mousePosition)) {
+                        RightMouseButtonDownTimer = 0f;
+                        if (CanvasManager.IsOverUIElement(goCrewBar)) {
+                            if (CanvasManager.IsOverUIElement(goCrewBarPortraitButton)) {
+                                OnRightClick.Invoke(new List<CondOwner> { GetSelectedCrew() });
+                            }
+                        } else {
+                            if (bShipEdit || bDebugShow) {
+                                ctSelectFilter = null;
+                            } else {
+                                ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelectedMTT");
+                            }
+                            List<CondOwner> mouseOverCO4 = GetMouseOverCO(new string[2] { "Default", "LoS" }, ctSelectFilter);
+                            Room room2 = null;
+                            if (shipCurrentLoaded != null) {
+                                room2 = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
+                            }
+                            if (room2 != null) {
+                                mouseOverCO4.Remove(room2.CO);
+                                mouseOverCO4.Add(room2.CO);
+                            }
+                            if (mouseOverCO4 != null && mouseOverCO4.Count > 0) {
+                                OnRightClick.Invoke(mouseOverCO4);
+                            }
+                            ctSelectFilter = null;
                         }
-                        if (room2 != null) {
-                            mouseOverCO4.Remove(room2.CO);
-                            mouseOverCO4.Add(room2.CO);
-                        }
-                        if (mouseOverCO4 != null && mouseOverCO4.Count > 0) {
-                            OnRightClick.Invoke(mouseOverCO4);
-                        }
-                        ctSelectFilter = null;
                     }
                 }
             } else if (GetMouseButton(2)) {

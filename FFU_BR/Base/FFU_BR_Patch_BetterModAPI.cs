@@ -146,10 +146,12 @@ public static partial class patch_DataHandler {
         } else {
             Debug.LogWarning("WARNING: settings.json not found. Resorting to default values.");
             DataHandler.dictSettings["UserSettings"] = new JsonUserSettings();
+            DataHandler.dictSettings["UserSettings"].Init();
         }
         if (!DataHandler.dictSettings.ContainsKey("UserSettings") || DataHandler.dictSettings["UserSettings"] == null) {
             Debug.LogError("ERROR: Malformed settings.json. Resorting to default values.");
             DataHandler.dictSettings["UserSettings"] = new JsonUserSettings();
+            DataHandler.dictSettings["UserSettings"].Init();
         }
         DataHandler.dictSettings["DefaultUserSettings"].CopyTo(DataHandler.GetUserSettings());
         DataHandler.dictSettings.Remove("DefaultUserSettings");
