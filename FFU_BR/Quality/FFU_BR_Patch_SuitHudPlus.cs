@@ -59,7 +59,8 @@ public partial class patch_GUIHelmet : GUIHelmet {
 									if (!foundPwr) foundPwr = true;
 									Powered refPower = slotItem.GetComponent<Powered>();
 									double currPwr = slotItem.GetCondAmount("StatPower");
-									double maxPwr = slotItem.GetCondAmount("StatPowerMax");
+									double maxPwr = slotItem.GetCondAmount("StatPowerMax") 
+                                        * slotItem.GetDamageState();
 									if (refPower != null) maxPwr = refPower.PowerStoredMax;
 									if (maxPwr == 0.0) maxPwr = 1.0;
 									if (FFU_BR_Defs.ShowEachO2Battery) {
