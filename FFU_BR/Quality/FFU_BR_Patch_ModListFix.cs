@@ -331,25 +331,45 @@ private void Init()
 	tfList = base.transform.Find("pnlFiles/pnlList/Viewport/pnlListContent");
 	JsonModList value5 = null;
 	GUIModRow component2 = Resources.Load<GameObject>("prefabModRow").GetComponent<GUIModRow>();
-	if (!DataHandler.dictModList.TryGetValue("Mod Loading Order", out value5))
+	if (DataHandler.dictModList.TryGetValue("Mod Loading Order", out value5))
 	{
-		return;
+		string[] aLoadOrder = value5.aLoadOrder;
+		foreach (string text2 in aLoadOrder)
+		{
+			GUIModRow gUIModRow = UnityEngine.Object.Instantiate(component2, tfList);
+			JsonModInfo value6 = null;
+			if (text2 != null && text2 != string.Empty && DataHandler.dictModInfos.TryGetValue(text2, out value6))
+			{
+				gUIModRow.txtName.text = value6.strName;
+				gUIModRow.Status = value6.Status;
+			}
+			else
+			{
+				gUIModRow.txtName.text = text2;
+				gUIModRow.Status = GUIModRow.ModStatus.Missing;
+			}
+		}
 	}
-	string[] aLoadOrder = value5.aLoadOrder;
-	foreach (string text2 in aLoadOrder)
+	_toggleBGRotation = base.transform.Find("pnlInterface/chkToggleBGRotation").GetComponent<ToggleSideSwitch>();
+	if (_toggleBGRotation.State != DataHandler.GetUserSettings().bDisableParallaxRotation)
 	{
-		GUIModRow gUIModRow = UnityEngine.Object.Instantiate(component2, tfList);
-		JsonModInfo value6 = null;
-		if (text2 != null && text2 != string.Empty && DataHandler.dictModInfos.TryGetValue(text2, out value6))
+		_toggleBGRotation.State = DataHandler.GetUserSettings().bDisableParallaxRotation;
+	}
+	_toggleBGRotation.OnClick.AddListener(ChangeParallaxRotation);
+	ddFlickerAmount = base.transform.Find("pnlInterface/ddFlickerAmount").GetComponent<TMP_Dropdown>();
+	ddFlickerAmount.ClearOptions();
+	ddFlickerAmount.AddOptions(new List<string>(dictFlickerAmount.Values));
+	if (dictFlickerAmount.TryGetValue(DataHandler.GetUserSettings().nFlickerAmount, out var value7))
+	{
+		foreach (TMP_Dropdown.OptionData option5 in ddFlickerAmount.options)
 		{
-			gUIModRow.txtName.text = value6.strName;
-			gUIModRow.Status = value6.Status;
-		}
-		else
-		{
-			gUIModRow.txtName.text = text2;
-			gUIModRow.Status = GUIModRow.ModStatus.Missing;
+			if (value7 == option5.text)
+			{
+				ddFlickerAmount.value = ddFlickerAmount.options.IndexOf(option5);
+				break;
+			}
 		}
 	}
+	ddFlickerAmount.onValueChanged.AddListener(ChangeFlickerAmount);
 }
 */

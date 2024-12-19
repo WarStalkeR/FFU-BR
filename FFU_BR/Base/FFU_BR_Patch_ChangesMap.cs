@@ -449,6 +449,7 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	{
 		return;
 	}
+	_bDoneLoading = false;
 	if (Comms == null)
 	{
 		Comms = new Comms(this, json.commData);
@@ -461,9 +462,6 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	{
 		CrewSim.bPoolVisUpdates = true;
 	}
-	GameObject gameObject = null;
-	CondOwner condOwner = null;
-	CondOwner condOwner2 = null;
 	List<CondOwner> aLootSpawners = new List<CondOwner>();
 	Dictionary<string, CondOwner> dictPlaceholders = new Dictionary<string, CondOwner>();
 	Dictionary<int, JsonRoom> dictionary = new Dictionary<int, JsonRoom>();
@@ -510,22 +508,6 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 			else
 			{
 				publicName = json.publicName;
-			}
-			if (json.origin == "$TEMPLATE")
-			{
-				Loot loot = DataHandler.GetLoot("TXTShipOrigin");
-				if (loot != null)
-				{
-					List<string> lootNames = loot.GetLootNames();
-					if (lootNames != null && lootNames.Count > 0)
-					{
-						origin = loot.GetLootNames()[0];
-					}
-					else
-					{
-						origin = DataHandler.GetString("SHIP_ORIGIN_UNKNOWN");
-					}
-				}
 			}
 		}
 		if (json.make != null)
@@ -575,6 +557,15 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		if (json.aMarketConfigs != null)
 		{
 			MarketConfigs = json.aMarketConfigs.CloneShallow();
+		}
+		if (json.aLog != null)
+		{
+			aLog = new List<JsonShipLog>();
+			JsonShipLog[] array = json.aLog;
+			foreach (JsonShipLog jsonShipLog in array)
+			{
+				aLog.Add(jsonShipLog.Clone());
+			}
 		}
 		Classification = json.ShipType;
 		strLaw = json.strLaw;
@@ -638,14 +629,34 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 			bPrefill = json.bPrefill;
 			bBreakInUsed = json.bBreakInUsed;
 		}
-		this.gameObject.name = strRegID;
+		if (json.origin == "$TEMPLATE")
+		{
+			Loot loot = DataHandler.GetLoot("TXTShipOrigin" + strRegID[0]);
+			if (loot == null)
+			{
+				loot = DataHandler.GetLoot("TXTShipOrigin");
+			}
+			if (loot != null)
+			{
+				List<string> lootNames = loot.GetLootNames();
+				if (lootNames != null && lootNames.Count > 0)
+				{
+					origin = loot.GetLootNames()[0];
+				}
+				else
+				{
+					origin = DataHandler.GetString("SHIP_ORIGIN_UNKNOWN");
+				}
+			}
+		}
+		gameObject.name = strRegID;
 		DMGStatus = json.DMGStatus;
 	}
 	Debug.Log(string.Concat("#Info# Loading ship ", strRegID, "; Requesting: ", nLoad, "; Currently: ", nLoadState));
 	if (nLoad >= Loaded.Edit)
 	{
 		list.AddRange(json.aItems);
-		this.gameObject.SetActive(value: true);
+		gameObject.SetActive(value: true);
 		nRCSDistroCount = 0;
 		fRCSCount = 0f;
 		nDockCount = 0;
@@ -692,7 +703,7 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	}
 	if (ShipCO == null)
 	{
-		ShipCO = DataHandler.GetCondOwner("ShipCO", strRegID, null, bLoot: false, null, json.shipCO, null, this.gameObject.transform);
+		ShipCO = DataHandler.GetCondOwner("ShipCO", strRegID, null, bLoot: false, null, json.shipCO, null, gameObject.transform);
 		ShipCO.ship = this;
 		ShipCO.ClaimShip(strRegID);
 	}
@@ -719,21 +730,21 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		fAIDockingExpire = json.fAIDockingExpire;
 		if (json.aWPs != null)
 		{
-			for (int k = 0; k < json.aWPs.Length; k++)
+			for (int l = 0; l < json.aWPs.Length; l++)
 			{
-				aWPs.Add(new WaypointShip(new ShipSitu(json.aWPs[k]), json.aWPTimes[k]));
+				aWPs.Add(new WaypointShip(new ShipSitu(json.aWPs[l]), json.aWPTimes[l]));
 			}
 		}
 		if (json.aRooms != null)
 		{
-			for (int l = 0; l < json.aRooms.Length; l++)
+			for (int m = 0; m < json.aRooms.Length; m++)
 			{
-				if (json.aRooms[l].aTiles != null)
+				if (json.aRooms[m].aTiles != null)
 				{
-					JsonRoom jsonRoom = json.aRooms[l];
-					for (int m = 0; m < jsonRoom.aTiles.Length; m++)
+					JsonRoom jsonRoom = json.aRooms[m];
+					for (int n = 0; n < jsonRoom.aTiles.Length; n++)
 					{
-						dictionary[jsonRoom.aTiles[m]] = jsonRoom;
+						dictionary[jsonRoom.aTiles[n]] = jsonRoom;
 					}
 				}
 			}
@@ -766,22 +777,22 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		TileUtils.GetPoweredTiles(this);
 		if (json.aBGXs != null && json.aBGYs != null && json.aBGNames != null)
 		{
-			for (int n = 0; n < json.aBGNames.Length && n < json.aBGYs.Length && n < json.aBGXs.Length; n++)
+			for (int num = 0; num < json.aBGNames.Length && num < json.aBGYs.Length && num < json.aBGXs.Length; num++)
 			{
-				if (json.aBGNames[n] == null || json.aBGXs[n] == null || json.aBGYs[n] == null)
+				if (json.aBGNames[num] == null || json.aBGXs[num] == null || json.aBGYs[num] == null)
 				{
 					continue;
 				}
-				for (int num = 0; num < json.aBGXs[n].Length; num++)
+				for (int num2 = 0; num2 < json.aBGXs[num].Length; num2++)
 				{
-					float num2 = json.aBGXs[n][num];
-					float num3 = json.aBGYs[n][num];
-					if (BGItemFits(json.aBGNames[n], num2, num3))
+					float num3 = json.aBGXs[num][num2];
+					float num4 = json.aBGYs[num][num2];
+					if (BGItemFits(json.aBGNames[num], num3, num4))
 					{
-						Item background = DataHandler.GetBackground(json.aBGNames[n]);
+						Item background = DataHandler.GetBackground(json.aBGNames[num]);
 						Vector3 position = new Vector3(tfBGs.position.x, tfBGs.position.y, background.TF.position.z);
-						position.x += num2;
-						position.y += num3;
+						position.x += num3;
+						position.y += num4;
 						background.TF.position = position;
 						BGItemAdd(background);
 					}
@@ -825,21 +836,21 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 			{
 				if (dictPlaceholders.ContainsKey(jsonPlaceholder.strName))
 				{
-					CondOwner condOwner3 = dictPlaceholders[jsonPlaceholder.strName];
-					string strID = condOwner3.strID;
-					CondOwner condOwner4 = DataHandler.GetCondOwner(jsonPlaceholder.strActionCO);
-					CondOwner condOwner5 = DataHandler.GetCondOwner(jsonPlaceholder.strInstalledCO);
-					condOwner5.tf.position = condOwner3.tf.position;
-					condOwner5.Item.fLastRotation = condOwner3.tf.rotation.eulerAngles.z;
-					condOwner4.strPersistentCO = jsonPlaceholder.strPersistentCO;
-					condOwner4.strPersistentCT = jsonPlaceholder.strPersistentCT;
-					CondOwner cOPlaceholder = DataHandler.GetCOPlaceholder(condOwner5, condOwner4, jsonPlaceholder.strInstallIA);
-					cOPlaceholder.jCOS = condOwner3.jCOS;
-					condOwner3.jCOS = null;
-					RemoveCO(condOwner3);
+					CondOwner condOwner = dictPlaceholders[jsonPlaceholder.strName];
+					string strID = condOwner.strID;
+					CondOwner condOwner2 = DataHandler.GetCondOwner(jsonPlaceholder.strActionCO);
+					CondOwner condOwner3 = DataHandler.GetCondOwner(jsonPlaceholder.strInstalledCO);
+					condOwner3.tf.position = condOwner.tf.position;
+					condOwner3.Item.fLastRotation = condOwner.tf.rotation.eulerAngles.z;
+					condOwner2.strPersistentCO = jsonPlaceholder.strPersistentCO;
+					condOwner2.strPersistentCT = jsonPlaceholder.strPersistentCT;
+					CondOwner cOPlaceholder = DataHandler.GetCOPlaceholder(condOwner3, condOwner2, jsonPlaceholder.strInstallIA);
+					cOPlaceholder.jCOS = condOwner.jCOS;
+					condOwner.jCOS = null;
+					RemoveCO(condOwner);
+					condOwner.Destroy();
+					condOwner2.Destroy();
 					condOwner3.Destroy();
-					condOwner4.Destroy();
-					condOwner5.Destroy();
 					cOPlaceholder.strID = strID;
 					AddCO(cOPlaceholder, bTiles: true);
 				}
@@ -882,29 +893,29 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	}
 	if (nLoad == Loaded.Full)
 	{
-		for (int num5 = aPeople.Count - 1; num5 >= 0; num5--)
+		for (int num6 = aPeople.Count - 1; num6 >= 0; num6--)
 		{
-			PersonSpec personSpec = aPeople[num5];
-			CondOwner condOwner6 = personSpec.MakeCondOwner(PersonSpec.StartShip.OLD, strRegID);
-			Pathfinder component4 = condOwner6.GetComponent<Pathfinder>();
-			Vector2 vector = new Vector2(condOwner6.tf.position.x, condOwner6.tf.position.y);
+			PersonSpec personSpec = aPeople[num6];
+			CondOwner condOwner4 = personSpec.MakeCondOwner(PersonSpec.StartShip.OLD, strRegID);
+			Pathfinder component4 = condOwner4.GetComponent<Pathfinder>();
+			Vector2 vector = new Vector2(condOwner4.tf.position.x, condOwner4.tf.position.y);
 			component4.tilCurrent = GetTileAtWorldCoords1(vector.x, vector.y, bAllowDocked: true);
 			if (component4.tilCurrent == null)
 			{
-				component4.tilCurrent = GetCrewSpawnTile(condOwner6);
+				component4.tilCurrent = GetCrewSpawnTile(condOwner4);
 			}
-			FaceAnim2.GetPNG(condOwner6);
-			if (condOwner6.currentRoom == null && component4.tilCurrent != null)
+			FaceAnim2.GetPNG(condOwner4);
+			if (condOwner4.currentRoom == null && component4.tilCurrent != null)
 			{
-				condOwner6.tf.position = component4.tilCurrent.tf.position;
-				condOwner6.AddFloatText(bAdd: true);
-				condOwner6.gameObject.SetActive(value: true);
-				condOwner6.Visible = true;
-				if (condOwner6.HasTickers())
+				condOwner4.tf.position = component4.tilCurrent.tf.position;
+				condOwner4.AddFloatText(bAdd: true);
+				condOwner4.gameObject.SetActive(value: true);
+				condOwner4.Visible = true;
+				if (condOwner4.HasTickers())
 				{
-					CrewSim.AddTicker(condOwner6);
+					CrewSim.AddTicker(condOwner4);
 				}
-				List<CondOwner> cOs2 = condOwner6.GetCOs(bAllowLocked: true);
+				List<CondOwner> cOs2 = condOwner4.GetCOs(bAllowLocked: true);
 				if (cOs2 != null)
 				{
 					foreach (CondOwner item4 in cOs2)
@@ -915,10 +926,10 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 						}
 					}
 				}
-				condOwner6.currentRoom = component4.tilCurrent.room;
-				if (condOwner6.currentRoom != null)
+				condOwner4.currentRoom = component4.tilCurrent.room;
+				if (condOwner4.currentRoom != null)
 				{
-					condOwner6.currentRoom.AddToRoom(condOwner6);
+					condOwner4.currentRoom.AddToRoom(condOwner4);
 				}
 			}
 		}
@@ -941,8 +952,8 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	CheckAccruedWear();
 	UpdatePower();
 	SilhouettePoints = SilhouetteUtility.GenerateVectorPoints(FloorPlan);
-	string[] array = strRegID.Split('|');
-	if (array.Length > 1)
+	string[] array2 = strRegID.Split('|');
+	if (array2.Length > 1)
 	{
 		HideFromSystem = true;
 		_subStation = true;
@@ -956,8 +967,8 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		List<Ship> list5 = new List<Ship>();
 		if (json.aDocked != null)
 		{
-			string[] array2 = json.aDocked;
-			foreach (string text in array2)
+			string[] array3 = json.aDocked;
+			foreach (string text in array3)
 			{
 				Ship shipByRegID = CrewSim.system.GetShipByRegID(text);
 				if (shipByRegID != null && list5.IndexOf(shipByRegID) < 0)
@@ -1011,5 +1022,6 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		Debug.Log("#Info# " + strRegID + GetRatingString());
 		VisualizeWear();
 	}
+	_bDoneLoading = true;
 }
 */
