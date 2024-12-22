@@ -987,13 +987,15 @@ public static partial class patch_DataHandler {
 
     public static bool IsForbidden(this string data, string property) {
         return property switch {
-            "strName" => true,
+            "strName" or
             "strReference" => true,
-            "Modifier" => data == "condrules",
+            "Modifier" or
             "Preference" => data == "condrules",
-            "ValuesWereChanged" => data == "condtrigs",
-            "RequiresHumans" => data == "condtrigs",
+            "ValuesWereChanged" or
+            "RequiresHumans" or
             "RulesInfo" => data == "condtrigs",
+            "Frequency" => data == "ledgerdefs",
+            "RaceTrackType" => data == "racing/tracks",
             _ => false
         };
     }
