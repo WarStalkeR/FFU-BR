@@ -639,10 +639,6 @@ public static partial class patch_DataHandler {
                             return $"{match.Groups[1].Value}\"{dataKey}\"";
                         });
                         if (isDeepCopySuccess) {
-                            string[] constsToClean = SyncConstants(strType);
-                            if (constsToClean != null && constsToClean.Length > 0)
-                                foreach (string vConst in constsToClean)
-                                    deepCopy = Regex.Replace(deepCopy, $",\"{vConst}\":\"[^\"]*\"?", "");
                             TJson deepCopyBlock = JsonMapper.ToObject<TJson>(deepCopy);
                             Debug.Log($"#Info# Modified Deep Copy Created: {referenceKey} => {dataKey}");
                             try {
@@ -732,7 +728,7 @@ public static partial class patch_DataHandler {
         // Iterate Over Properties
         foreach (PropertyInfo currProperty in currDataType.GetProperties()) {
             // Ignore Forbidden Property
-            if (dataType.IsForbidden(currProperty.Name)) continue;
+            if (!currProperty.CanWrite || dataType.IsForbidden(currProperty.Name)) continue;
 
             // New Data Property Validation
             PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
@@ -761,7 +757,7 @@ public static partial class patch_DataHandler {
         BindingFlags fieldFlags = BindingFlags.Public | BindingFlags.Instance;
         foreach (FieldInfo currField in currDataType.GetFields(fieldFlags)) {
             // Ignore Forbidden Field
-            if (dataType.IsForbidden(currField.Name)) continue;
+            if (currField.IsLiteral || dataType.IsForbidden(currField.Name)) continue;
 
             // New Data Field Validation
             FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
@@ -975,27 +971,9 @@ public static partial class patch_DataHandler {
         }
     }
 
-    public static string[] SyncConstants(string constants) {
-        return constants switch {
-            "loot" => new string[] {
-                "NAME_BLANK", "TYPE_TRIGGER", "TYPE_COND", "TYPE_CONDRULE", 
-                "TYPE_ITEM", "TYPE_INTERACTION", "TYPE_TEXT", "TYPE_REL", 
-                "TYPE_LIFEEVENT", "TYPE_SHIP", "TYPE_Data" },
-            _ => null
-        };
-    }
-
     public static bool IsForbidden(this string data, string property) {
         return property switch {
-            "strName" or
-            "strReference" => true,
-            "Modifier" or
-            "Preference" => data == "condrules",
-            "ValuesWereChanged" or
-            "RequiresHumans" or
-            "RulesInfo" => data == "condtrigs",
-            "Frequency" => data == "ledgerdefs",
-            "RaceTrackType" => data == "racing/tracks",
+            "strName" or "strReference" => true,
             _ => false
         };
     }
