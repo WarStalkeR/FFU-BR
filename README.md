@@ -97,23 +97,27 @@ any other number is treated as `false`).
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
 
 # New Parameters & Properties
-**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
-When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
-parameter.
+**strReference** - a `condowners` parameter that allows to create reference-based copy of the existing CO, 
+whilst overriding only specific parameters. **Note**: will inherit all properties of the original CO.
 
-**invSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
+**strInvSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
 inventory owner. Works pretty much same way as other `slot effects`, except parameters `mapMeshTextures`,
 `strSlotImage` and `strSlotImageUnder` are ignored. Thread carefully, as it applies effect to **every** item,
 including whole stacks.
 
-**sOrder** - a `slots` parameter that only used, if `StrictInvSorting` gameplay setting is enabled. Requires 
-an integer value, but can be nulled. If nulled, defaults to `nDepth` to avoid potential issues. Slots with 
-lesser numbers are rendered first in open inventory UI. Was implemented to avoid `nDepth` collision/issues.
+**nSlotOrder** - a `slots` parameter that only used, if `StrictInvSorting` gameplay setting is enabled. 
+Requires an integer value, but can be nulled. If nulled, defaults to `nDepth` to avoid potential issues. Slots 
+with lesser numbers are rendered first in open inventory UI. Was implemented to avoid `nDepth` collision/issues.
 
-**maxDepth** - a `condtrigs` parameter that used to check how deeply nested `condowners` object. If object
+**nMaxDepth** - a `condtrigs` parameter that used to check how deeply nested `condowners` object. If object
 is nested at depth greater than `maxDepth` parameter, then condition trigger automatically returns `false`. 
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
+
+## New Hardcoded Conditions
+**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
+When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
+parameter.
 
 ## Improved Console Commands
 `getcond [them] *` - now `getcond` command supports wildcard `*` that lists all stats, regardless of their name.  

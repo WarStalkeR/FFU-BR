@@ -17,16 +17,16 @@ using System.Linq;
 using UnityEngine;
 
 public partial class patch_JsonSlot : JsonSlot {
-    public int? sOrder { get; set; }
+    public int? nSlotOrder { get; set; }
 }
 
 public partial class patch_Slot : Slot {
-    public int sOrder;
+    public int nSlotOrder;
     [MonoModIgnore] public extern patch_Slot(JsonSlot jslot);
     [MonoModOriginal] public extern void orig_Slot(JsonSlot jslot);
     [MonoModConstructor] public void Slot(patch_JsonSlot jslot) {
         orig_Slot(jslot);
-        sOrder = jslot.sOrder != null ? (int)jslot.sOrder : jslot.nDepth;
+        nSlotOrder = jslot.nSlotOrder != null ? jslot.nSlotOrder.Value : jslot.nDepth;
     }
 }
 
@@ -92,7 +92,7 @@ public partial class patch_CondOwner : CondOwner {
         // Depth Sorting Method
         int SortByDepth(Slot s1, Slot s2) {
             if ((s1 as patch_Slot) == null || (s2 as patch_Slot) == null) return 0;
-            return (s1 as patch_Slot).sOrder.CompareTo((s2 as patch_Slot).sOrder);
+            return (s1 as patch_Slot).nSlotOrder.CompareTo((s2 as patch_Slot).nSlotOrder);
         }
 
         // Recursive Slot Sorting

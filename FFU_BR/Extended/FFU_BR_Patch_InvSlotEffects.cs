@@ -12,24 +12,24 @@ using MonoMod;
 using UnityEngine;
 
 public partial class patch_JsonCondOwner : JsonCondOwner {
-    public string invSlotEffect { get; set; }
+    public string strInvSlotEffect { get; set; }
 }
 
 public partial class patch_CondOwner : CondOwner {
-    public JsonSlotEffects invSlotEffect;
+    public JsonSlotEffects jsInvSlotEffect;
     public extern void orig_SetData(JsonCondOwner jid, bool bLoot, JsonCondOwnerSave jCOSIn);
     public void SetData(patch_JsonCondOwner jid, bool bLoot, JsonCondOwnerSave jCOSIn) {
         orig_SetData(jid, bLoot, jCOSIn);
         ParseInvEffects(jid);
     }
     public void ParseInvEffects(patch_JsonCondOwner jid) {
-        if (jid.invSlotEffect != null) {
-            JsonSlotEffects slotEffect = DataHandler.GetSlotEffect(jid.invSlotEffect);
+        if (jid.strInvSlotEffect != null) {
+            JsonSlotEffects slotEffect = DataHandler.GetSlotEffect(jid.strInvSlotEffect);
             if (slotEffect != null) {
                 if (Container.GetSpace(this) < 1)
                     Debug.LogWarning($"Can't assign 'invSlotEffect' " +
                         $"for [{strName}] without inventory grid.");
-                else invSlotEffect = slotEffect;
+                else jsInvSlotEffect = slotEffect;
             }
         }
     }
@@ -46,8 +46,8 @@ public partial class patch_Container : Container {
             co.Visible = false;
         }
         if (!CO.HasCond("IsHuman")) {
-            if (CO.invSlotEffect != null)
-                ApplyContainerEffects(co, CO.invSlotEffect);
+            if (CO.jsInvSlotEffect != null)
+                ApplyContainerEffects(co, CO.jsInvSlotEffect);
             co.AddCondAmount("IsInContainer", 1.0);
         }
         CondOwner targetCO = CO;
@@ -65,8 +65,8 @@ public partial class patch_Container : Container {
     }
 
     [MonoModReplace] public void ClearIsInContainer(CondOwner co) {
-        if (CO.invSlotEffect != null)
-			ApplyContainerEffects(co, CO.invSlotEffect, true);
+        if (CO.jsInvSlotEffect != null)
+			ApplyContainerEffects(co, CO.jsInvSlotEffect, true);
         co.ZeroCondAmount("IsInContainer");
         co.ZeroCondAmount("IsCarried");
         CondOwnerVisitorZeroCond condOwnerVisitorZeroCond = new CondOwnerVisitorZeroCond();

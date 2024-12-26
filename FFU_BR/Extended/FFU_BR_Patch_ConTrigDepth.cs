@@ -10,19 +10,19 @@
 #pragma warning disable IDE0002
 
 public partial class patch_CondTrigger : CondTrigger {
-    public int maxDepth { get; set; }
+    public int nMaxDepth { get; set; }
 
     public extern CondTrigger orig_Clone();
     public CondTrigger Clone() {
         patch_CondTrigger condTrigger = orig_Clone() as patch_CondTrigger;
-        condTrigger.maxDepth = maxDepth;
+        condTrigger.nMaxDepth = nMaxDepth;
         return condTrigger;
     }
 
     public extern bool orig_Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true);
     public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true) {
-		if (maxDepth > 0 && objOwner != null 
-			&& GetDepth(objOwner) > maxDepth)
+		if (nMaxDepth > 0 && objOwner != null 
+			&& GetDepth(objOwner) > nMaxDepth)
 			return false;
         return orig_Triggered(objOwner, strIAStatsName, logOutcome);
     }
@@ -44,8 +44,8 @@ public partial class patch_CondTrigger : CondTrigger {
     //...ORIGINAL CODE...//
     objOwner.ValidateParent();
     // MAX DEPTH TEST BEGIN //
-    if (maxDepth > 0 &&
-        GetDepth(objOwner) > maxDepth)
+    if (nMaxDepth > 0 &&
+        GetDepth(objOwner) > nMaxDepth)
         return false;
     // MAX DEPTH TEST END //
     SocialStats socStats = null;
