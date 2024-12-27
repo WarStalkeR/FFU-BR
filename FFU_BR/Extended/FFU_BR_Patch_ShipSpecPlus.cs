@@ -9,13 +9,16 @@
 #pragma warning disable IDE0002
 
 public partial class patch_JsonShipSpec : JsonShipSpec {
-    public bool bIsSameShipCO { get; set; }
+    public int nIsSameShipCO { get; set; }
     public extern bool orig_Matches(Ship ship, CondOwner coUs = null);
     public bool Matches(Ship ship, CondOwner coUs = null) {
         bool rShipMatch = orig_Matches(ship, coUs);
         if (rShipMatch) {
-            if (bIsSameShipCO && (coUs == null || coUs.ship != ship)) {
-                return false;
+            if (nIsSameShipCO != 0) {
+                if (coUs == null) return false;
+                if (!IntMatchesBool(nIsSameShipCO, coUs.ship == ship)) {
+                    return false;
+                }
             }
         }
         return rShipMatch;
