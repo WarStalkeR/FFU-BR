@@ -269,9 +269,9 @@ private void Init()
 		{
 			Application.OpenURL("https://docs.google.com/document/d/1MVRows7dK7nS8DsQqSSG_UxGJRlOFmp0wv7eEN7SLGk/edit?usp=sharing");
 		}
-		catch (Exception ex5)
+		catch (Exception ex)
 		{
-			Debug.LogError(ex5.Message + "\n" + ex5.StackTrace.ToString());
+			Debug.LogError(ex.Message + "\n" + ex.StackTrace.ToString());
 		}
 	});
 	base.transform.Find("pnlFiles/btnScreenshots/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath + "/Screenshots";
@@ -282,9 +282,9 @@ private void Init()
 		{
 			Application.OpenURL(Application.persistentDataPath + "/Screenshots");
 		}
-		catch (Exception ex4)
+		catch (Exception ex2)
 		{
-			Debug.LogError(ex4.Message + "\n" + ex4.StackTrace.ToString());
+			Debug.LogError(ex2.Message + "\n" + ex2.StackTrace.ToString());
 		}
 	});
 	base.transform.Find("pnlFiles/btnScreenshots/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath + "/Screenshots";
@@ -308,9 +308,9 @@ private void Init()
 		{
 			Application.OpenURL(Application.persistentDataPath);
 		}
-		catch (Exception ex2)
+		catch (Exception ex4)
 		{
-			Debug.LogError(ex2.Message + "\n" + ex2.StackTrace.ToString());
+			Debug.LogError(ex4.Message + "\n" + ex4.StackTrace.ToString());
 		}
 	});
 	base.transform.Find("pnlFiles/btnSave1/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath;
@@ -321,9 +321,9 @@ private void Init()
 		{
 			Application.OpenURL(Application.streamingAssetsPath);
 		}
-		catch (Exception ex)
+		catch (Exception ex5)
 		{
-			Debug.LogError(ex.Message + "\n" + ex.StackTrace.ToString());
+			Debug.LogError(ex5.Message + "\n" + ex5.StackTrace.ToString());
 		}
 	});
 	base.transform.Find("pnlFiles/btnAssets/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.streamingAssetsPath;

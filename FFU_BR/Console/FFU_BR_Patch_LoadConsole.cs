@@ -85,10 +85,12 @@ public static bool ResolveString(ref string strInput)
 		return KeywordRelationship(ref strInput, array);
 	case "skywalk":
 		return KeywordSkywalk(ref strInput, array);
-	case "detatch":
+	case "detach":
 		return KeywordDetach(ref strInput, array);
-	case "attatch":
+	case "attach":
 		return KeywordAttach(ref strInput, array);
+	case "meatstate":
+		return KeywordMeatState(ref strInput, array);
 	case "clear":
 	case "clr":
 		return KeywordClear(ref strInput, array);
