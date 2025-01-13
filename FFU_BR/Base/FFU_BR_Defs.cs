@@ -16,7 +16,7 @@ using System.IO;
 namespace FFU_Beyond_Reach {
     public partial class FFU_BR_Defs {
         public static readonly string ModName = "Fight For Universe: Beyond Reach";
-        public static readonly string ModVersion = "0.4.8.5";
+        public static readonly string ModVersion = "0.4.9.0";
 
         private static ConfigFile ModDefs = null;
         public static SyncLogs SyncLogging = SyncLogs.None;
