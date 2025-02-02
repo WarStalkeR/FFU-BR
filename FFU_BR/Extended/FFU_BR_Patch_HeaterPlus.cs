@@ -8,6 +8,7 @@
 #pragma warning disable IDE1006
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
+#pragma warning disable IDE0051
 
 using MonoMod;
 using System.Collections.Generic;

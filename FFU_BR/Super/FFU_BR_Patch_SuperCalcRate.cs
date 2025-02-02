@@ -7,6 +7,7 @@
 #pragma warning disable IDE1006
 #pragma warning disable IDE0019
 #pragma warning disable IDE0002
+#pragma warning disable IDE0051
 
 using FFU_Beyond_Reach;
 using System.Linq;
