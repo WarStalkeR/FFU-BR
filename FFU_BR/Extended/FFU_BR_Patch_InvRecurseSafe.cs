@@ -80,6 +80,15 @@ public bool AllowedCO(CondOwner coIn)
 	{
 		return false;
 	}
+	CondOwner objCOParent = CO.objCOParent;
+	while (objCOParent != null)
+	{
+		if (coIn == objCOParent)
+		{
+			return false;
+		}
+		objCOParent = objCOParent.objCOParent;
+	}
 	if (ctAllowed != null)
 	{
 		return ctAllowed.Triggered(coIn);

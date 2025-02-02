@@ -54,25 +54,31 @@ private void AddSkillTrait(JsonCareer jc, string strChosen)
 	cgs.ApplyCareer(coUser, latestCareer, bEvents: true);
 	latestCareer.bTermEnded = true;
 	latestCareer.aEvents.Add(strChosen);
-	double fAmount = 1.0;
+	double num = 1.0;
 	if (strChosen != null && strChosen.IndexOf("-") == 0)
 	{
 		strChosen = strChosen.Substring(1);
-		fAmount = -1.0;
+		num = -1.0;
 	}
-	int traitYears = GetTraitYears(strChosen);
-	coUser.AddCondAmount("StatAge", traitYears);
-	coUser.AddCondAmount(strChosen, fAmount);
-	foreach (Condition value in coUser.mapConds.Values)
+	int num2 = GetTraitYears(strChosen) * (int)num;
+	CondRuleThresh changedCRThresh = GetChangedCRThresh(0, num2);
+	if (changedCRThresh != null && _promisedAgeLoot.TryGetValue(changedCRThresh.strLootNew, out var value) && value != null)
 	{
-		if (list.IndexOf(value.strName) < 0 && latestCareer.aSkillsChosen.IndexOf(value.strName) < 0 && value.nDisplaySelf == 2 && value.strName.IndexOf("Dc") != 0)
+		foreach (KeyValuePair<string, double> item in value)
 		{
-			latestCareer.aSkillsChosen.Add(value.strName);
+			coUser.AddCondAmount(item.Key, item.Value);
 		}
 	}
-	UpdateSidebar();
-	HideSidebarAlt();
-	ClearMain();
-	PageBranchChoice(latestCareer);
+	coUser.bFreezeCondRules = true;
+	coUser.AddCondAmount("StatAge", num2);
+	coUser.bFreezeCondRules = false;
+	coUser.AddCondAmount(strChosen, num);
+	foreach (Condition value2 in coUser.mapConds.Values)
+	{
+		if (list.IndexOf(value2.strName) < 0 && latestCareer.aSkillsChosen.IndexOf(value2.strName) < 0 && value2.nDisplaySelf == 2 && value2.strName.IndexOf("Dc") != 0)
+		{
+			latestCareer.aSkillsChosen.Add(value2.strName);
+		}
+	}
 }
 */

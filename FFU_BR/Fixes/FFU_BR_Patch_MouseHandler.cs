@@ -362,15 +362,7 @@ public class patch_CrewSim : CrewSim {
                         return;
                     }
                     if (objInstance.coConnectMode != null) {
-                        if (coConnectLastCrew != null) {
-                            SetBracketTarget(coConnectLastCrew.strID, bUpdateOnly: false, noAuto: true);
-                            coConnectLastCrew = null;
-                            coConnectMode = null;
-                        } else {
-                            SetBracketTarget(null, bUpdateOnly: false);
-                        }
-                        HideInputSelector();
-                        GUIModal.Instance.Hide();
+                        CloseConnectionMode();
                     } else if ((contextMenuPool.IsRaised && !bRaisedMenuThisFrame) || (double)RightMouseButtonDownTimer > 0.3) {
                         RightMouseButtonDownTimer = 0f;
                         LowerContextMenu();

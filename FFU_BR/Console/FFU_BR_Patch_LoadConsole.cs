@@ -91,6 +91,8 @@ public static bool ResolveString(ref string strInput)
 		return KeywordAttach(ref strInput, array);
 	case "meatstate":
 		return KeywordMeatState(ref strInput, array);
+	case "priceflips":
+		return KeywordPriceFlips(ref strInput, array);
 	case "clear":
 	case "clr":
 		return KeywordClear(ref strInput, array);

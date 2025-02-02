@@ -1450,18 +1450,18 @@ DataHandler.JsonToData
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
 {
 	Debug.Log("#Info# Loading json: " + strFile);
-	string text = string.Empty;
+	StringBuilder stringBuilder = new StringBuilder(70);
 	try
 	{
 		string json = File.ReadAllText(strFile, Encoding.UTF8);
-		text += "Converting json into Array...\n";
+		stringBuilder.AppendLine("Converting json into Array...");
 		TJson[] array = JsonMapper.ToObject<TJson[]>(json);
 		TJson[] array2 = array;
 		for (int i = 0; i < array2.Length; i++)
 		{
 			TJson val = array2[i];
-			text += "Getting key: ";
-			string text2 = null;
+			stringBuilder.Append("Getting key: ");
+			string text = null;
 			Type type = val.GetType();
 			PropertyInfo property = type.GetProperty("strName");
 			if (property == null)
@@ -1469,16 +1469,16 @@ public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> d
 				JsonLogger.ReportProblem("strName is missing", ReportTypes.FailingString);
 			}
 			object value = property.GetValue(val, null);
-			text2 = value.ToString();
-			text = text + text2 + "\n";
-			if (dict.ContainsKey(text2))
+			text = value.ToString();
+			stringBuilder.AppendLine(text);
+			if (dict.ContainsKey(text))
 			{
-				Debug.Log("Warning: Trying to add " + text2 + " twice.");
-				dict[text2] = val;
+				Debug.Log("Warning: Trying to add " + text + " twice.");
+				dict[text] = val;
 			}
 			else
 			{
-				dict.Add(text2, val);
+				dict.Add(text, val);
 			}
 		}
 		array = null;
@@ -1487,15 +1487,12 @@ public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> d
 	catch (Exception ex)
 	{
 		JsonLogger.ReportProblem(strFile, ReportTypes.SourceInfo);
-		if (text.Length > 1000)
-		{
-			text = text.Substring(text.Length - 1000);
-		}
-		Debug.LogError(text + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
+		string text2 = ((stringBuilder.Length <= 1000) ? stringBuilder.ToString() : stringBuilder.ToString(stringBuilder.Length - 1000, 1000));
+		Debug.LogError(text2 + "\n" + ex.Message + "\n" + ex.StackTrace.ToString());
 	}
 	if (strFile.IndexOf("osSGv1") >= 0)
 	{
-		Debug.Log(text);
+		Debug.Log(stringBuilder);
 	}
 }
 */

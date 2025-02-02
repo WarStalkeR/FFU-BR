@@ -864,7 +864,13 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 	if (bPrefill && nLoad >= Loaded.Edit)
 	{
 		PreFillRooms();
-		if (DMGStatus == Damage.Derelict || DMGStatus == Damage.Damaged || (DMGStatus == Damage.Used && bBreakInUsed))
+		if (ctTutorialDerelict.Triggered(ShipCO))
+		{
+			SetupTutorialDerelict();
+			DamageAllCOs(fBreakInMultiplier);
+			ShipCO.ZeroCondAmount("IsTutorialDerelict");
+		}
+		else if (DMGStatus == Damage.Derelict || DMGStatus == Damage.Damaged || (DMGStatus == Damage.Used && bBreakInUsed))
 		{
 			BreakIn();
 			if (fLastQuotedPrice == 0.0)
@@ -908,7 +914,6 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 			if (condOwner4.currentRoom == null && component4.tilCurrent != null)
 			{
 				condOwner4.tf.position = component4.tilCurrent.tf.position;
-				condOwner4.AddFloatText(bAdd: true);
 				condOwner4.gameObject.SetActive(value: true);
 				condOwner4.Visible = true;
 				if (condOwner4.HasTickers())
