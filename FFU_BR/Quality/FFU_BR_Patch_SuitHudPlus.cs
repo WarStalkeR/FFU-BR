@@ -15,6 +15,12 @@ using UnityEngine;
 
 public partial class patch_GUIHelmet : GUIHelmet {
     private double fPwrLast;
+    private extern void orig_Init();
+    private void Init() {
+        orig_Init();
+        ghTempInt.DangerLow = 289.15;
+        ghTempInt.DangerHigh = 315.15;
+    }
     [MonoModReplace] public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut) {
         if (coRoomIn == null || !coRoomIn.HasCond("IsHuman")) {
             Style = HelmetStyle.None;
@@ -102,10 +108,12 @@ public partial class patch_GUIHelmet : GUIHelmet {
             }
             HUDOn = isSuitHud;
             GaugeOn = isBasicHud;
-            bool flag5 = (int)Time.realtimeSinceStartup % 2 == 0;
-            if (isBasicHud) {
-                UpdatePSGauge(coRoomIn);
-            } else if (isSuitHud) {
+            bool isEvenTime = (int)Time.realtimeSinceStartup % 2 == 0;
+            double amountO2 = coRoomIn.GetCondAmount("StatGasPpO2");
+            double amountCO2 = coRoomIn.GetCondAmount("StatGasPpCO2");
+            if (amountO2 <= fO2PPMin || amountCO2 >= fCO2Max) TriggerTutorial();
+            if (isBasicHud) UpdatePSGauge(amountO2, amountCO2);
+            else if (isSuitHud) {
                 if (noOxygen) txtO2.text = "ERROR";
                 ghO2Int.Value = coRoomIn.GetCondAmount("StatGasPpO2");
                 ghO2Ext.Value = coRoomOut.GetCondAmount("StatGasPpO2");
