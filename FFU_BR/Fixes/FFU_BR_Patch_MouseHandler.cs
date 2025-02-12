@@ -84,7 +84,7 @@ public class patch_CrewSim : CrewSim {
             } else if (GetMouseButton(0)) {
                 if (!EventSystem.current.IsPointerOverGameObject() && !GUIQuickBar.IsBeingDragged) {
                     if (bShipEdit && GUIActionKeySelector.commandEyedropper.Held) {
-                        List<CondOwner> mouseOverCO = GetMouseOverCO(new string[1] { "Default" }, null);
+                        List<CondOwner> mouseOverCO = GetMouseOverCO(new string[1] { "Default" }, null, null);
                         if (mouseOverCO.Count > 0) {
                             SetPartCursor(mouseOverCO[0].strCODef);
                         } else {
@@ -146,16 +146,10 @@ public class patch_CrewSim : CrewSim {
                             nLastClickIndex = 0;
                             vLastClick = default(Vector2);
                             goSelPart.layer = LayerMask.NameToLayer("Default");
-                            if (iaItmInstall != null) {
+                            if (iaItmInstall != null && iaItmInstall.objThem.strPersistentCO == null) {
                                 InstallFinish();
                                 if (bContinuePaintingJob) {
                                     StartPaintingJob(jiLast);
-                                } else {
-                                    CondOwner selectedCrew = GetSelectedCrew();
-                                    int hourFromS = MathUtils.GetHourFromS(StarSystem.fEpoch);
-                                    if (selectedCrew != null && selectedCrew.Company.GetShift(hourFromS, selectedCrew).nID != 2) {
-                                        selectedCrew.LogMessage(selectedCrew.FriendlyName + DataHandler.GetString("SHIFT_WARN_NONWORK"), "Bad", selectedCrew.strID);
-                                    }
                                 }
                                 bContinuePaintingJob = true;
                             } else if (iaItmInstall == null) {
@@ -168,7 +162,7 @@ public class patch_CrewSim : CrewSim {
                                 item.fLastRotation = z2;
                             }
                         } else if (iaItmInstall == null) {
-                            List<CondOwner> mouseOverCO2 = GetMouseOverCO(new string[1] { "Default" }, null);
+                            List<CondOwner> mouseOverCO2 = GetMouseOverCO(new string[1] { "Default" }, null, null);
                             CondOwner component3 = item.GetComponent<CondOwner>();
                             foreach (CondOwner item6 in mouseOverCO2) {
                                 if (item6.CanStackOnItem(component3) > 0 && component3 != item6.StackCO(component3)) {
@@ -241,10 +235,10 @@ public class patch_CrewSim : CrewSim {
                                 if (bContinuePaintingJob) {
                                     StartPaintingJob(jiLast);
                                 } else {
-                                    CondOwner selectedCrew2 = GetSelectedCrew();
-                                    int hourFromS2 = MathUtils.GetHourFromS(StarSystem.fEpoch);
-                                    if (selectedCrew2 != null && selectedCrew2.Company.GetShift(hourFromS2, selectedCrew2).nID != 2) {
-                                        selectedCrew2.LogMessage(selectedCrew2.FriendlyName + DataHandler.GetString("SHIFT_WARN_NONWORK"), "Bad", selectedCrew2.strID);
+                                    CondOwner selectedCrew = GetSelectedCrew();
+                                    int hourFromS = MathUtils.GetHourFromS(StarSystem.fEpoch);
+                                    if (selectedCrew != null && selectedCrew.Company.GetShift(hourFromS, selectedCrew).nID != 2) {
+                                        selectedCrew.LogMessage(selectedCrew.FriendlyName + DataHandler.GetString("SHIFT_WARN_NONWORK"), "Bad", selectedCrew.strID);
                                     }
                                 }
                                 bContinuePaintingJob = true;
@@ -260,7 +254,7 @@ public class patch_CrewSim : CrewSim {
                             } else {
                                 ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelected");
                             }
-                            List<CondOwner> mouseOverCO3 = GetMouseOverCO(new string[1] { "Default" }, null);
+                            List<CondOwner> mouseOverCO3 = GetMouseOverCO(new string[1] { "Default" }, null, null);
                             Room room = null;
                             if (shipCurrentLoaded != null) {
                                 room = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
@@ -378,7 +372,7 @@ public class patch_CrewSim : CrewSim {
                             } else {
                                 ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelectedMTT");
                             }
-                            List<CondOwner> mouseOverCO4 = GetMouseOverCO(new string[2] { "Default", "LoS" }, ctSelectFilter);
+                            List<CondOwner> mouseOverCO4 = GetMouseOverCO(new string[2] { "Default", "LoS" }, ctSelectFilter, null);
                             Room room2 = null;
                             if (shipCurrentLoaded != null) {
                                 room2 = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);

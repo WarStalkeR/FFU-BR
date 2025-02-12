@@ -205,9 +205,15 @@ public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 		HUDOn = flag2;
 		GaugeOn = flag3;
 		bool flag5 = (int)Time.realtimeSinceStartup % 2 == 0;
+		double condAmount = coRoomIn.GetCondAmount("StatGasPpO2");
+		double condAmount2 = coRoomIn.GetCondAmount("StatGasPpCO2");
+		if (condAmount <= fO2PPMin || condAmount2 >= fCO2Max)
+		{
+			TriggerTutorial();
+		}
 		if (flag3)
 		{
-			UpdatePSGauge(coRoomIn);
+			UpdatePSGauge(condAmount, condAmount2);
 		}
 		else if (flag2)
 		{

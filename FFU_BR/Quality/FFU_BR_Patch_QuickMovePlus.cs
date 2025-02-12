@@ -111,6 +111,7 @@ public void OnShiftPointerDown()
 			CrewSim.coPlayer.ZeroCondAmount("TutorialClothesWaiting");
 			MonoSingleton<ObjectiveTracker>.Instance.CheckObjective(CrewSim.coPlayer.strID);
 		}
+		CrewSimTut.CheckHelmetAtmoTutorial();
 		if (GUIInventory.CTOpenInv.Triggered(CO))
 		{
 			GUIInventory.instance.SpawnInventoryWindow(CO, InventoryWindowType.Container, bFlyIn: true);

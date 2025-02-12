@@ -486,10 +486,12 @@ public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOS
 				if (interaction == null)
 				{
 					Debug.Log("Interaction " + jsonInteractionSave.strName + " is missing from the DataHandler. This should probably be a crash...");
+					continue;
 				}
-				else
+				aQueue.Add(interaction);
+				if (interaction.strName == "Walk" && interaction.strTargetPoint == null)
 				{
-					aQueue.Add(interaction);
+					interaction.strTargetPoint = "use";
 				}
 			}
 		}
@@ -600,9 +602,18 @@ public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOS
 		if (jCOSIn.aPledges != null)
 		{
 			JsonPledgeSave[] aPledges = jCOSIn.aPledges;
-			foreach (JsonPledgeSave jps in aPledges)
+			foreach (JsonPledgeSave jsonPledgeSave in aPledges)
 			{
-				Pledge2 pledge = PledgeFactory.Factory(jps);
+				if (CrewSim.bSaveHasMissingPledgeUs && jsonPledgeSave.strUsID != jCOSIn.strID)
+				{
+					string strUsID = jsonPledgeSave.strUsID;
+					jsonPledgeSave.strUsID = jCOSIn.strID;
+					if (jsonPledgeSave.strThemID == strUsID)
+					{
+						jsonPledgeSave.strThemID = jsonPledgeSave.strUsID;
+					}
+				}
+				Pledge2 pledge = PledgeFactory.Factory(jsonPledgeSave);
 				if (pledge != null)
 				{
 					AddPledge(pledge);
