@@ -35,7 +35,7 @@ namespace FFU_Beyond_Reach {
         public static bool OrgInventoryMode = true;
         public static float[] OrgInventoryTweaks = new float[] { -60f, -65f, -55f, -50f, 16f, 0.67f };
         public static bool BetterInvTransfer = true;
-        public static bool QuickBarPinning = true;
+        public static bool QuickBarPinning = false;
         public static float[] QuickBarTweaks = new float[] { -520f, 340f, 1f };
         public static bool NoSkillTraitCost = false;
         public static bool AllowSuperChars = false;
@@ -121,7 +121,7 @@ namespace FFU_Beyond_Reach {
                 "Changes behavior of shift-click item transferring in inventory. Items will be " +
                 "auto-transferred to the last inventory window, where player has placed the item " +
                 "manually. Last inventory window is forgotten, when inventory is closed.").Value;
-            QuickBarPinning = ModDefs.Bind("QualitySettings", "QuickBarPinning", !QuickBarPinning,
+            QuickBarPinning = ModDefs.Bind("QualitySettings", "QuickBarPinning", QuickBarPinning,
                 "Allows to permanently lock the interactions quick bar, where you desire.").Value;
             string refQckBarString = ModDefs.Bind("QualitySettings", "QuickBarTweaks",
                 string.Join("|", Array.ConvertAll(QuickBarTweaks, n => n.ToString())),
