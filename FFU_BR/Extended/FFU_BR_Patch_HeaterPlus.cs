@@ -25,12 +25,12 @@ public partial class patch_Heater : Heater {
             if (strAddPoint != "ignore") {
                 List<CondOwner> addList = new List<CondOwner>();
                 coUs.ship.GetCOsAtWorldCoords1(coUs.GetPos(strAddPoint), ct, false, false, addList);
-                if (addList.Count != 0) addPointCO = addList[0];
+                if (addList.Count != 0) addPointCO = !addList.Contains(coUs) ? addList[0] : coUs;
             }
             if (strSubPoint != "ignore") {
                 List<CondOwner> subList = new List<CondOwner>();
                 coUs.ship.GetCOsAtWorldCoords1(coUs.GetPos(strSubPoint), ct, false, false, subList);
-                if (subList.Count != 0) subPointCO = subList[0];
+                if (subList.Count != 0) subPointCO = !subList.Contains(coUs) ? subList[0] : coUs;
             }
             if (addPointCO == null) {
                 addPointCO = subPointCO;
@@ -38,6 +38,8 @@ public partial class patch_Heater : Heater {
                 subPointCO = null;
             }
             if (addPointCO == null) return;
+            string strCODef = addPointCO.strCODef;
+            if (subPointCO != null) strCODef = subPointCO.strCODef;
             double cMolHeatCap = 20.7;
             double cEmissCoef = 0.9;
 			double cStefBoltz = 5.67E-08;

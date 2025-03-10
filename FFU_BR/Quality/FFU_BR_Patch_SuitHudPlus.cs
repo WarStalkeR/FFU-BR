@@ -41,7 +41,7 @@ public partial class patch_GUIHelmet : GUIHelmet {
 							double percO2 = 0;
 							double percPwr = 0;
 							foreach (CondOwner slotItem in suitSlots) {
-								if (ctEVABottle.Triggered(slotItem)) {
+								if (ctEVABottle.Triggered(slotItem, null, false)) {
 									if (!foundO2) foundO2 = true;
 									double currO2 = slotItem.GetCondAmount("StatGasMolO2");
 									double maxO2 = slotItem.GetCondAmount("StatRef");
@@ -51,7 +51,7 @@ public partial class patch_GUIHelmet : GUIHelmet {
 										currO2Total += currO2;
 										maxO2Total += maxO2;
 									}
-								} else if (ctEVABatt.Triggered(slotItem)) {
+								} else if (ctEVABatt.Triggered(slotItem, null, false)) {
 									if (!foundPwr) foundPwr = true;
 									Powered refPower = slotItem.GetComponent<Powered>();
 									double currPwr = slotItem.GetCondAmount("StatPower");
