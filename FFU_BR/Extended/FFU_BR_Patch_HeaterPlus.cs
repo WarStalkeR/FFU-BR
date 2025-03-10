@@ -123,7 +123,7 @@ private void Heat(double fTimePassed)
 			coUs.ship.GetCOsAtWorldCoords1(coUs.GetPos(strAddPoint), ct, bAllowDocked: false, bAllowLocked: false, list);
 			if (list.Count != 0)
 			{
-				condOwner2 = list[0];
+				condOwner2 = ((!list.Contains(coUs)) ? list[0] : coUs);
 			}
 		}
 		if (strSubPoint != "ignore")
@@ -132,7 +132,7 @@ private void Heat(double fTimePassed)
 			coUs.ship.GetCOsAtWorldCoords1(coUs.GetPos(strSubPoint), ct, bAllowDocked: false, bAllowLocked: false, list2);
 			if (list2.Count != 0)
 			{
-				condOwner3 = list2[0];
+				condOwner3 = ((!list2.Contains(coUs)) ? list2[0] : coUs);
 			}
 		}
 		if (condOwner2 == null)
@@ -144,6 +144,11 @@ private void Heat(double fTimePassed)
 		if (condOwner2 == null)
 		{
 			return;
+		}
+		string strCODef = condOwner2.strCODef;
+		if (condOwner3 != null)
+		{
+			strCODef = condOwner3.strCODef;
 		}
 		double num2 = 20.7;
 		double num3 = 0.9;

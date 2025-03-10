@@ -264,7 +264,6 @@ private void Init()
 			Debug.LogError(ex.Message + "\n" + ex.StackTrace.ToString());
 		}
 	});
-	base.transform.Find("pnlFiles/btnScreenshots/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath + "/Screenshots";
 	component = base.transform.Find("pnlFiles/btnScreenshots/btn").GetComponent<Button>();
 	component.onClick.AddListener(delegate
 	{
@@ -296,14 +295,27 @@ private void Init()
 	{
 		try
 		{
-			Application.OpenURL(Application.persistentDataPath);
+			Application.OpenURL(MonoSingleton<LoadManager>.Instance.SavesPath);
 		}
 		catch (Exception ex4)
 		{
 			Debug.LogError(ex4.Message + "\n" + ex4.StackTrace.ToString());
 		}
 	});
-	base.transform.Find("pnlFiles/btnSave1/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath;
+	base.transform.Find("pnlFiles/btnSave1/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = MonoSingleton<LoadManager>.Instance.SavesPath;
+	component = base.transform.Find("pnlFiles/btnSettings/btn").GetComponent<Button>();
+	component.onClick.AddListener(delegate
+	{
+		try
+		{
+			Application.OpenURL(Application.persistentDataPath);
+		}
+		catch (Exception ex5)
+		{
+			Debug.LogError(ex5.Message + "\n" + ex5.StackTrace.ToString());
+		}
+	});
+	base.transform.Find("pnlFiles/btnSettings/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.persistentDataPath;
 	component = base.transform.Find("pnlFiles/btnAssets/btn").GetComponent<Button>();
 	component.onClick.AddListener(delegate
 	{
@@ -311,9 +323,9 @@ private void Init()
 		{
 			Application.OpenURL(Application.streamingAssetsPath);
 		}
-		catch (Exception ex5)
+		catch (Exception ex6)
 		{
-			Debug.LogError(ex5.Message + "\n" + ex5.StackTrace.ToString());
+			Debug.LogError(ex6.Message + "\n" + ex6.StackTrace.ToString());
 		}
 	});
 	base.transform.Find("pnlFiles/btnAssets/boxFilePath/txt").GetComponent<TextMeshProUGUI>().text = Application.streamingAssetsPath;

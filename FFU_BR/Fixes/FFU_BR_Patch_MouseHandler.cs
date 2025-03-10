@@ -65,327 +65,327 @@ public class patch_CrewSim : CrewSim {
             }
             if (GetMouseButtonDown(2)) {
                 vDragStart = Input.mousePosition;
-            } else if (GetMouseButtonDown(1)) {
-                if (goSelPart != null || goPaintJob != null || guiPDA.JobsActive) {
-                    guiPDA.HideJobPaintUI();
-                    return;
-                }
-            } else if (GetMouseButton(0)) {
-                if (!EventSystem.current.IsPointerOverGameObject() && !GUIQuickBar.IsBeingDragged) {
-                    if (bShipEdit && GUIActionKeySelector.commandEyedropper.Held) {
-                        List<CondOwner> mouseOverCO = GetMouseOverCO(new string[1] { "Default" }, null, null);
-                        if (mouseOverCO.Count > 0) {
-                            SetPartCursor(mouseOverCO[0].strCODef);
-                        } else {
-                            SetPartCursor(null);
-                        }
-                    } else if (flag3) {
-                        Item item = null;
-                        if (goSelPart != null) {
-                            item = goSelPart.GetComponent<Item>();
-                        }
-                        if (jiLast != null && jiLast.strName == "Cancel") {
-                            RemoveTasksAtMousePosition();
-                        } else if (jiLast != null && (jiLast.strName == "Uninstall" || jiLast.strName == "Scrap" || jiLast.strName == "Repair" || jiLast.strName == "Dismantle")) {
-                            List<CondOwner> list2 = FindCOsAtMousePosition(null, bInteractive: false, bAllowLocked: false);
-                            foreach (CondOwner item3 in list2) {
-                                if (GUIPDA.ctJobFilter != null && !GUIPDA.ctJobFilter.Triggered(item3)) {
-                                    continue;
-                                }
-                                List<string> jobActions = item3.GetJobActions(jiLast.strName);
-                                foreach (string item4 in jobActions) {
-                                    Interaction interaction = DataHandler.GetInteraction(item4);
-                                    if (interaction != null && interaction.Triggered(GetSelectedCrew(), item3, bStats: false, bIgnoreItems: true)) {
-                                        Task2 task = new Task2();
-                                        task.strDuty = "Construct";
-                                        task.strInteraction = item4;
-                                        task.strTargetCOID = item3.strID;
-                                        task.strName = jiLast.strName + "Job" + item3.strID;
-                                        workManager.AddTask(task);
-                                        break;
-                                    }
-                                }
-                            }
-                        } else if (jiLast != null && jiLast.strName == "Haul") {
-                            List<CondOwner> list3 = FindCOsAtMousePosition(null, bInteractive: false, bAllowLocked: false);
-                            CondTrigger condTrigger = DataHandler.GetCondTrigger("TIsValidHaulSource");
-                            foreach (CondOwner item5 in list3) {
-                                if (condTrigger.Triggered(item5)) {
-                                    Task2 task2 = new Task2();
-                                    task2.strDuty = "Haul";
-                                    task2.strInteraction = "ACTHaulItem";
-                                    task2.strTargetCOID = item5.strID;
-                                    task2.strName = "HaulJob" + item5.strID;
-                                    workManager.AddTask(task2);
-                                }
-                            }
-                        } else if (chkFill.isOn) {
-                            FloodFill();
-                        } else if (bShipEditBG) {
-                            if (shipCurrentLoaded.BGItemFits(item)) {
-                                shipCurrentLoaded.BGItemAdd(item);
-                                Debug.Log(string.Concat("Placing BG at: ", item.transform.position, "; local: ", item.transform.localPosition));
-                            }
-                            goSelPart.layer = LayerMask.NameToLayer("Default");
-                            float z = goSelPart.transform.rotation.eulerAngles.z;
-                            SetPartCursor(goSelPart.name);
-                            item = goSelPart.GetComponent<Item>();
-                            item.fLastRotation = z;
-                        } else if (item.CheckFit(item.rend.bounds.center, shipCurrentLoaded, TileUtils.aSelPartTiles)) {
-                            nLastClickIndex = 0;
-                            vLastClick = default(Vector2);
-                            goSelPart.layer = LayerMask.NameToLayer("Default");
-                            if (iaItmInstall != null && iaItmInstall.objThem.strPersistentCO == null) {
-                                InstallFinish();
-                                if (bContinuePaintingJob) {
-                                    StartPaintingJob(jiLast);
-                                }
-                                bContinuePaintingJob = true;
-                            } else if (iaItmInstall == null) {
-                                bPoolShipUpdates = true;
-                                Debug.Log("bPoolShipUpdates = true");
-                                shipCurrentLoaded.AddCO(goSelPart.GetComponent<CondOwner>(), bTiles: true);
-                                float z2 = goSelPart.transform.rotation.eulerAngles.z;
-                                SetPartCursor(goSelPart.GetComponent<CondOwner>().strName);
-                                item = goSelPart.GetComponent<Item>();
-                                item.fLastRotation = z2;
-                            }
-                        } else if (iaItmInstall == null) {
-                            List<CondOwner> mouseOverCO2 = GetMouseOverCO(new string[1] { "Default" }, null, null);
-                            CondOwner component3 = item.GetComponent<CondOwner>();
-                            foreach (CondOwner item6 in mouseOverCO2) {
-                                if (item6.CanStackOnItem(component3) > 0 && component3 != item6.StackCO(component3)) {
-                                    goSelPart.layer = LayerMask.NameToLayer("Default");
-                                    float z3 = goSelPart.transform.rotation.eulerAngles.z;
-                                    SetPartCursor(component3.strCODef);
-                                    item = goSelPart.GetComponent<Item>();
-                                    item.fLastRotation = z3;
-                                    break;
-                                }
-                            }
-                        }
-                    } else if (inventoryGUI.activeWindows.Count == 0) {
-                        float num = Mathf.Abs(Input.mousePosition.x - vDragStart.x);
-                        float num2 = Mathf.Abs(Input.mousePosition.y - vDragStart.y);
-                        if ((num2 > 16f || num > 16f) && lineSelectRect == null) {
-                            lineSelectRect = new VectorLine("SelectionRect", new List<Vector2>(5), 1.5f, LineType.Continuous, Joins.Weld);
-                            lineSelectRect.color = Color.white;
-                            lineSelectRect.SetCanvas(CanvasManager.goCanvasGUI, worldPositionStays: false);
-                        }
-                    }
-                }
-            } else if (GetMouseButtonUp(0)) {
-                bPoolShipUpdates = false;
-                GameObject gameObject = null;
-                if (contextMenuPool.IsRaised) {
-                    LowerContextMenu();
-                } else if (lineSelectRect != null) {
-                    VectorLine.Destroy(ref lineSelectRect);
-                    SetBracketTarget(null, bUpdateOnly: false);
-                    Bounds viewportBounds = GetViewportBounds(camMain, vDragStart, Input.mousePosition);
-                    if (TileUtils.bShowTiles || bShipEdit) {
-                        SelectBounds(viewportBounds, TileUtils.bShowTiles);
-                    }
-                } else if (!EventSystem.current.IsPointerOverGameObject()) {
-                    if (TileUtils.bShowTiles) {
-                        gameObject = ClickSelectScenePart(new string[1] { "Tile Helpers" });
-                        CondOwner condOwner = null;
-                        if (gameObject != null) {
-                            condOwner = gameObject.GetComponent<CondOwner>();
-                            Tile component4 = gameObject.GetComponent<Tile>();
-                            SelectCO(condOwner);
-                            int value = shipCurrentLoaded.aTiles.IndexOf(component4);
-                            if (!GUIActionKeySelector.commandZoneAlternate.Held) {
-                                foreach (JsonZone value2 in shipCurrentLoaded.mapZones.Values) {
-                                    if (value2.aTiles.Contains(value)) {
-                                        int[] aTiles = value2.aTiles;
-                                        foreach (int index in aTiles) {
-                                            SelectCO(shipCurrentLoaded.aTiles[index].coProps);
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                        } else {
-                            SetBracketTarget(null, bUpdateOnly: false);
-                        }
-                        OnTileSelectionUpdated.Invoke(aSelected);
-                    } else if (flag3) {
-                        Item item2 = null;
-                        if (goSelPart != null) {
-                            item2 = goSelPart.GetComponent<Item>();
-                        }
-                        if (item2 != null && item2.CheckFit(item2.rend.bounds.center, shipCurrentLoaded, TileUtils.aSelPartTiles)) {
-                            nLastClickIndex = 0;
-                            vLastClick = default(Vector2);
-                            goSelPart.layer = LayerMask.NameToLayer("Default");
-                            if (iaItmInstall != null) {
-                                InstallFinish();
-                                if (bContinuePaintingJob) {
-                                    StartPaintingJob(jiLast);
-                                } else {
-                                    CondOwner selectedCrew = GetSelectedCrew();
-                                    int hourFromS = MathUtils.GetHourFromS(StarSystem.fEpoch);
-                                    if (selectedCrew != null && selectedCrew.Company.GetShift(hourFromS, selectedCrew).nID != 2) {
-                                        selectedCrew.LogMessage(selectedCrew.FriendlyName + DataHandler.GetString("SHIFT_WARN_NONWORK"), "Bad", selectedCrew.strID);
-                                    }
-                                }
-                                bContinuePaintingJob = true;
-                            }
-                        }
-                    } else if (!bJustClickedInput) {
-                        if (coConnectMode != null) {
-                            gameObject = ClickSelectScenePart(new string[1] { "Tile Helpers" });
-                        } else if (!bShipEditBG) {
-                            CondTrigger condTrigger2 = ctSelectFilter;
-                            if (bShipEdit || bDebugShow) {
-                                ctSelectFilter = null;
+            } else if (!GetMouseButtonDown(1)) {
+                if (GetMouseButton(0)) {
+                    if (!EventSystem.current.IsPointerOverGameObject() && !GUIQuickBar.IsBeingDragged) {
+                        if (bShipEdit && GUIActionKeySelector.commandEyedropper.Held) {
+                            List<CondOwner> mouseOverCO = GetMouseOverCO(_layerMaskDefault, null, null);
+                            if (mouseOverCO.Count > 0) {
+                                SetPartCursor(mouseOverCO[0].strCODef);
                             } else {
-                                ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelected");
+                                SetPartCursor(null);
                             }
-                            List<CondOwner> mouseOverCO3 = GetMouseOverCO(new string[1] { "Default" }, null, null);
-                            Room room = null;
-                            if (shipCurrentLoaded != null) {
-                                room = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
+                        } else if (flag3) {
+                            Item item = null;
+                            if (goSelPart != null) {
+                                item = goSelPart.GetComponent<Item>();
                             }
-                            if (room != null) {
-                                mouseOverCO3.Remove(room.CO);
-                                mouseOverCO3.Add(room.CO);
-                            }
-                            if (!bShipEdit && mouseOverCO3.Count > 0 && mouseOverCO3.IndexOf(GUIMegaToolTip.Selected) >= 0) {
-                                mouseOverCO3.Clear();
-                                OnRightClick.Invoke(mouseOverCO3);
-                            }
-                            gameObject = ClickSelectScenePart(new string[1] { "Default" });
-                            if (gameObject == null && !bShipEdit && mouseOverCO3.Count > 0) {
-                                Walk();
-                            }
-                            ctSelectFilter = condTrigger2;
-                        }
-                        if (coConnectMode != null) {
-                            CondOwner condOwner2 = null;
-                            if (gameObject != null) {
-                                condOwner2 = gameObject.GetComponent<CondOwner>();
-                                if (!ctSelectFilter.Triggered(condOwner2)) {
-                                    condOwner2 = null;
+                            if (jiLast != null && jiLast.strName == "Cancel") {
+                                RemoveTasksAtMousePosition();
+                            } else if (jiLast != null && (jiLast.strName == "Uninstall" || jiLast.strName == "Scrap" || jiLast.strName == "Repair" || jiLast.strName == "Dismantle")) {
+                                List<CondOwner> list2 = FindCOsAtMousePosition(null, bInteractive: false, bAllowLocked: false);
+                                foreach (CondOwner item3 in list2) {
+                                    if (GUIPDA.ctJobFilter != null && !GUIPDA.ctJobFilter.Triggered(item3)) {
+                                        continue;
+                                    }
+                                    List<string> jobActions = item3.GetJobActions(jiLast.strName);
+                                    foreach (string item4 in jobActions) {
+                                        Interaction interaction = DataHandler.GetInteraction(item4);
+                                        if (interaction != null && interaction.Triggered(GetSelectedCrew(), item3, bStats: false, bIgnoreItems: true)) {
+                                            Task2 task = new Task2();
+                                            task.strDuty = "Construct";
+                                            task.strInteraction = item4;
+                                            task.strTargetCOID = item3.strID;
+                                            task.strName = jiLast.strName + "Job" + item3.strID;
+                                            workManager.AddTask(task);
+                                            break;
+                                        }
+                                    }
+                                }
+                            } else if (jiLast != null && jiLast.strName == "Haul") {
+                                List<CondOwner> list3 = FindCOsAtMousePosition(null, bInteractive: false, bAllowLocked: false);
+                                foreach (CondOwner item5 in list3) {
+                                    if (WorkManager.CTHaul.Triggered(item5)) {
+                                        Task2 task2 = new Task2();
+                                        task2.strDuty = "Haul";
+                                        task2.strInteraction = "ACTHaulItem";
+                                        task2.strTargetCOID = item5.strID;
+                                        task2.strName = "HaulJob" + item5.strID;
+                                        workManager.AddTask(task2);
+                                    }
+                                }
+                            } else if (chkFill.isOn) {
+                                FloodFill();
+                            } else if (bShipEditBG) {
+                                if (shipCurrentLoaded.BGItemFits(item)) {
+                                    shipCurrentLoaded.BGItemAdd(item);
+                                    Debug.Log(string.Concat("Placing BG at: ", item.transform.position, "; local: ", item.transform.localPosition));
+                                }
+                                goSelPart.layer = LayerMask.NameToLayer("Default");
+                                float z = goSelPart.transform.rotation.eulerAngles.z;
+                                SetPartCursor(goSelPart.name);
+                                item = goSelPart.GetComponent<Item>();
+                                item.fLastRotation = z;
+                            } else if (item.CheckFit(item.rend.bounds.center, shipCurrentLoaded, TileUtils.aSelPartTiles)) {
+                                nLastClickIndex = 0;
+                                vLastClick = default(Vector2);
+                                goSelPart.layer = LayerMask.NameToLayer("Default");
+                                if (iaItmInstall != null && iaItmInstall.objThem.strPersistentCO == null) {
+                                    InstallFinish();
+                                    if (bContinuePaintingJob) {
+                                        StartPaintingJob(jiLast);
+                                    }
+                                    bContinuePaintingJob = true;
+                                } else if (iaItmInstall == null) {
+                                    bPoolShipUpdates = true;
+                                    Debug.Log("bPoolShipUpdates = true");
+                                    shipCurrentLoaded.AddCO(goSelPart.GetComponent<CondOwner>(), bTiles: true);
+                                    float z2 = goSelPart.transform.rotation.eulerAngles.z;
+                                    SetPartCursor(goSelPart.GetComponent<CondOwner>().strName);
+                                    item = goSelPart.GetComponent<Item>();
+                                    item.fLastRotation = z2;
+                                }
+                            } else if (iaItmInstall == null) {
+                                List<CondOwner> mouseOverCO2 = GetMouseOverCO(_layerMaskDefault, null, null);
+                                CondOwner component3 = item.GetComponent<CondOwner>();
+                                foreach (CondOwner item6 in mouseOverCO2) {
+                                    if (item6.CanStackOnItem(component3) > 0 && component3 != item6.StackCO(component3)) {
+                                        goSelPart.layer = LayerMask.NameToLayer("Default");
+                                        float z3 = goSelPart.transform.rotation.eulerAngles.z;
+                                        SetPartCursor(component3.strCODef);
+                                        item = goSelPart.GetComponent<Item>();
+                                        item.fLastRotation = z3;
+                                        break;
+                                    }
                                 }
                             }
-                            igdConnectMode.SetInput(condOwner2);
-                            if (coConnectLastCrew != null) {
-                                SetBracketTarget(coConnectLastCrew.strID, bUpdateOnly: false, noAuto: true);
-                                coConnectLastCrew = null;
-                                coConnectMode = null;
+                        } else if (inventoryGUI.activeWindows.Count == 0) {
+                            float num = Mathf.Abs(Input.mousePosition.x - vDragStart.x);
+                            float num2 = Mathf.Abs(Input.mousePosition.y - vDragStart.y);
+                            if ((num2 > 16f || num > 16f) && lineSelectRect == null) {
+                                lineSelectRect = new VectorLine("SelectionRect", new List<Vector2>(5), 1.5f, LineType.Continuous, Joins.Weld);
+                                lineSelectRect.color = Color.white;
+                                lineSelectRect.SetCanvas(CanvasManager.goCanvasGUI, worldPositionStays: false);
+                            }
+                        }
+                    }
+                } else if (GetMouseButtonUp(0)) {
+                    bPoolShipUpdates = false;
+                    GameObject gameObject = null;
+                    if (contextMenuPool.IsRaised) {
+                        LowerContextMenu();
+                    } else if (lineSelectRect != null) {
+                        VectorLine.Destroy(ref lineSelectRect);
+                        SetBracketTarget(null, bUpdateOnly: false);
+                        Bounds viewportBounds = GetViewportBounds(camMain, vDragStart, Input.mousePosition);
+                        if (TileUtils.bShowTiles || bShipEdit) {
+                            SelectBounds(viewportBounds, TileUtils.bShowTiles);
+                        }
+                    } else if (!EventSystem.current.IsPointerOverGameObject()) {
+                        if (TileUtils.bShowTiles) {
+                            gameObject = ClickSelectScenePart(new string[1] { "Tile Helpers" });
+                            CondOwner condOwner = null;
+                            if (gameObject != null) {
+                                condOwner = gameObject.GetComponent<CondOwner>();
+                                Tile component4 = gameObject.GetComponent<Tile>();
+                                SelectCO(condOwner);
+                                int value = shipCurrentLoaded.aTiles.IndexOf(component4);
+                                if (!GUIActionKeySelector.commandZoneAlternate.Held) {
+                                    foreach (JsonZone value2 in shipCurrentLoaded.mapZones.Values) {
+                                        if (value2.aTiles.Contains(value)) {
+                                            int[] aTiles = value2.aTiles;
+                                            foreach (int index in aTiles) {
+                                                SelectCO(shipCurrentLoaded.aTiles[index].coProps);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
                             } else {
                                 SetBracketTarget(null, bUpdateOnly: false);
                             }
-                            HideInputSelector();
-                            if (GUIModal.Instance != null) GUIModal.Instance.Hide(); // FIX
-                        } else if (gameObject != null) {
-                            CondOwner component5 = gameObject.GetComponent<CondOwner>();
-                            if (component5.strCODef.IndexOf("Closed") >= 0 || component5.strCODef.IndexOf("Open") >= 0) {
-                                Ship ship = component5.ship;
-                                CondOwner condOwner3 = null;
-                                string strCODef = component5.strCODef;
-                                strCODef = ((strCODef.IndexOf("Open") < 0) ? strCODef.Replace("Closed", "Open") : strCODef.Replace("Open", "Closed"));
-                                condOwner3 = DataHandler.GetCondOwner(strCODef, component5.strID);
-                                if (condOwner3 != null) {
-                                    component5.ModeSwitch(condOwner3, component5.tf.position);
+                            OnTileSelectionUpdated.Invoke(aSelected);
+                        } else if (flag3) {
+                            Item item2 = null;
+                            if (goSelPart != null) {
+                                item2 = goSelPart.GetComponent<Item>();
+                            }
+                            if (item2 != null && item2.CheckFit(item2.rend.bounds.center, shipCurrentLoaded, TileUtils.aSelPartTiles)) {
+                                nLastClickIndex = 0;
+                                vLastClick = default(Vector2);
+                                goSelPart.layer = LayerMask.NameToLayer("Default");
+                                if (iaItmInstall != null) {
+                                    InstallFinish();
+                                    if (bContinuePaintingJob) {
+                                        StartPaintingJob(jiLast);
+                                    } else {
+                                        CondOwner selectedCrew = GetSelectedCrew();
+                                        int hourFromS = MathUtils.GetHourFromS(StarSystem.fEpoch);
+                                        if (selectedCrew != null && selectedCrew.Company.GetShift(hourFromS, selectedCrew).nID != 2) {
+                                            selectedCrew.LogMessage(selectedCrew.FriendlyName + DataHandler.GetString("SHIFT_WARN_NONWORK"), "Bad", selectedCrew.strID);
+                                        }
+                                    }
+                                    bContinuePaintingJob = true;
                                 }
                             }
-                        } else if (CanvasManager.State == CanvasManager.GUIState.SOCIAL && GUISocialCombat2.coUs == GetSelectedCrew() && GUISocialCombat2.coUs != GUISocialCombat2.coThem) {
-                            if (GUISocialCombat2.coUs.bAlive) {
-                                Interaction interaction2 = DataHandler.GetInteraction("SOCSnub");
-                                interaction2.objUs = GUISocialCombat2.coUs;
-                                interaction2.objThem = GUISocialCombat2.coThem;
-                                interaction2.bManual = true;
-                                GUISocialCombat2.coUs.AIIssueOrder(interaction2.objThem, interaction2, bPlayerOrdered: true, null);
-                                Paused = false;
-                            } else {
-                                GUISocialCombat2.objInstance.EndSocialCombat();
+                        } else if (!bJustClickedInput) {
+                            if (coConnectMode != null) {
+                                gameObject = ClickSelectScenePart(new string[1] { "Tile Helpers" });
+                            } else if (!bShipEditBG) {
+                                CondTrigger condTrigger = ctSelectFilter;
+                                if (bShipEdit || bDebugShow) {
+                                    ctSelectFilter = null;
+                                } else {
+                                    ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelected");
+                                }
+                                List<CondOwner> list4 = GetMouseOverCO(_layerMaskDefault, null, null).ToList();
+                                Room room = null;
+                                if (shipCurrentLoaded != null) {
+                                    room = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
+                                }
+                                if (room != null) {
+                                    list4.Remove(room.CO);
+                                    list4.Add(room.CO);
+                                }
+                                if (!bShipEdit && list4.Count > 0 && list4.IndexOf(GUIMegaToolTip.Selected) >= 0) {
+                                    list4.Clear();
+                                    OnRightClick.Invoke(list4);
+                                }
+                                gameObject = ClickSelectScenePart(new string[1] { "Default" });
+                                if (gameObject == null && !bShipEdit && list4.Count > 0) {
+                                    Walk();
+                                }
+                                ctSelectFilter = condTrigger;
+                            }
+                            if (coConnectMode != null) {
+                                CondOwner condOwner2 = null;
+                                if (gameObject != null) {
+                                    condOwner2 = gameObject.GetComponent<CondOwner>();
+                                    if (!ctSelectFilter.Triggered(condOwner2)) {
+                                        condOwner2 = null;
+                                    }
+                                }
+                                igdConnectMode.SetInput(condOwner2);
+                                if (coConnectLastCrew != null) {
+                                    SetBracketTarget(coConnectLastCrew.strID, bUpdateOnly: false, noAuto: true);
+                                    coConnectLastCrew = null;
+                                    coConnectMode = null;
+                                } else {
+                                    SetBracketTarget(null, bUpdateOnly: false);
+                                }
+                                HideInputSelector();
+                            if (GUIModal.Instance != null) GUIModal.Instance.Hide(); // FIX
+                            } else if (gameObject != null) {
+                                CondOwner component5 = gameObject.GetComponent<CondOwner>();
+                                if (component5.strCODef.IndexOf("Closed") >= 0 || component5.strCODef.IndexOf("Open") >= 0) {
+                                    Ship ship = component5.ship;
+                                    CondOwner condOwner3 = null;
+                                    string strCODef = component5.strCODef;
+                                    strCODef = ((strCODef.IndexOf("Open") < 0) ? strCODef.Replace("Closed", "Open") : strCODef.Replace("Open", "Closed"));
+                                    condOwner3 = DataHandler.GetCondOwner(strCODef, component5.strID);
+                                    if (condOwner3 != null) {
+                                        component5.ModeSwitch(condOwner3, component5.tf.position);
+                                    }
+                                }
+                            } else if (CanvasManager.State == CanvasManager.GUIState.SOCIAL && GUISocialCombat2.coUs == GetSelectedCrew() && GUISocialCombat2.coUs != GUISocialCombat2.coThem) {
+                                if (GUISocialCombat2.coUs.bAlive) {
+                                    Interaction interaction2 = DataHandler.GetInteraction("SOCSnub");
+                                    interaction2.objUs = GUISocialCombat2.coUs;
+                                    interaction2.objThem = GUISocialCombat2.coThem;
+                                    interaction2.bManual = true;
+                                    GUISocialCombat2.coUs.AIIssueOrder(interaction2.objThem, interaction2, bPlayerOrdered: true, null);
+                                    Paused = false;
+                                } else {
+                                    GUISocialCombat2.objInstance.EndSocialCombat();
+                                }
                             }
                         }
                     }
-                }
-            } else if (bShipEdit && GetMouseButtonDown(1)) {
-                if (goSelPart != null) {
-                    SetPartCursor(null);
-                    return;
-                }
-                if (TileUtils.bShowTiles) {
-                    SetBracketTarget(null, bUpdateOnly: false);
-                    return;
-                }
-                if (bShipEditBG) {
-                    List<Item> mouseOverBG = GetMouseOverBG(new string[1] { "Default" });
-                    if (mouseOverBG != null && mouseOverBG.Count > 0) {
-                        shipCurrentLoaded.BGItemRemove(mouseOverBG[0]);
-                    }
-                } else {
-                    nLastClickIndex = 0;
-                    vLastClick = default(Vector2);
-                    CondTrigger condTrigger3 = ctSelectFilter;
-                    ctSelectFilter = new CondTrigger();
-                    List<string> list4 = new List<string>();
-                    if (condTrigger3 != null) {
-                        list4.AddRange(condTrigger3.aForbids);
-                        Array.Copy(condTrigger3.aReqs, ctSelectFilter.aReqs, condTrigger3.aReqs.Length);
-                    }
-                    list4.Add("IsRoom");
-                    ctSelectFilter.aForbids = list4.ToArray();
-                    GameObject gameObject2 = ClickSelectScenePart(new string[1] { "Default" });
-                    if (gameObject2 != null) {
-                        shipCurrentLoaded.RemoveCO(gameObject2.GetComponent<CondOwner>());
-                        UnityEngine.Object.Destroy(gameObject2);
-                    }
-                    ctSelectFilter = condTrigger3;
-                }
-            } else if (GetMouseButtonUp(1)) {
-                if (!bJustClickedInput) {
-                    if (ZoneMenuOpen) {
+                } else if (bShipEdit && GetMouseButtonDown(1)) {
+                    if (goSelPart != null) {
+                        SetPartCursor(null);
                         return;
                     }
-                    if (objInstance.coConnectMode != null) {
-                        CloseConnectionMode();
-                    } else if ((contextMenuPool.IsRaised && !bRaisedMenuThisFrame) || (double)RightMouseButtonDownTimer > 0.3) {
-                        RightMouseButtonDownTimer = 0f;
-                        LowerContextMenu();
-                    } else if (!bRaiseUI && !inventoryGUI.ClickedInventory(Input.mousePosition)) {
-                        RightMouseButtonDownTimer = 0f;
-                        if (CanvasManager.IsOverUIElement(goCrewBar)) {
-                            if (CanvasManager.IsOverUIElement(goCrewBarPortraitButton)) {
-                                OnRightClick.Invoke(new List<CondOwner> { GetSelectedCrew() });
-                            }
-                        } else {
-                            if (bShipEdit || bDebugShow) {
-                                ctSelectFilter = null;
+                    if (TileUtils.bShowTiles) {
+                        SetBracketTarget(null, bUpdateOnly: false);
+                        return;
+                    }
+                    if (bShipEditBG) {
+                        List<Item> mouseOverBG = GetMouseOverBG(new string[1] { "Default" });
+                        if (mouseOverBG != null && mouseOverBG.Count > 0) {
+                            shipCurrentLoaded.BGItemRemove(mouseOverBG[0]);
+                        }
+                    } else {
+                        nLastClickIndex = 0;
+                        vLastClick = default(Vector2);
+                        CondTrigger condTrigger2 = ctSelectFilter;
+                        ctSelectFilter = new CondTrigger();
+                        List<string> list5 = new List<string>();
+                        if (condTrigger2 != null) {
+                            list5.AddRange(condTrigger2.aForbids);
+                            Array.Copy(condTrigger2.aReqs, ctSelectFilter.aReqs, condTrigger2.aReqs.Length);
+                        }
+                        list5.Add("IsRoom");
+                        ctSelectFilter.aForbids = list5.ToArray();
+                        GameObject gameObject2 = ClickSelectScenePart(new string[1] { "Default" });
+                        if (gameObject2 != null) {
+                            shipCurrentLoaded.RemoveCO(gameObject2.GetComponent<CondOwner>());
+                            UnityEngine.Object.Destroy(gameObject2);
+                        }
+                        ctSelectFilter = condTrigger2;
+                    }
+                } else if (GetMouseButtonUp(1)) {
+                    if (goSelPart != null || goPaintJob != null || guiPDA.JobsActive) {
+                        guiPDA.HideJobPaintUI();
+                        return;
+                    }
+                    if (!bJustClickedInput) {
+                        if (ZoneMenuOpen) {
+                            return;
+                        }
+                        if (objInstance.coConnectMode != null) {
+                            CloseConnectionMode();
+                        } else if ((contextMenuPool.IsRaised && !bRaisedMenuThisFrame) || (double)RightMouseButtonDownTimer > 0.3) {
+                            RightMouseButtonDownTimer = 0f;
+                            LowerContextMenu();
+                        } else if (!bRaiseUI && !inventoryGUI.ClickedInventory(Input.mousePosition)) {
+                            RightMouseButtonDownTimer = 0f;
+                            if (CanvasManager.IsOverUIElement(goCrewBar)) {
+                                if (CanvasManager.IsOverUIElement(goCrewBarPortraitButton)) {
+                                    OnRightClick.Invoke(new List<CondOwner> { GetSelectedCrew() });
+                                }
                             } else {
-                                ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelectedMTT");
+                                if (bShipEdit || bDebugShow) {
+                                    ctSelectFilter = null;
+                                } else {
+                                    ctSelectFilter = DataHandler.GetCondTrigger("TCanBeSelectedMTT");
+                                }
+                                List<CondOwner> mouseOverCO3 = GetMouseOverCO(_layerMaskDefaultLos, ctSelectFilter, null);
+                                Room room2 = null;
+                                if (shipCurrentLoaded != null) {
+                                    room2 = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
+                                }
+                                if (room2 != null) {
+                                    mouseOverCO3.Remove(room2.CO);
+                                    mouseOverCO3.Add(room2.CO);
+                                }
+                                if (mouseOverCO3 != null && mouseOverCO3.Count > 0) {
+                                    OnRightClick.Invoke(mouseOverCO3);
+                                }
+                                ctSelectFilter = null;
                             }
-                            List<CondOwner> mouseOverCO4 = GetMouseOverCO(new string[2] { "Default", "LoS" }, ctSelectFilter, null);
-                            Room room2 = null;
-                            if (shipCurrentLoaded != null) {
-                                room2 = shipCurrentLoaded.GetRoomAtWorldCoords1(vMouse, bAllowDocked: true);
-                            }
-                            if (room2 != null) {
-                                mouseOverCO4.Remove(room2.CO);
-                                mouseOverCO4.Add(room2.CO);
-                            }
-                            if (mouseOverCO4 != null && mouseOverCO4.Count > 0) {
-                                OnRightClick.Invoke(mouseOverCO4);
-                            }
-                            ctSelectFilter = null;
                         }
                     }
+                } else if (GetMouseButton(2)) {
+                    float num3 = Input.mousePosition.x - vDragStart.x;
+                    float num4 = Input.mousePosition.y - vDragStart.y;
+                    float num5 = 1f;
+                    if (camMain != null) {
+                        num5 = camMain.aspect;
+                    }
+                    delX += num3 / 15f * num5;
+                    delY += num4 / 15f;
                 }
-            } else if (GetMouseButton(2)) {
-                float num3 = Input.mousePosition.x - vDragStart.x;
-                float num4 = Input.mousePosition.y - vDragStart.y;
-                float num5 = 1f;
-                if (camMain != null) {
-                    num5 = camMain.aspect;
-                }
-                delX += num3 / 15f * num5;
-                delY += num4 / 15f;
             }
             if (goSelPart != null) {
                 Item component6 = goSelPart.GetComponent<Item>();

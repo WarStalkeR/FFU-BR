@@ -159,7 +159,7 @@ public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 					{
 						foreach (CondOwner item in list)
 						{
-							if (!flag4 && ctEVABottle.Triggered(item))
+							if (!flag4 && ctEVABottle.Triggered(item, null, logOutcome: false))
 							{
 								double num = item.GetCondAmount("StatGasMolO2") / item.GetCondAmount("StatRef") * 100.0;
 								txtO2.text = num.ToString("n2") + "%";
@@ -171,7 +171,7 @@ public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 								}
 								flag4 = true;
 							}
-							else if (ctEVABatt.Triggered(item))
+							else if (ctEVABatt.Triggered(item, null, logOutcome: false))
 							{
 								Powered component = item.GetComponent<Powered>();
 								double num2 = item.GetCondAmount("StatPowerMax");
@@ -202,7 +202,6 @@ public void UpdateUI(CondOwner coRoomIn, CondOwner coRoomOut)
 		}
 		HUDOn = flag2;
 		GaugeOn = flag3;
-		bool flag5 = (int)Time.realtimeSinceStartup % 2 == 0;
 		double condAmount = coRoomIn.GetCondAmount("StatGasPpO2");
 		double condAmount2 = coRoomIn.GetCondAmount("StatGasPpCO2");
 		if (condAmount <= fO2PPMin || condAmount2 >= fCO2Max)
