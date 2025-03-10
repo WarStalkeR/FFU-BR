@@ -32,9 +32,6 @@ only to very specific action that related to modified game code (such as invento
 **DynamicRandomRange** - By default loot random range is limited to `1.0f`, thus preventing use of 
 loot tables, if total sum of their chances goes beyond `1.0f`. This feature allows to increase max 
 possible random range beyond `1.0f`, to the total sum of all chances in the loot table.  
-**IgnoredKeys** - Case-sensitive list of entries for Dynamic Random Range feature to ignore (for 
-avoiding errors). In the vanilla behavior, some items were expected to never appear due to random 
-range being limited to `1f`, but it isn't the case, if Dynamic Random Range is enabled.  
 **MaxLogTextSize** - Defines the max length of the text in the console. Needed in case if you want 
 to see the whole list of entries from the console commands without missing anything (whether it is
 `getcond` or any other command). May impact performance, if the value is too big.  
