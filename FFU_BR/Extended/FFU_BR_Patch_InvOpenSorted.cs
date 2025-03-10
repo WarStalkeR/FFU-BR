@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using MonoMod;
 using Ostranauts.Core;
 using Ostranauts.Objectives;
@@ -115,8 +105,8 @@ public partial class patch_CondOwner : CondOwner {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-GUIInventory.SpawnInventoryWindow
+
+/* GUIInventory.SpawnInventoryWindow
 public void SpawnInventoryWindow(CondOwner CO, InventoryWindowType type, bool bFlyIn)
 {
 	if (CO == null)
@@ -181,8 +171,9 @@ public void SpawnInventoryWindow(CondOwner CO, InventoryWindowType type, bool bF
 		MonoSingleton<ObjectiveTracker>.Instance.CheckObjective(CrewSim.coPlayer.strID);
 	}
 }
+*/
 
-Slots.GetSlotsDepthFirst
+/* Slots.GetSlotsDepthFirst
 public List<Slot> GetSlotsDepthFirst(bool bDeep)
 {
 	List<Slot> list = new List<Slot>(aSlots);

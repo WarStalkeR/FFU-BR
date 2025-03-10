@@ -15,6 +15,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
+  <PropertyGroup>
+    <NoWarn>0108;0114;0162;0414;0618;0626;0649;IDE0002;IDE0019;IDE0051;IDE0130;IDE1006</NoWarn>
+  </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="@echo off&#xD;&#xA;setlocal&#xD;&#xA;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;) else if $(ConfigurationName) == Patch (&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\..\BepInEx\monomod\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(TargetPath)&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp.FFU_BR.mm.dll&quot;&#xD;&#xA;    &quot;$(SolutionDir)..\MonoMod\MonoMod.exe&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\Assembly-CSharp.FFU_BR.mm.dll&quot; /F&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.pdb&quot; /F&#xD;&#xA;    echo F | xcopy /F /Y &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.dll&quot; &quot;$(SolutionDir)..\Modded\Assembly-CSharp-FFU_BR.dll&quot;&#xD;&#xA;    del &quot;$(SolutionDir)..\Modded\MONOMODDED_Assembly-CSharp.dll&quot; /F&#xD;&#xA;    del &quot;$(TargetPath)&quot; /F&#xD;&#xA;)" />
   </Target>

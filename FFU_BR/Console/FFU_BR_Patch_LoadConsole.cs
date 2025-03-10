@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-public partial class patch_ConsoleResolver : ConsoleResolver {
+﻿public partial class patch_ConsoleResolver : ConsoleResolver {
     public static extern bool orig_ResolveString(ref string strInput);
     public static bool ResolveString(ref string strInput) {
         strInput = strInput.Trim();
@@ -23,8 +13,8 @@ public partial class patch_ConsoleResolver : ConsoleResolver {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-ConsoleResolver.ResolveString
+
+/* ConsoleResolver.ResolveString
 public static bool ResolveString(ref string strInput)
 {
 	strInput.Trim();

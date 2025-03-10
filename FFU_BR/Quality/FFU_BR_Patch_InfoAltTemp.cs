@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0114
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using Ostranauts.UI.MegaToolTip.DataModules.SubElements;
 using UnityEngine;
 using UnityEngine.UI;
@@ -69,8 +58,8 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-NumberModule.SetData
+
+/* NumberModule.SetData
 public override void SetData(CondOwner co)
 {
 	if (co == null || co.mapConds == null)
@@ -105,8 +94,9 @@ public override void SetData(CondOwner co)
 		_IsMarkedForDestroy = true;
 	}
 }
+*/
 
-NumberModule.OnUpdateUI
+/* NumberModule.OnUpdateUI
 protected override void OnUpdateUI()
 {
 	if (_numbList.Count == 0)

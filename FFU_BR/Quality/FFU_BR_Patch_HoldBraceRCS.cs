@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0114
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using MonoMod;
 using Ostranauts.Ships.AIPilots.Interfaces;
 using System.Collections.Generic;
@@ -88,8 +77,8 @@ namespace Ostranauts.Ships.Commands {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-HoldStationAutoPilot.RunCommand
+
+/* HoldStationAutoPilot.RunCommand
 public override CommandCode RunCommand()
 {
 	Ship shipStationKeepingTarget = base.ShipUs.shipStationKeepingTarget;

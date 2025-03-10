@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-#pragma warning disable IDE0051
-
-using UnityEngine;
+﻿using UnityEngine;
 
 public partial class patch_GUIOptions : GUIOptions {
     bool removedExcess = false;
@@ -30,8 +19,8 @@ public partial class patch_GUIOptions : GUIOptions {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-GUIOptions.Init
+
+/* GUIOptions.Init
 private void Init()
 {
 	cgOptions = base.transform.parent.GetComponent<CanvasGroup>();

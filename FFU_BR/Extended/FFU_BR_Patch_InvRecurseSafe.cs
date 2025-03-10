@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using MonoMod;
+﻿using MonoMod;
 
 public partial class patch_Slot : Slot {
     [MonoModReplace] public bool CanFit(CondOwner coFit) {
@@ -50,8 +40,8 @@ public partial class patch_Container : Container {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-Slot.CanFit
+
+/* Slot.CanFit
 public bool CanFit(CondOwner coFit)
 {
 	if (aCOs == null)
@@ -72,8 +62,9 @@ public bool CanFit(CondOwner coFit)
 	}
 	return false;
 }
+*/
 
-Container.AllowedCO
+/* Container.AllowedCO
 public bool AllowedCO(CondOwner coIn)
 {
 	if (coIn == null || coIn == CO)

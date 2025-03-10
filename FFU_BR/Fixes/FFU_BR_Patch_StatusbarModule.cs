@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ostranauts.UI.MegaToolTip.DataModules {
@@ -57,8 +47,8 @@ namespace Ostranauts.UI.MegaToolTip.DataModules {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-StatusbarModule.OnUpdateUI
+
+/* StatusbarModule.OnUpdateUI
 protected override void OnUpdateUI()
 {
 	if (_co == null)

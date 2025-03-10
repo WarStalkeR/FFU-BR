@@ -1,16 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0114
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-#pragma warning disable IDE0051
-
-using MonoMod;
+﻿using MonoMod;
 using UnityEngine;
 using System.IO;
 using System.Text;
@@ -115,8 +103,8 @@ public partial class patch_ConsoleToGUI : ConsoleToGUI {
 
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-ConsoleToGUI.DrawConsole
+
+/* ConsoleToGUI.DrawConsole
 private void DrawConsole(int window)
 {
 	if (HandleInput())

@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using Ostranauts.Core.Models;
+﻿using Ostranauts.Core.Models;
 using System.Collections.Generic;
 using UnityEngine;
 using MonoMod;
@@ -306,8 +296,8 @@ public partial class patch_Loot : Loot {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-Loot.GetCTLoot
+
+/* Loot.GetCTLoot
 public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 {
 	List<CondTrigger> list = new List<CondTrigger>();
@@ -375,8 +365,9 @@ public List<CondTrigger> GetCTLoot(CondTrigger objUs, string strRandID = null)
 	}
 	return list;
 }
+*/
 
-Loot.GetCOLoot
+/* Loot.GetCOLoot
 public List<CondOwner> GetCOLoot(CondOwner objUs, bool bSuppressOverride, string strRandID = null)
 {
 	List<CondOwner> list = new List<CondOwner>();
@@ -471,8 +462,9 @@ public List<CondOwner> GetCOLoot(CondOwner objUs, bool bSuppressOverride, string
 	}
 	return list;
 }
+*/
 
-Loot.GetLootNames
+/* Loot.GetLootNames
 public List<string> GetLootNames(string strRandID = null, bool bOnlyCOs = false, string type = null)
 {
 	List<string> list = new List<string>();
@@ -554,8 +546,9 @@ public List<string> GetLootNames(string strRandID = null, bool bOnlyCOs = false,
 	}
 	return list;
 }
+*/
 
-Loot.ApplyCondLoot
+/* Loot.ApplyCondLoot
 public void ApplyCondLoot(CondOwner coUs, float fCoeff, string strRandID = null, float fCondRuleTrack = 0f)
 {
 	if (coUs == null || strType != "condition")
@@ -598,8 +591,9 @@ public void ApplyCondLoot(CondOwner coUs, float fCoeff, string strRandID = null,
 		}
 	}
 }
+*/
 
-Loot.GetCondLoot
+/* Loot.GetCondLoot
 public Dictionary<string, double> GetCondLoot(float fCoeff, Dictionary<string, double> dictOut, string strRandID = null)
 {
 	if (dictOut == null)

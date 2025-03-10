@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using Ostranauts.Core;
 using Ostranauts.Ships.Rooms;
 using Ostranauts.Trading;
@@ -1000,8 +990,8 @@ public static partial class patch_DataHandler {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-DataHandler.Init
+
+/* DataHandler.Init
 public static void Init()
 {
 	string empty = string.Empty;
@@ -1256,8 +1246,9 @@ public static void Init()
 	}
 	bLoaded = true;
 }
+*/
 
-DataHandler.LoadMod
+/* DataHandler.LoadMod
 private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, JsonModInfo jmi)
 {
 	if (!Directory.Exists(strFolderPath + "data/"))
@@ -1410,8 +1401,9 @@ private static void LoadMod(string strFolderPath, string[] aIgnorePatterns, Json
 		jmi.Status = GUIModRow.ModStatus.Loaded;
 	}
 }
+*/
 
-DataHandler.LoadModJsons
+/* DataHandler.LoadModJsons
 private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string, TJson> dict, string[] aIgnorePatterns)
 {
 	if (!Directory.Exists(strFolderPath))
@@ -1445,8 +1437,9 @@ private static void LoadModJsons<TJson>(string strFolderPath, Dictionary<string,
 		}
 	}
 }
+*/
 
-DataHandler.JsonToData
+/* DataHandler.JsonToData
 public static void JsonToData<TJson>(string strFile, Dictionary<string, TJson> dict)
 {
 	Debug.Log("#Info# Loading json: " + strFile);

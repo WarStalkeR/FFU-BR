@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,8 +49,8 @@ public partial class patch_GUIInventory : GUIInventory {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-GUIInventory.GetWindowPosition
+
+/* GUIInventory.GetWindowPosition
 private Vector2 GetWindowPosition(GUIInventoryWindow winCurrent, GUIInventoryWindow winPrev)
 {
 	RectTransform component = base.transform.Find("PaperDoll").GetComponent<RectTransform>();

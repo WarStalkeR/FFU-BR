@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using MonoMod;
 using System;
 using System.Collections.Generic;
@@ -441,8 +431,8 @@ public static partial class patch_DataHandler {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-Ship.InitShip
+
+/* Ship.InitShip
 public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null)
 {
 	if (nLoad <= nLoadState || json == null)

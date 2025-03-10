@@ -1,14 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-using MonoMod;
+﻿using MonoMod;
 using UnityEngine;
 
 public partial class patch_JsonCondOwner : JsonCondOwner {
@@ -83,8 +73,8 @@ public partial class patch_Container : Container {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-CondOwner.SetData
+
+/* CondOwner.SetData
 public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOSIn = null)
 {
 	if (jid == null)
@@ -638,8 +628,9 @@ public void SetData(JsonCondOwner jid, bool bLoot = true, JsonCondOwnerSave jCOS
 	}
 	SetUpBehaviours();
 }
+*/
 
-Container.SetIsInContainer
+/* Container.SetIsInContainer
 public void SetIsInContainer(CondOwner co)
 {
 	if (CO == this)
@@ -672,8 +663,9 @@ public void SetIsInContainer(CondOwner co)
 		condOwner = condOwner.objCOParent;
 	}
 }
+*/
 
-Container.ClearIsInContainer
+/* Container.ClearIsInContainer
 public void ClearIsInContainer(CondOwner co)
 {
 	co.ZeroCondAmount("IsInContainer");
@@ -683,8 +675,9 @@ public void ClearIsInContainer(CondOwner co)
 	co.VisitCOs(condOwnerVisitorZeroCond, bAllowLocked: true);
 	co.objCOParent = null;
 }
+*/
 
-Slots.ApplySlotEffects
+/* Slots.ApplySlotEffects
 private void ApplySlotEffects(Slot slot, CondOwner co, JsonSlotEffects jse, bool bRemove = false)
 {
 	if (co == null || slot == null || jse == null)

@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-#pragma warning disable IDE0051
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using Ostranauts.ShipGUIs.Chargen;
 using System.Collections.Generic;
 using System.Text;
@@ -101,8 +90,8 @@ public partial class patch_GUIChargenCareer : GUIChargenCareer {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-GUIChargenCareer.AddSkillTrait
+
+/* GUIChargenCareer.AddSkillTrait
 private void AddSkillTrait(JsonCareer jc, string strChosen)
 {
 	bmpDot2.color = Color.white;
@@ -139,8 +128,9 @@ private void AddSkillTrait(JsonCareer jc, string strChosen)
 		}
 	}
 }
+*/
 
-GUIChargenCareer.RebuildMultiSelectSidebar
+/* GUIChargenCareer.RebuildMultiSelectSidebar
 private void RebuildMultiSelectSidebar()
 {
 	if (_selectedSkills.Count == 0)

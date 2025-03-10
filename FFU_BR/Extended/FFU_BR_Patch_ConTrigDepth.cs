@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0114
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-
-public partial class patch_CondTrigger : CondTrigger {
+﻿public partial class patch_CondTrigger : CondTrigger {
     public int nMaxDepth { get; set; }
 
     public extern CondTrigger orig_Clone();
@@ -38,24 +27,9 @@ public partial class patch_CondTrigger : CondTrigger {
     }
 }
 
-// Prototype Changes (for TEST BEGIN/TEST END):
-/*
-[MonoModReplace] public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true) {
-    //...ORIGINAL CODE...//
-    objOwner.ValidateParent();
-    // MAX DEPTH TEST BEGIN //
-    if (nMaxDepth > 0 &&
-        GetDepth(objOwner) > nMaxDepth)
-        return false;
-    // MAX DEPTH TEST END //
-    SocialStats socStats = null;
-    //...ORIGINAL CODE...//
-}
-*/
-
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-CondTrigger.Clone
+
+/* CondTrigger.Clone
 public CondTrigger Clone()
 {
 	CondTrigger condTrigger = new CondTrigger();
@@ -80,8 +54,9 @@ public CondTrigger Clone()
 	condTrigger._valuesWereChanged = false;
 	return condTrigger;
 }
+*/
 
-CondTrigger.Triggered
+/* CondTrigger.Triggered
 public bool Triggered(CondOwner objOwner, string strIAStatsName = null, bool logOutcome = true)
 {
 	if (logReason)

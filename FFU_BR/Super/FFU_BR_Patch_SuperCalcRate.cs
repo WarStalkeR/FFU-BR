@@ -1,15 +1,4 @@
-﻿#pragma warning disable CS0108
-#pragma warning disable CS0162
-#pragma warning disable CS0414
-#pragma warning disable CS0618
-#pragma warning disable CS0626
-#pragma warning disable CS0649
-#pragma warning disable IDE1006
-#pragma warning disable IDE0019
-#pragma warning disable IDE0002
-#pragma warning disable IDE0051
-
-using FFU_Beyond_Reach;
+﻿using FFU_Beyond_Reach;
 using System.Linq;
 using UnityEngine;
 
@@ -47,8 +36,8 @@ public partial class patch_Interaction : Interaction {
 }
 
 // Reference Output: ILSpy v9.0.0.7660 / C# 11.0 / 2022.4
-/*
-Interaction.CalcRate
+
+/* Interaction.CalcRate
 private void CalcRate()
 {
 	if (strActionGroup != "Work" || bCTThemModifierCalculated)
