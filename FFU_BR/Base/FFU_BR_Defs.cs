@@ -12,12 +12,6 @@ namespace FFU_Beyond_Reach {
         public static SyncLogs SyncLogging = SyncLogs.None;
         public static ActLogs ActLogging = ActLogs.None;
         public static bool DynamicRandomRange = true;
-        public static string[] IgnoredKeys = new string[] {
-            "pbaseEyesMissing", "pbaseGlassesMissing", "pbaseHeadMissing", 
-            "pbaseLipsMissing", "pbaseNeckMissing", "pbaseNoseMissing", 
-            "pbasePupilsMissing", "pbaseScarMissing", "pbaseTeethMissing", 
-            "pbaseHairMissing", "pbaseBeardMissing"
-        };
         public static int MaxLogTextSize = 16382;
         public static bool ModSyncLoading = true;
         public static bool EnableCodeFixes = true;
@@ -60,11 +54,6 @@ namespace FFU_Beyond_Reach {
                 "By default loot random range is limited to 1f, thus preventing use of loot tables, if " +
                 "total sum of their chances goes beyond 1f. This feature allows to increase max possible " +
                 "random range beyond 1f, to the total sum of all chances in the loot table.").Value;
-            string refIgnoreString = ModDefs.Bind("ConfigSettings", "IgnoredKeys", string.Join("|", IgnoredKeys),
-                "Case-sensitive list of entries for Dynamic Random Range feature to ignore (for avoiding " +
-                "errors). In the vanilla behavior, some items were expected to never appear due to random range " +
-                "being limited to 1f, but it isn't the case, if Dynamic Random Range is enabled.").Value;
-            if (!string.IsNullOrEmpty(refIgnoreString)) IgnoredKeys = refIgnoreString.Split('|');
             MaxLogTextSize = ModDefs.Bind("ConfigSettings", "MaxLogTextSize", MaxLogTextSize,
                 "Defines the max length of the text in the console. May impact performance.").Value;
             ModSyncLoading = ModDefs.Bind("ConfigSettings", "ModSyncLoading", ModSyncLoading,
