@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Collections;
 
 public partial class patch_JsonModInfo : JsonModInfo {
     public Dictionary<string, string[]> removeIds { get; set; }
@@ -723,20 +724,63 @@ public static partial class patch_DataHandler {
             // New Data Property Validation
             PropertyInfo newProperty = newDataType.GetProperty(currProperty.Name);
             if (newProperty != null) {
+                bool isDictionary = false;
+                string refName = currProperty.Name;
                 object newValue = newProperty.GetValue(newDataSet, null);
                 object currValue = currProperty.GetValue(currDataSet, null);
-                if (rawDataSet.IndexOf(currProperty.Name) >= 0) {
+                if (rawDataSet.IndexOf(refName) >= 0) {
                     try {
-                        if (currValue != null && newValue is string[])
-                            SyncArrays(ref newValue, ref currValue, dataKey, currProperty.Name, extData, doLog);
+                        // Handle Dictionary Variables
+                        if (currValue != null && newValue is IDictionary) {
+                            isDictionary = true;
+                            IDictionary newDict = (IDictionary)newValue;
+                            IDictionary currDict = (IDictionary)currValue;
+                            bool isPrimitive = currDict.Values.Cast<object>().FirstOrDefault()?.GetType().IsPrimitive ?? false;
+                            foreach (var newKey in newDict.Keys.Cast<object>().ToList()) {
+                                bool doRemove = newKey.ToString().StartsWith(FFU_BR_Defs.OPT_DEL);
+                                bool doReplace = newKey.ToString().StartsWith(FFU_BR_Defs.OPT_MOD);
+                                bool hasAction = doRemove || doReplace;
+                                object targetKey = hasAction ? newKey.ToString().Substring(1) : newKey;
+                                if (currDict.Contains(targetKey)) {
+                                    if (doRemove) {
+                                        if (doLog) Debug.Log($"#Info# Property [{targetKey}] was removed " +
+                                            $"from Data Block [{dataKey}/{refName}]");
+                                        currDict.Remove(targetKey);
+                                    } else if (doReplace) {
+                                        if (doLog) Debug.Log($"#Info# Property [{targetKey}] was replaced " +
+                                            $"in Data Block [{dataKey}/{refName}]");
+                                        currDict[targetKey] = newDict[newKey];
+                                    } else if (!isPrimitive) {
+                                        string rawDataSubSet = JsonMapper.ToJson(newDict[targetKey]);
+                                        SyncDataSafe(currDict[targetKey], newDict[targetKey], ref rawDataSubSet, dataType, $"{dataKey}/{refName}:{targetKey}", extData, doLog);
+                                    } else {
+                                        if (doLog) Debug.Log($"#Info# Data Block [{dataKey}/{refName}], " +
+                                            $"Property [{targetKey}]: {currDict[targetKey]} => {newDict[targetKey]}");
+                                        currDict[targetKey] = newDict[targetKey];
+                                    }
+                                } else {
+                                    if (doLog) Debug.Log($"#Info# Property [{targetKey}], Value [{newDict[targetKey]}] " +
+                                        $"was added to Data Block [{dataKey}/{refName}]");
+                                    currDict[targetKey] = newDict[targetKey];
+                                }
+                            }
+                        }
+
+                        // Handle Array Variables
+                        else if (currValue != null && newValue is string[])
+                            SyncArrays(ref newValue, ref currValue, dataKey, refName, extData, doLog);
+
+                        // Handle Simple Variables
                         else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], Property " +
-                            $"[{currProperty.Name}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
+                            $"[{refName}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
+
                         // Overwrite Existing Value
-                        currProperty.SetValue(currDataSet, newValue, null);
+                        if (isDictionary) currProperty.SetValue(currDataSet, currValue, null);
+                        else currProperty.SetValue(currDataSet, newValue, null);
                     } catch (Exception ex) {
                         Exception inner = ex.InnerException;
                         Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
-                        $"[{currProperty.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" +
+                        $"[{refName}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" +
                         (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 }
@@ -752,20 +796,63 @@ public static partial class patch_DataHandler {
             // New Data Field Validation
             FieldInfo newField = newDataType.GetField(currField.Name, fieldFlags);
             if (newField != null) {
+                bool isDictionary = false;
+                string refName = currField.Name;
                 object newValue = newField.GetValue(newDataSet);
                 object currValue = currField.GetValue(currDataSet);
-                if (rawDataSet.IndexOf(currField.Name) >= 0) {
+                if (rawDataSet.IndexOf(refName) >= 0) {
                     try {
-                        if (currValue != null && newValue is string[])
-                            SyncArrays(ref newValue, ref currValue, dataKey, currField.Name, extData, doLog);
+                        // Handle Dictionary Variables
+                        if (currValue != null && newValue is IDictionary) {
+                            isDictionary = true;
+                            IDictionary newDict = (IDictionary)newValue;
+                            IDictionary currDict = (IDictionary)currValue;
+                            bool isPrimitive = currDict.Values.Cast<object>().FirstOrDefault()?.GetType().IsPrimitive ?? false;
+                            foreach (var newKey in newDict.Keys.Cast<object>().ToList()) {
+                                bool doRemove = newKey.ToString().StartsWith(FFU_BR_Defs.OPT_DEL);
+                                bool doReplace = newKey.ToString().StartsWith(FFU_BR_Defs.OPT_MOD);
+                                bool hasAction = doRemove || doReplace;
+                                object targetKey = hasAction ? newKey.ToString().Substring(1) : newKey;
+                                if (currDict.Contains(targetKey)) {
+                                    if (doRemove) {
+                                        if (doLog) Debug.Log($"#Info# Property [{targetKey}] was removed " +
+                                            $"from Data Block [{dataKey}/{refName}]");
+                                        currDict.Remove(targetKey);
+                                    } else if (doReplace) {
+                                        if (doLog) Debug.Log($"#Info# Property [{targetKey}] was replaced " +
+                                            $"in Data Block [{dataKey}/{refName}]");
+                                        currDict[targetKey] = newDict[newKey];
+                                    } else if (!isPrimitive) {
+                                        string rawDataSubSet = JsonMapper.ToJson(newDict[targetKey]);
+                                        SyncDataSafe(currDict[targetKey], newDict[targetKey], ref rawDataSubSet, dataType, $"{dataKey}/{refName}:{targetKey}", extData, doLog);
+                                    } else {
+                                        if (doLog) Debug.Log($"#Info# Data Block [{dataKey}/{refName}], " +
+                                            $"Property [{targetKey}]: {currDict[targetKey]} => {newDict[targetKey]}");
+                                        currDict[targetKey] = newDict[targetKey];
+                                    }
+                                } else {
+                                    if (doLog) Debug.Log($"#Info# Property [{targetKey}], Value [{newDict[targetKey]}] " +
+                                        $"was added to Data Block [{dataKey}/{refName}]");
+                                    currDict[targetKey] = newDict[targetKey];
+                                }
+                            }
+                        }
+
+                        // Handle Array Variables
+                        else if (currValue != null && newValue is string[])
+                            SyncArrays(ref newValue, ref currValue, dataKey, refName, extData, doLog);
+
+                        // Handle Simple Variables
                         else if (doLog) Debug.Log($"#Info# Data Block [{dataKey}], Field " +
-                            $"[{currField.Name}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
+                            $"[{refName}]: {currValue.Sanitized()} => {newValue.Sanitized()}");
+
                         // Overwrite Existing Value
-                        currField.SetValue(currDataSet, newValue);
+                        if (isDictionary) currField.SetValue(currDataSet, currValue);
+                        else currField.SetValue(currDataSet, newValue);
                     } catch (Exception ex) {
                         Exception inner = ex.InnerException;
                         Debug.LogWarning($"Value sync for Data Block [{dataKey}], Property " +
-                        $"[{currField.Name}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
+                        $"[{refName}] has failed! Ignoring.\n{ex.Message}\n{ex.StackTrace}" + 
                         (inner != null ? $"\nInner: {inner.Message}\n{inner.StackTrace}" : ""));
                     }
                 }
