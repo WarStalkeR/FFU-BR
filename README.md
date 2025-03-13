@@ -304,6 +304,65 @@ it is enough to choose valid `strReference` (`strName` of some other entry) and 
 copy of the entry, but with new `strName` of your choice. Any additional parameters will be used to overwrite
 existing copied parameters of the new entry.  
 
+## Precision Dictionary Modifications
+Some of the Ostranauts data is stored as dictionaries. In order to precisely modify it, a set modding API
+handling mechanisms was implemented. In addition, modding API supports indefinite amount of nested dictionaries,
+as long as dictionaries themselves are supported by the data architecture of the game itself.  
+
+There are 3 methods of modifying dictionary records:  
+`"KeyName": {//...DATA...//}` adds new or modifies existing record entry with the new data.  
+`"*KeyName": {//...DATA...//}` removes all old data in the record and replaces it with the new data.  
+`"~KeyName": {//...DATA...//}` completely removes all data along with the record from the dictionary.  
+
+```json
+{
+    "strName": "Robot",
+    "mapIAHist2": {
+        "~StatSecurity": {},
+        "*StatSelfRespect": {
+            "strCondName": "StatSelfRespect",
+            "mapInteractions": {
+                "SeekKOAllow": {
+                    "strName": "SeekKOAllow",
+                    "nIterations": 41,
+                    "fTotalValue": 2461.0
+                }
+            }
+        },
+        "StatSolidTemp": {
+            "mapInteractions": {
+                "ACTExcerciseTreadmillDo": {
+                    "strName": "ACTExcerciseTreadmillDo",
+                    "nIterations": 276,
+                    "fTotalValue": 20.42594
+                },
+                "ACTExcerciseTreadmillDoHot": {
+                    "strName": "ACTExcerciseTreadmillDoHot",
+                    "nIterations": 242,
+                    "fTotalValue": 9.623437
+                },
+                "~ACTExcerciseStrengthTrainerDo": {},
+                "*ACTExcerciseStrengthTrainerDoHot": {
+                    "strName": "ACTExcerciseStrengthTrainerDoHot",
+                    "nIterations": 555
+                },
+                "ACTSomethingUnexpected": {
+                    "strName": "ACTSomethingUnexpected",
+                    "nIterations": 777,
+                    "fTotalValue": 77
+                }
+            }
+        }
+    }
+}
+```
+The best example of usage for this modding API is `ai_training` data. In example above, record `StatSecurity` is
+completely removed, record `StatSelfRespect` has all its data replaced with completely new data in the example,
+two records `ACTExcerciseTreadmillDo` and `ACTExcerciseTreadmillDoHot` are updated with new data, the record
+`ACTExcerciseStrengthTrainerDo` is removed as well, record `ACTExcerciseStrengthTrainerDoHot` also has its data
+completely discarded and replaced with new data, and completely new record `ACTSomethingUnexpected` is added 
+to the dictionary. As you can see in example, it allows to operate at various sub-levels without an issue.
+
 ## Precision Array Modifications
 Since Ostranauts is extremely data-drive game, lots of various parameters and flags are stored in various arrays 
 and sub-arrays. Modified modding/loading API supports precise modifications of such arrays and sub-arrays. If
