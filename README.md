@@ -95,7 +95,7 @@ any other number is treated as `false`).
 
 # New Parameters & Properties
 **strReference** - a `condowners` parameter that allows to create reference-based copy of the existing CO, 
-whilst overriding only specific parameters. **Note**: will inherit all properties of the original CO.
+whilst overriding only specific parameters. **Note:** will inherit all properties of the original CO.
 
 **strInvSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
 inventory owner. Works pretty much same way as other `slot effects`, except parameters `mapMeshTextures`,
@@ -110,6 +110,14 @@ with lesser numbers are rendered first in open inventory UI. Was implemented to 
 is nested at depth greater than `maxDepth` parameter, then condition trigger automatically returns `false`. 
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
+
+## Existing Functionality Changes
+**Sensor** - an `aUpdateCommands` command. By default it can only execute interactions based on the room
+conditions. Modification allows to run it condition triggers against itself, if **strPoint** is set to `null`.
+In addition, if **dictGUIPropMap** that it uses, contains **dfUpdateInterval** entry - it replaces default
+`1.0` (value is in **seconds**) update interval with a new value as long as its greater than `0.0`. **Note:** it
+relies on Unity's internal `Update()` method, so if update interval is set to a too small value (i.e. too 
+short), it just won't be able to keep up with correct timing.
 
 ## New Hardcoded Conditions
 **StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
@@ -377,7 +385,7 @@ There are 4 commands to perform such modifications:
 `--ADD--` just adds the entry to the existing data as is, doesn't care about array type.  
 `--INS--` inserts the entry at designated index, shifting whatever was at this index forward.
 
-**Note**: make sure that precisely modified arrays start from any command. Otherwise, they will be copied as is
+**Note:** make sure that precisely modified arrays start from any command. Otherwise, they will be copied as is
 and you're pretty much asking for a trouble. Same applies to sub-arrays, except first goes number of modifier row
 in the array - loader can't do anything with row number, but without command and will tell you about it.
 
