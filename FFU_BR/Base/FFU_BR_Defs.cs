@@ -173,6 +173,7 @@ namespace FFU_Beyond_Reach {
 
         public enum ActLogs {
             None,
+            Interactions,
             Runtime
         }
     }
