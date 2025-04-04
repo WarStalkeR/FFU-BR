@@ -28,10 +28,9 @@ public partial class patch_Interaction : Interaction {
     private extern void orig_AddFailReason(string strKey, string strReason);
     private void AddFailReason(string strKey, string strReason) {
         if (bWriteToLog && strReason != Interaction.STR_IA_FAIL_DEFAULT)
-            UnityEngine.Debug.Log($"#Interaction# " +
-                $"{objUs?.strName ?? "Unknown"}:" +
-                $"{objUs?.strID ?? "N/A"} => " +
-                $"{strKey}, {strReason}");
+            UnityEngine.Debug.Log($"#Interaction# {objUs?.strName ?? "Unknown"}:" +
+                $"{objUs?.strID ?? "0"} => [Failed] {strKey}: " +
+                $"{(string.IsNullOrEmpty(strReason) ? "N/A" : strReason)}");
         orig_AddFailReason(strKey, strReason);
     }
 
@@ -46,8 +45,15 @@ public partial class patch_Interaction : Interaction {
 
     // Room Lookup Integration
     [MonoModReplace] public void ApplyLogging(string strOwner, bool bTraitSuffix) {
+        string msgText = null;
+        if (bWriteToLog) {
+            msgText = GetText(bTraitSuffix);
+            UnityEngine.Debug.Log($"#Interaction# " +
+            $"{objUs?.strName ?? "Unknown"}:" +
+            $"{objUs?.strID ?? "0"} => {msgText}");
+        }
         if (nLogging == Logging.NONE || bLogged) return;
-        string msgText = GetText(bTraitSuffix);
+        msgText = msgText ?? GetText(bTraitSuffix);
         List<CondOwner> coNotifyList = new List<CondOwner>();
         switch (nLogging) {
             case Logging.GROUP: {
