@@ -1,12 +1,16 @@
 ﻿using FFU_Beyond_Reach;
+using MonoMod;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class patch_JsonInteraction : JsonInteraction {
     public bool bForceVerbose { get; set; }
+    public bool bRoomLookup { get; set; }
 }
 
 public partial class patch_Interaction : Interaction {
     public bool bForceVerbose;
+    public bool bRoomLookup;
     public bool bWriteToLog;
 
     // Assign New Variables
@@ -15,6 +19,7 @@ public partial class patch_Interaction : Interaction {
         orig_SetData(jsonIn, jis);
         if (jsonIn != null) {
             bForceVerbose = (jsonIn as patch_JsonInteraction).bForceVerbose;
+            bRoomLookup = (jsonIn as patch_JsonInteraction).bRoomLookup;
             bWriteToLog = FFU_BR_Defs.ActLogging >= FFU_BR_Defs.ActLogs.Interactions && bForceVerbose;
         }
     }
@@ -37,6 +42,42 @@ public partial class patch_Interaction : Interaction {
         bool bIgnoreItems = false, bool bCheckPath = false, bool bFetchItems = true, List<string> aForbid3rds = null) {
         if (bForceVerbose) bVerboseTrigger = true;
         return orig_TriggeredInternal(objUs, objThem, bStats, bIgnoreItems, bCheckPath, bFetchItems, aForbid3rds);
+    }
+
+    // Room Lookup Integration
+    [MonoModReplace] public void ApplyLogging(string strOwner, bool bTraitSuffix) {
+        if (nLogging == Logging.NONE || bLogged) return;
+        string msgText = GetText(bTraitSuffix);
+        List<CondOwner> coNotifyList = new List<CondOwner>();
+        switch (nLogging) {
+            case Logging.GROUP: {
+                coNotifyList.Add(objUs);
+                if (strThemType == TARGET_OTHER) coNotifyList.Add(objThem);
+                break;
+            }
+            case Logging.ROOM: {
+                if (objUs.currentRoom != null) {
+                    coNotifyList.AddRange(objUs.ship.GetPeopleInRoom(objUs.currentRoom));
+                } else if (bRoomLookup) {
+                    List<CondOwner> listCOsAtPos = new List<CondOwner>();
+                    CondTrigger isRoomCT = DataHandler.GetCondTrigger("TIsRoom");
+                    objUs.ship.GetCOsAtWorldCoords1(objUs.GetPos(), isRoomCT, false, false, listCOsAtPos);
+                    objUs.currentRoom = listCOsAtPos.First().currentRoom;
+                    coNotifyList.AddRange(objUs.ship.GetPeopleInRoom(objUs.currentRoom));
+                }
+                if (!coNotifyList.Contains(objUs)) coNotifyList.Add(objUs);
+                if (!coNotifyList.Contains(objThem)) coNotifyList.Add(objThem);
+                break;
+            }
+            case Logging.SHIP: {
+                if (objUs.ship != null) coNotifyList.AddRange(objUs.ship.GetPeople(true));
+                break;
+            }
+        }
+        foreach (CondOwner item in coNotifyList) {
+            item.LogMessage(msgText, strColor, strOwner);
+        }
+        bLogged = true;
     }
 }
 
@@ -637,5 +678,52 @@ private bool TriggeredInternal(CondOwner objUs, CondOwner objThem, bool bStats =
 	}
 	mapFails["main"][0] = string.Empty;
 	return true;
+}
+*/
+
+/* Interaction.ApplyLogging
+public void ApplyLogging(string strOwner, bool bTraitSuffix)
+{
+	if (nLogging == Logging.NONE || bLogged)
+	{
+		return;
+	}
+	string text = GetText(bTraitSuffix);
+	List<CondOwner> list = new List<CondOwner>();
+	switch (nLogging)
+	{
+	case Logging.SHIP:
+		if (objUs.ship != null)
+		{
+			list.AddRange(objUs.ship.GetPeople(bAllowDocked: true));
+		}
+		break;
+	case Logging.GROUP:
+		list.Add(objUs);
+		if (strThemType == TARGET_OTHER)
+		{
+			list.Add(objThem);
+		}
+		break;
+	case Logging.ROOM:
+		if (objUs.currentRoom != null)
+		{
+			list.AddRange(objUs.ship.GetPeopleInRoom(objUs.currentRoom));
+		}
+		if (!list.Contains(objUs))
+		{
+			list.Add(objUs);
+		}
+		if (!list.Contains(objThem))
+		{
+			list.Add(objThem);
+		}
+		break;
+	}
+	foreach (CondOwner item in list)
+	{
+		item.LogMessage(text, strColor, strOwner);
+	}
+	bLogged = true;
 }
 */
