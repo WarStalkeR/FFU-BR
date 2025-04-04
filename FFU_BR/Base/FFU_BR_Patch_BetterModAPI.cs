@@ -1052,6 +1052,21 @@ public static partial class patch_DataHandler {
         else return refObject;
     }
 
+    public static bool TryGetCOValue(string strName, out JsonCondOwner refCO) {
+        if (DataHandler.dictCOs.TryGetValue(strName, out JsonCondOwner coDict)) {
+            refCO = coDict;
+            return true;
+        }
+        if (DataHandler.dictCOOverlays.TryGetValue(strName, out JsonCOOverlay coOver)) {
+            if (DataHandler.dictCOs.TryGetValue(coOver.strCOBase, out JsonCondOwner coOverDict)) {
+                refCO = coOverDict;
+                return true;
+            }
+        }
+        refCO = null;
+        return false;
+    }
+
     public const string OP_MOD = "--MOD--";
     public const string OP_ADD = "--ADD--";
     public const string OP_INS = "--INS--";

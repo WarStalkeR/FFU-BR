@@ -57,12 +57,12 @@ public static partial class patch_DataHandler {
                         Debug.Log($"#Info# Found the mismatched CO [{aItem.strName}:{aItem.strID}] " +
                             $"for the Parent CO [{aParent.strName}:{aParent.strID}] for remapping! " +
                             $"Syncing to the CO [{refTarget}] from the template.");
-                        if (DataHandler.dictCOs.TryGetValue(refTarget, out JsonCondOwner refCO)) {
+                        if (patch_DataHandler.TryGetCOValue(refTarget, out JsonCondOwner refCO)) {
                             
                             // Sync Existing Item
                             aItem.strName = refCO.strName;
                             if (!isTemplate && aSavedCOs != null &&
-                                DataHandler.dictCOs.TryGetValue(aParent.strName, out JsonCondOwner prntCO)) {
+                                patch_DataHandler.TryGetCOValue(aParent.strName, out JsonCondOwner prntCO)) {
                                 JsonCondOwnerSave aSavedCO = aSavedCOs.Find(x => x.strID == aItem.strID);
 
                                 // Sync Saved CO Data
@@ -95,7 +95,7 @@ public static partial class patch_DataHandler {
             if (dictChangesMap.ContainsKey(aItem.strName) &&
                 dictChangesMap[aItem.strName].ContainsKey(FFU_BR_Defs.CMD_REC_MISSING) &&
                 dictChangesMap[aItem.strName][FFU_BR_Defs.CMD_REC_MISSING] != null &&
-                DataHandler.dictCOs.TryGetValue(aItem.strName, out JsonCondOwner refCO)) {
+                patch_DataHandler.TryGetCOValue(aItem.strName, out JsonCondOwner refCO)) {
                 
                 // Prepare Base Commands
                 List<string> targetKeys = dictChangesMap[aItem.strName][FFU_BR_Defs.CMD_REC_MISSING].ToList();
@@ -158,16 +158,14 @@ public static partial class patch_DataHandler {
                     if (aParent == null || aParentCO == null) continue;
 
                     // Proceed If Parent Has CO
-                    if (DataHandler.dictCOs.ContainsKey(aItem.strName) && 
-                        DataHandler.dictCOs.ContainsKey(aParent.strName) &&
+                    if (patch_DataHandler.TryGetCOValue(aItem.strName, out JsonCondOwner refCO) &&
+                        patch_DataHandler.TryGetCOValue(aParent.strName, out JsonCondOwner prntCO) &&
                         dictChangesMap.ContainsKey(aParent.strName) &&
                         dictChangesMap[aParent.strName].ContainsKey(FFU_BR_Defs.CMD_REC_MISSING)) {
 
                         // Prepare Base Variables
                         Debug.Log($"#Info# Found the CO [{aItem.strName}:{aItem.strID}] " +
                             $"with missing save data! Creating data from template.");
-                        JsonCondOwner refCO = DataHandler.dictCOs[aItem.strName];
-                        JsonCondOwner prntCO = DataHandler.dictCOs[aParent.strName];
 
                         // Create From Template If Item Type
                         if (refCO.strType == "Item") {
@@ -218,7 +216,7 @@ public static partial class patch_DataHandler {
             if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) && 
                 dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_CONDS_SYN) &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_SYN] != null &&
-                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+                patch_DataHandler.TryGetCOValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
                 // Prepare Base Variables
                 List<string> targetKeys = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_SYN].ToList();
@@ -264,7 +262,7 @@ public static partial class patch_DataHandler {
             if (aSavedCO != null && dictChangesMap.ContainsKey(aSavedCO.strCODef) && 
                 dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_CONDS_UPD) &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_UPD] != null &&
-                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+                patch_DataHandler.TryGetCOValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
                 // Prepare Base Variables
                 List<string> targetKeys = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_CONDS_UPD].ToList();
@@ -313,7 +311,7 @@ public static partial class patch_DataHandler {
                 dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_EFFECT_SLT) &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT] != null &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT].Count > 0 &&
-                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+                patch_DataHandler.TryGetCOValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
                 // Prepare Base Variables
                 List<string> addConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_SLT]
@@ -377,7 +375,7 @@ public static partial class patch_DataHandler {
                 dictChangesMap[aSavedCO.strCODef].ContainsKey(FFU_BR_Defs.CMD_EFFECT_INV) &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV] != null &&
                 dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV].Count > 0 &&
-                DataHandler.dictCOs.TryGetValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
+                patch_DataHandler.TryGetCOValue(aSavedCO.strCODef, out JsonCondOwner refCO)) {
 
                 // Prepare Base Variables
                 List<string> addConds = dictChangesMap[aSavedCO.strCODef][FFU_BR_Defs.CMD_EFFECT_INV]
