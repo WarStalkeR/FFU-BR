@@ -17,7 +17,7 @@
     }
 
     public static int GetDepth(CondOwner objCO) {
-        int currDepth = 0;
+        int currDepth = 1;
         CondOwner objParent = objCO.objCOParent;
         while (objParent != null) {
             objParent = objParent.objCOParent;
