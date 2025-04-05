@@ -308,13 +308,11 @@ public static partial class patch_DataHandler {
                     validModPaths.Add(queuedPath[0]);
                     validDataPaths.Add(queuedPath[0] + "data/");
                     Debug.Log($"Data Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
-                } else if (Directory.Exists(queuedPath[0] + "images/") ||
-                      Directory.Exists(queuedPath[0] + "audio/") ||
-                      Directory.Exists(queuedPath[0] + "mesh/")) {
+                } else if (File.Exists(queuedPath[0] + "mod_info.json")) {
                     validModInfos.Add(queuedPath[1]);
                     validModPaths.Add(queuedPath[0]);
                     Debug.Log($"Asset Mod Queued: {queuedPath[1]} => {queuedPath[0]}");
-                } else Debug.LogWarning($"Mod folder '{queuedPath[0]}' has no data or assets! Ignoring.");
+                } else Debug.LogWarning($"Mod folder '{queuedPath[0]}' has no data or info file! Ignoring.");
             } else Debug.LogError($"Received 'refQueuedPaths' data set is invalid! Ignoring.");
         }
 
