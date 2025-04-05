@@ -486,3 +486,7 @@ if it isn't needed or used.
 4\. Unzip all contents into `Ostranauts` root folder. `Ostranauts/BepInEx/core` should now contain `MonoMod.dll`.  
 5\. Download my mod's DLL file from releases (or compile it) and put it into `Ostranauts/BepInEx/monomod`.  
 6\. Launch game, once in the main menu, exit, modify config files as you want. Enjoy playing/modding.  
+
+# Potential Features
+1\. Implementation of `condtrigs` parameters that allow to compare values with specific numbers, including 
+possibility of minor mathematical operations (i.e. compare stat with 1% of another stat for example).
