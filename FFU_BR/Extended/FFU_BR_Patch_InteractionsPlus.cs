@@ -28,9 +28,9 @@ public partial class patch_Interaction : Interaction {
     private extern void orig_AddFailReason(string strKey, string strReason);
     private void AddFailReason(string strKey, string strReason) {
         if (bWriteToLog && strReason != Interaction.STR_IA_FAIL_DEFAULT)
-            UnityEngine.Debug.Log($"#Interaction# {objUs?.strName ?? "Unknown"}:" +
-                $"{objUs?.strID ?? "0"} => [Failed] {strKey}: " +
-                $"{(string.IsNullOrEmpty(strReason) ? "N/A" : strReason)}");
+            UnityEngine.Debug.Log($"#Interaction# {strName} (US: {objUs?.strName ?? "N/A"}, " +
+                $"THEM: {objThem?.strName ?? "N/A"}, 3RD: {obj3rd?.strName ?? "N/A"}) => " +
+                $"[Failed] {strKey}: {(string.IsNullOrEmpty(strReason) ? "N/A" : strReason)}");
         orig_AddFailReason(strKey, strReason);
     }
 
@@ -48,9 +48,8 @@ public partial class patch_Interaction : Interaction {
         string msgText = null;
         if (bWriteToLog) {
             msgText = GetText(bTraitSuffix);
-            UnityEngine.Debug.Log($"#Interaction# " +
-            $"{objUs?.strName ?? "Unknown"}:" +
-            $"{objUs?.strID ?? "0"} => {msgText}");
+            UnityEngine.Debug.Log($"#Interaction# {strName} (US: {objUs?.strName ?? "N/A"}, " +
+                $"THEM: {objThem?.strName ?? "N/A"}, 3RD: {obj3rd?.strName ?? "N/A"}) => {msgText}");
         }
         if (nLogging == Logging.NONE || bLogged) return;
         msgText = msgText ?? GetText(bTraitSuffix);
