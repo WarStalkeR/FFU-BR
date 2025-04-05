@@ -492,3 +492,4 @@ if it isn't needed or used.
 possibility of minor mathematical operations (i.e. compare stat with 1% of another stat for example).  
 2\. Implementation of option that prevents game from unpausing, even when you're queuing any interaction.  
 3\. Remove strict `loot` tables check for modding entries only, to resolve redundant edge cases.  
+4\. Improve shift-click inventory transfer - by default choose latest open container, but not ground.  
