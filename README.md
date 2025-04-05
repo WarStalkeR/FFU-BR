@@ -111,6 +111,19 @@ is nested at depth greater than `maxDepth` parameter, then condition trigger aut
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
 
+**strMathCond** - a `condtrigs` parameter that is used to compare value of a specific condition with a 
+specific number. In addition, requires defined `nMathOp` and `fMathVal` parameters to work. Supports number 
+of different operations.
+
+**nMathOp** - a `condtrigs` parameter that defines the math operation that will be used when comparing
+condition's value (from `strMathCond`) with a `fMathVal` parameter value. **1** → Not Equal (`!=`), **2** → 
+Equal (`==`), **3** → Greater Than (`>`), **4** → Greater or Equal (`>=`), **5** → Less Than (`<`), **6** → 
+Less of Equal (`<=`). **Formula**: *CT.Value #OP# fMathVal*.
+
+**fMathVal** - a `condtrigs` parameter that defines the value, which will be used for mathematical comparison.
+If `fMathVal` isn't set, default value of `0` will be used. Whilst you can put negative value in `fMathVal`
+parameter, it is irrelevant, since condition values can't be below zero.
+
 **nIsSameShipCO** - a `shipspecs` parameter that allows to find a ship, where object itself is placed. Should
 be a quite optimized option for `interactions` that allows to access all other COs within confines of same ship 
 via `ShipTest3rd` and `CTTest3rd` parameters without much hassle.
