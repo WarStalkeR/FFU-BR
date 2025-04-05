@@ -489,4 +489,5 @@ if it isn't needed or used.
 
 # Potential Features
 1\. Implementation of `condtrigs` parameters that allow to compare values with specific numbers, including 
-possibility of minor mathematical operations (i.e. compare stat with 1% of another stat for example).
+possibility of minor mathematical operations (i.e. compare stat with 1% of another stat for example).  
+2\. Implementation of option that prevents game from unpausing, even when you're queuing any interaction.  
