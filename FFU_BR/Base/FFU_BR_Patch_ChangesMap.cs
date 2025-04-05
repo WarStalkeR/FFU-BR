@@ -579,7 +579,7 @@ public void InitShip(bool bTemplateOnly, Loaded nLoad, string strRegIDNew = null
 		}
 		nRCSDistroCount = json.nRCSDistroCount;
 		fAeroCoefficient = json.fAeroCoefficient;
-		bFusionTorch = json.bFusionTorch;
+		bFusionReactorRunning = json.bFusionTorch;
 		strXPDR = json.strXPDR;
 		bXPDRAntenna = json.bXPDRAntenna;
 		bShipHidden = json.bShipHidden;
