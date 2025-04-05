@@ -27,7 +27,7 @@ created after running Ostranauts for the first time with this mod installed).
 ## Configuration Settings
 **SyncLogging** - defines what logging type is used for when overwriting data and/or
 copy-referencing existing items into new items with various parameters overwriting.  
-**ActLogging** - defines what activity will be shown in the log during gameplay/runtime. Applies
+**ActLogging** - defines what activity will be shown in the log during specific actions. Applies
 only to very specific action that related to modified game code (such as inventory sorting).  
 **DynamicRandomRange** - By default loot random range is limited to `1.0f`, thus preventing use of 
 loot tables, if total sum of their chances goes beyond `1.0f`. This feature allows to increase max 
@@ -111,6 +111,24 @@ is nested at depth greater than `maxDepth` parameter, then condition trigger aut
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
 
+**nIsSameShipCO** - a `shipspecs` parameter that allows to find a ship, where object itself is placed. Should
+be a quite optimized option for `interactions` that allows to access all other COs within confines of same ship 
+via `ShipTest3rd` and `CTTest3rd` parameters without much hassle.
+
+**bForceVerbose** - a `interactions` parameter that forces interaction to be verbose even during failed attempts.
+Exists only so other mod developers can debug where interactions fail and where they successfully execute. If
+`ActLogging` in options is set to `Interactions`, everything also will be written into log files. Do note, that
+if `nLogging` is set to `0`, no information will be written to logs, except interaction failures.
+
+**bRoomLookup** - a `interactions` parameter that allows object to identify its `room` and send message to all 
+the crewmembers in it, if interaction's `nLogging` parameter is set to `2`. Required, because by default CO don't 
+contain current room information and it is only assigned via `CrewSim` (i.e. only to crewmember COs).
+
+## New Hardcoded Conditions
+**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
+When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
+parameter.
+
 ## Existing Functionality Changes
 **Sensor** - an `aUpdateCommands` command. By default it can only execute interactions based on the room
 conditions. Modification allows to run it condition triggers against itself, if **strPoint** is set to `null`.
@@ -118,11 +136,6 @@ In addition, if **dictGUIPropMap** that it uses, contains **dfUpdateInterval** e
 `1.0` (value is in **seconds**) update interval with a new value as long as its greater than `0.0`. **Note:** it
 relies on Unity's internal `Update()` method, so if update interval is set to a too small value (i.e. too 
 short), it just won't be able to keep up with correct timing.
-
-## New Hardcoded Conditions
-**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
-When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
-parameter.
 
 ## Improved Console Commands
 `getcond [them] *` - now `getcond` command supports wildcard `*` that lists all stats, regardless of their name.  
