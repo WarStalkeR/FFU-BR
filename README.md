@@ -94,56 +94,56 @@ any other number is treated as `false`).
 **SuperCharacters** - List of character names in lower case that you want to apply multiplier to.  
 
 # New Parameters & Properties
-**strReference** - a `condowners` parameter that allows to create reference-based copy of the existing CO, 
+**strReference** - `condowners` parameter that allows to create reference-based copy of the existing CO, 
 whilst overriding only specific parameters. **Note:** will inherit all properties of the original CO.
 
-**strInvSlotEffect** - a `condowners` parameter that applies `slot effect` to every inventory item and/or the
+**strInvSlotEffect** - `condowners` parameter that applies `slot effect` to every inventory item and/or the
 inventory owner. Works pretty much same way as other `slot effects`, except parameters `mapMeshTextures`,
 `strSlotImage` and `strSlotImageUnder` are ignored. Thread carefully, as it applies effect to **every** item,
 including whole stacks.
 
-**nSlotOrder** - a `slots` parameter that only used, if `StrictInvSorting` gameplay setting is enabled. 
+**nSlotOrder** - `slots` parameter that only used, if `StrictInvSorting` gameplay setting is enabled. 
 Requires an integer value, but can be nulled. If nulled, defaults to `nDepth` to avoid potential issues. Slots 
 with lesser numbers are rendered first in open inventory UI. Was implemented to avoid `nDepth` collision/issues.
 
-**nMaxDepth** - a `condtrigs` parameter that used to check how deeply nested `condowners` object. If object
+**nMaxDepth** - `condtrigs` parameter that used to check how deeply nested `condowners` object. If object
 is nested at depth greater than `maxDepth` parameter, then condition trigger automatically returns `false`. 
 Use console command `getcond [them] *coParents` on selected object and count number of **in**'s to identify 
 its current depth.
 
-**strMathCond** - a `condtrigs` parameter that is used to compare value of a specific condition with a 
+**strMathCond** - `condtrigs` parameter that is used to compare value of a specific condition with a 
 specific number. In addition, requires defined `nMathOp` and `fMathVal` parameters to work. Supports number 
 of different operations.
 
-**nMathOp** - a `condtrigs` parameter that defines the math operation that will be used when comparing
+**nMathOp** - `condtrigs` parameter that defines the math operation that will be used when comparing
 condition's value (from `strMathCond`) with a `fMathVal` parameter value. **1** → Not Equal (`!=`), **2** → 
 Equal (`==`), **3** → Greater Than (`>`), **4** → Greater or Equal (`>=`), **5** → Less Than (`<`), **6** → 
-Less of Equal (`<=`). **Formula**: *CT.Value #OP# fMathVal*.
+Less or Equal (`<=`). **Formula**: *CT.Value #OP# fMathVal*.
 
-**fMathVal** - a `condtrigs` parameter that defines the value, which will be used for mathematical comparison.
+**fMathVal** - `condtrigs` parameter that defines the value, which will be used for mathematical comparison.
 If `fMathVal` isn't set, default value of `0` will be used. Whilst you can put negative value in `fMathVal`
 parameter, it is irrelevant, since condition values can't be below zero.
 
-**nIsSameShipCO** - a `shipspecs` parameter that allows to find a ship, where object itself is placed. Should
+**nIsSameShipCO** - `shipspecs` parameter that allows to find a ship, where object itself is placed. Should
 be a quite optimized option for `interactions` that allows to access all other COs within confines of same ship 
 via `ShipTest3rd` and `CTTest3rd` parameters without much hassle.
 
-**bForceVerbose** - a `interactions` parameter that forces interaction to be verbose even during failed attempts.
+**bForceVerbose** - `interactions` parameter that forces interaction to be verbose even during failed attempts.
 Exists only so other mod developers can debug where interactions fail and where they successfully execute. If
 `ActLogging` in options is set to `Interactions`, everything also will be written into log files. Do note, that
 if `nLogging` is set to `0`, no information will be written to logs, except interaction failures.
 
-**bRoomLookup** - a `interactions` parameter that allows object to identify its `room` and send message to all 
+**bRoomLookup** - `interactions` parameter that allows object to identify its `room` and send message to all 
 the crewmembers in it, if interaction's `nLogging` parameter is set to `2`. Required, because by default CO don't 
 contain current room information and it is only assigned via `CrewSim` (i.e. only to crewmember COs).
 
 ## New Hardcoded Conditions
-**StatEmittedTemp** - a `simple condition` value that allow to override `StatSolidTemp` without changing it. 
+**StatEmittedTemp** - `simple condition` value that allow to override `StatSolidTemp` without changing it. 
 When set, temperature emitted from object via `Heater.Heat()` will be based on it instead of `StatSolidTemp` 
 parameter.
 
 ## Existing Functionality Changes
-**Sensor** - an `aUpdateCommands` command. By default it can only execute interactions based on the room
+**Sensor** - `aUpdateCommands` command. By default it can only execute interactions based on the room
 conditions. Modification allows to run it condition triggers against itself, if **strPoint** is set to `null`.
 In addition, if **dictGUIPropMap** that it uses, contains **dfUpdateInterval** entry - it replaces default
 `1.0` (value is in **seconds**) update interval with a new value as long as its greater than `0.0`. **Note:** it
